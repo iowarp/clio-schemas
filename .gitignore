@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# Node
+tools/ts-gen/node_modules/
+
+# Generated TS output (regenerated in CI; committed goldens live in tests/golden)
+generated-ts/
+.ts-fresh/
+
+# Consumer copy-out target for the committed schemas (repo-local temp).
+# NOTE: the CANONICAL committed schemas live at src/clio_schemas/schemas/ and
+# are tracked — do NOT ignore that path.
+/schemas/

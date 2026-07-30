@@ -1,0 +1,49 @@
+# DRAFT — job snippet to add to gact-tui's CI.
+#
+# Purpose (acceptance criterion #3 of #1110): gact-tui generates TypeScript from
+# the JSON Schema shipped inside the installed clio-schemas package (exact pin =>
+# exact bytes => exact types) and the generated files compile. It also guards
+# against stale committed types by regenerating into a CLEAN temp dir and
+# comparing exact file SETS + bytes — which catches added-untracked and
+# removed-orphan files that `git diff` alone would miss.
+#
+# Layout assumed: gact-tui vendors the generator (tools/ts-gen) or checks out
+# clio-schemas; committed generated types live at src/generated/schemas.
+
+jobs:
+  schemas-to-ts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install uv (to copy the schema artifacts)
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install clio-schemas (exact pin, lockstep)
+        run: uv pip install --system "clio-schemas==0.1.0"
+
+      - name: Copy the immutable JSON Schema artifacts out of the package
+        run: python -m clio_schemas.export --out schemas
+
+      - name: Install TS generator deps
+        working-directory: tools/ts-gen
+        run: npm ci
+
+      - name: Generate TypeScript into a CLEAN dir + typecheck (strict, isolated)
+        # `npm run check` runs schemas-to-ts.mjs (which wipes its --out dir first,
+        # so orphans cannot survive) then `tsc -p tsconfig.check.json`.
+        working-directory: tools/ts-gen
+        run: npm run check
+
+      - name: Committed types match regenerated (exact file-set + bytes)
+        # diff -rN reports missing, extra (untracked/orphan), AND changed files —
+        # unlike `git diff`, it does not silently ignore untracked additions.
+        # Adjust paths: generated-ts is npm run check's output; src/generated/
+        # schemas is where gact-tui commits its vendored types.
+        run: diff -rN src/generated/schemas generated-ts

@@ -1,0 +1,86 @@
+{
+  "$defs": {
+    "ProbeBatch": {
+      "additionalProperties": false,
+      "description": "Placeholder aggregate proving multi-root / shared-definition handling.\n\nReferences `SchemaProbe` (a nested model) and reuses `ProbeKind` (a shared\nenum). The exporter emits both `ProbeKind` and `SchemaProbe` exactly once in\nthe aggregate schema, and the TypeScript generator must not duplicate their\ndeclarations — the anti-duplication proof for P2.1's richer record graph.",
+      "properties": {
+        "batch_id": {
+          "description": "Opaque identifier for this batch.",
+          "title": "Batch Id",
+          "type": "string"
+        },
+        "default_kind": {
+          "$ref": "#/$defs/ProbeKind",
+          "default": "ping",
+          "description": "Fallback probe behaviour for probes that omit their kind."
+        },
+        "probes": {
+          "default": [],
+          "description": "The probe records in this batch (order-significant).",
+          "items": {
+            "$ref": "#/$defs/SchemaProbe"
+          },
+          "title": "Probes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "batch_id"
+      ],
+      "title": "ProbeBatch",
+      "type": "object"
+    },
+    "ProbeKind": {
+      "description": "Discriminator enum shared by more than one model.\n\nExists so the bootstrap exercises enum handling through the whole\npydantic -> JSON Schema -> TypeScript pipeline (enums are a common source of\ngenerator drift) and, because it is referenced by both `SchemaProbe` and\n`ProbeBatch`, proves that a shared definition is emitted exactly once.",
+      "enum": [
+        "ping",
+        "echo",
+        "noop"
+      ],
+      "title": "ProbeKind",
+      "type": "string"
+    },
+    "SchemaProbe": {
+      "additionalProperties": false,
+      "description": "Placeholder record proving the schema export pipeline works end to end.\n\nIntentionally trivial; removed once the real shared records land in P2.1. It\ncarries one required string, one typed enum, and one integer with a default\nso required/optional handling, enum generation, and defaults are all\nexercised by the golden round-trip test.",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ProbeKind",
+          "default": "ping",
+          "description": "Which probe behaviour this record represents."
+        },
+        "probe_id": {
+          "description": "Opaque identifier for this probe record.",
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "sequence": {
+          "default": 0,
+          "description": "Monotonic sequence number within a probe stream.",
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "probe_id"
+      ],
+      "title": "SchemaProbe",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.iowarp.dev/clio-schemas/index.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Aggregate of all canonical clio-schemas records with shared definitions emitted once. Used to generate TypeScript without duplicate declarations.",
+  "properties": {
+    "ProbeBatch": {
+      "$ref": "#/$defs/ProbeBatch"
+    },
+    "SchemaProbe": {
+      "$ref": "#/$defs/SchemaProbe"
+    }
+  },
+  "title": "ClioSchemaRegistry",
+  "type": "object"
+}

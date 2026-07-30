@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "clio-schemas"
+version = "0.1.0"
+description = "Canonical shared record schemas (pydantic v2) for clio-agent, clio-relay, and gact-tui."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "IOWarp" }]
+keywords = ["clio", "schemas", "pydantic", "json-schema"]
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+dependencies = [
+    "pydantic>=2.7,<3",
+]
+
+[project.urls]
+Homepage = "https://github.com/iowarp/clio-schemas"
+Repository = "https://github.com/iowarp/clio-schemas"
+
+[project.scripts]
+clio-schemas-export = "clio_schemas.export:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+    "pyright>=1.1.370",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/clio_schemas"]
+# Ship the canonical JSON Schemas + hash manifest + py.typed inside the wheel so
+# consumers copy immutable bytes (their pin determines the shapes, not their
+# pydantic). *.json/py.typed are not Python modules, so force-include them.
+artifacts = [
+    "src/clio_schemas/schemas/*.json",
+    "src/clio_schemas/py.typed",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/tools",
+    "/scripts",
+    "/ci-drafts",
+    "/README.md",
+    "/SCAFFOLD_REPORT.md",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.pyright]
+include = ["src", "tests", "scripts"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.411",
+    "pytest>=9.1.1",
+    "ruff>=0.16.0",
+]

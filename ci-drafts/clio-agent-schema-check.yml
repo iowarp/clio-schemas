@@ -1,0 +1,47 @@
+# DRAFT — job snippet to add to clio-agent's CI (e.g. a new job in
+# `.github/workflows/ci.yml`, or a standalone workflow).
+#
+# Purpose (acceptance criterion #2 of #1110): clio-agent resolves the
+# clio-schemas dependency (exact pin) and verifies that any schemas it vendors
+# match the IMMUTABLE bytes shipped inside the installed clio-schemas package.
+# Because consumers *copy* the committed artifacts rather than regenerate them,
+# the exact pin fully determines the bytes — this job proves that holds.
+#
+# Prerequisite in clio-agent: add an exact pin to pyproject.toml, e.g.
+#   dependencies = [ ..., "clio-schemas==0.1.0" ]
+# If clio-agent vendors the schemas for offline use, commit them under a known
+# dir (e.g. `schemas/`); otherwise it can consume them straight from the package.
+
+jobs:
+  clio-schemas-export-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sync deps (resolves the exact clio-schemas pin)
+        run: uv sync --extra dev
+
+      - name: Confirm exact-pin lockstep is installed
+        run: |
+          uv run python - <<'PY'
+          import clio_schemas
+          print("clio-schemas", clio_schemas.__version__)
+          PY
+
+      # Option A — clio-agent vendors the schemas under ./schemas:
+      # verify the vendored copy is byte-identical to the installed package
+      # (rejects stale, missing, AND unexpected/orphaned files).
+      - name: Vendored schemas match the installed package (exact bytes + set)
+        run: uv run python -m clio_schemas.export --out schemas --check
+
+      # Option B — CI refreshes the vendored copy into a CLEAN dir and fails on
+      # any drift, including untracked/orphaned files that `git diff` alone
+      # would miss:
+      #   rm -rf schemas
+      #   uv run python -m clio_schemas.export --out schemas
+      #   git add -A schemas && git diff --cached --exit-code -- schemas

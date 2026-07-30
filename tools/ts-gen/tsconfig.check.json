@@ -1,0 +1,15 @@
+{
+  "//": "Isolated strict typecheck of generated .ts files. `types: []` prevents ambient @types (transitive deps of json-schema-to-typescript) from leaking in.",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "target": "es2020",
+    "lib": ["es2020"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": [],
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["../../generated-ts/*.ts"]
+}

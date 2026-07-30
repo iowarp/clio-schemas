@@ -1,0 +1,82 @@
+# DRAFT — becomes `.github/workflows/ci.yml` in the iowarp/clio-schemas repo.
+#
+# Own-repo CI for clio-schemas: lint, typecheck, prove the committed schema
+# artifacts are canonical (match the models under the locked pydantic + their
+# hashes), enforce the version-bump-on-schema-change rule, run the golden
+# round-trip test, and typecheck the generated TypeScript.
+name: ci
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # version-bump check diffs against the base ref
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sync (dev extras, locked pydantic)
+        run: uv sync --extra dev
+
+      - name: Lint
+        run: uv run ruff check src tests scripts
+
+      - name: Format check
+        run: uv run ruff format --check src tests scripts
+
+      - name: Typecheck
+        run: uv run pyright src tests scripts
+
+      - name: Committed schemas are canonical (models + hashes, locked pydantic)
+        run: uv run python -m clio_schemas.export --verify
+
+      - name: Version pins agree (pyproject == __version__)
+        run: |
+          PY=$(uv run python -c "import clio_schemas; print(clio_schemas.__version__)")
+          TOML=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          echo "pkg=$PY pyproject=$TOML"
+          test "$PY" = "$TOML"
+
+      - name: Schema change requires a version bump
+        run: uv run python scripts/check_version_bump.py --base "origin/${{ github.base_ref || 'main' }}"
+
+  roundtrip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Sync (dev extras)
+        run: uv sync --extra dev
+
+      - name: Install TS generator deps
+        working-directory: tools/ts-gen
+        run: npm ci
+
+      - name: Golden round-trip test (copy schemas -> TS -> byte-compare dir)
+        run: uv run pytest -v
+
+      - name: Generated TS typechecks
+        working-directory: tools/ts-gen
+        run: npm run check
