@@ -1,8 +1,13 @@
 {
   "algorithm": "sha256",
   "files": {
-    "index.json": "f66661af349e5a835331305952e2684ca54228a271c4ad56670532dc270a56c7",
-    "probe_batch.json": "74476e463d5efd3d329651f2ff1ec0ae23f7a6193a10cec9079532dd81274f91",
-    "schema_probe.json": "0b6ee77bf3fb4321efb34e1d51d0a961483b621891c106ef52d09b18bd42039e"
+    "artifact_record.json": "cc2bdf9e06bc943fb0b4e7507fb81d99109ecad24e6781965f651a2ef9144345",
+    "artifact_version.json": "747b005cee6392e7cbdf4436783f0dbc6170a2a7f26ba128689b12d01d9877a2",
+    "environment_record.json": "f49ed295a42e1f6339b397e148fd67d23ded450cb7645336f3a1052746feb750",
+    "identity_evidence.json": "e333287055167d9fe39e6bf23105a242030519dda8d6db207431c2ced17c89e3",
+    "index.json": "fcc5707e9225a0ab77d3ffc03bd1c55c921c822fe3b1241a6f3cfbbf588ae4ba",
+    "instrument.json": "cbdc64b639e4ba9ca65f274b17519c20ac4239125e75e2faab34330fd6c944ea",
+    "prov_edge.json": "262ad2564a1dc90da9dde26dad49be4d8ece3353db4ba22806f44d5183add1bb",
+    "transform_record.json": "40f82754aecd22f2ae74fdaff9783b66fba7580b901e5183e14eb0e63757621d"
   }
 }

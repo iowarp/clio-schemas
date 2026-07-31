@@ -6,6 +6,5 @@
  */
 
 export type {
-  ProbeKind,
-  SchemaProbe
+  Instrument
 } from "./_models";

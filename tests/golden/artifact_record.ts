@@ -6,7 +6,11 @@
  */
 
 export type {
-  ProbeBatch,
-  ProbeKind,
-  SchemaProbe
+  ArtifactKind,
+  ArtifactRecord,
+  ArtifactVersion,
+  Custody,
+  EvidenceClass,
+  IdentityEvidence,
+  Mechanism
 } from "./_models";

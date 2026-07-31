@@ -1,72 +1,638 @@
 {
   "$defs": {
-    "ProbeBatch": {
-      "additionalProperties": false,
-      "description": "Placeholder aggregate proving multi-root / shared-definition handling.\n\nReferences `SchemaProbe` (a nested model) and reuses `ProbeKind` (a shared\nenum). The exporter emits both `ProbeKind` and `SchemaProbe` exactly once in\nthe aggregate schema, and the TypeScript generator must not duplicate their\ndeclarations — the anti-duplication proof for P2.1's richer record graph.",
+    "AgentRole": {
+      "description": "Whether the agent executed or annotated the transform.",
+      "enum": [
+        "executing",
+        "annotating"
+      ],
+      "title": "AgentRole",
+      "type": "string"
+    },
+    "ArtifactKind": {
+      "description": "The curated kinds an artifact version may take.",
+      "enum": [
+        "dataset",
+        "image",
+        "report",
+        "plan",
+        "script",
+        "config",
+        "model",
+        "ui_payload",
+        "other"
+      ],
+      "title": "ArtifactKind",
+      "type": "string"
+    },
+    "ArtifactRecord": {
+      "description": "A mutable logical artifact chain keyed by workspace and name.",
       "properties": {
-        "batch_id": {
-          "description": "Opaque identifier for this batch.",
-          "title": "Batch Id",
+        "aliases": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Aliases",
+          "type": "object"
+        },
+        "name": {
+          "title": "Name",
           "type": "string"
         },
-        "default_kind": {
-          "$ref": "#/$defs/ProbeKind",
-          "default": "ping",
-          "description": "Fallback probe behaviour for probes that omit their kind."
-        },
-        "probes": {
-          "default": [],
-          "description": "The probe records in this batch (order-significant).",
+        "versions": {
           "items": {
-            "$ref": "#/$defs/SchemaProbe"
+            "$ref": "#/$defs/ArtifactVersion"
           },
-          "title": "Probes",
+          "title": "Versions",
           "type": "array"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
         }
       },
       "required": [
-        "batch_id"
+        "workspace_id",
+        "name"
       ],
-      "title": "ProbeBatch",
+      "title": "ArtifactRecord",
       "type": "object"
     },
-    "ProbeKind": {
-      "description": "Discriminator enum shared by more than one model.\n\nExists so the bootstrap exercises enum handling through the whole\npydantic -> JSON Schema -> TypeScript pipeline (enums are a common source of\ngenerator drift) and, because it is referenced by both `SchemaProbe` and\n`ProbeBatch`, proves that a shared definition is emitted exactly once.",
-      "enum": [
-        "ping",
-        "echo",
-        "noop"
-      ],
-      "title": "ProbeKind",
-      "type": "string"
-    },
-    "SchemaProbe": {
-      "additionalProperties": false,
-      "description": "Placeholder record proving the schema export pipeline works end to end.\n\nIntentionally trivial; removed once the real shared records land in P2.1. It\ncarries one required string, one typed enum, and one integer with a default\nso required/optional handling, enum generation, and defaults are all\nexercised by the golden round-trip test.",
+    "ArtifactVersion": {
+      "description": "One immutable version of a logical artifact.",
       "properties": {
-        "kind": {
-          "$ref": "#/$defs/ProbeKind",
-          "default": "ping",
-          "description": "Which probe behaviour this record represents."
-        },
-        "probe_id": {
-          "description": "Opaque identifier for this probe record.",
-          "title": "Probe Id",
+        "annotation": {
+          "default": "",
+          "title": "Annotation",
           "type": "string"
         },
-        "sequence": {
-          "default": 0,
-          "description": "Monotonic sequence number within a probe stream.",
-          "minimum": 0,
-          "title": "Sequence",
+        "artifact_id": {
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "custody": {
+          "$ref": "#/$defs/Custody",
+          "default": "workspace-referenced"
+        },
+        "custody_gap": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Custody Gap"
+        },
+        "evidence": {
+          "$ref": "#/$defs/IdentityEvidence"
+        },
+        "kind": {
+          "$ref": "#/$defs/ArtifactKind",
+          "default": "other"
+        },
+        "kind_warning": {
+          "default": "",
+          "title": "Kind Warning",
+          "type": "string"
+        },
+        "mechanism": {
+          "$ref": "#/$defs/Mechanism",
+          "default": "tool-schema"
+        },
+        "not_ingested_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Not Ingested Size"
+        },
+        "path": {
+          "default": "",
+          "title": "Path",
+          "type": "string"
+        },
+        "prior_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Sha256"
+        },
+        "prior_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Version"
+        },
+        "producer": {
+          "additionalProperties": true,
+          "title": "Producer",
+          "type": "object"
+        },
+        "version": {
+          "default": 1,
+          "title": "Version",
           "type": "integer"
         }
       },
       "required": [
-        "probe_id"
+        "evidence"
       ],
-      "title": "SchemaProbe",
+      "title": "ArtifactVersion",
       "type": "object"
+    },
+    "Custody": {
+      "description": "Where artifact bytes live and what custody guarantee applies.",
+      "enum": [
+        "cas",
+        "workspace-referenced",
+        "external-referenced"
+      ],
+      "title": "Custody",
+      "type": "string"
+    },
+    "EdgeEvidence": {
+      "description": "How a provenance edge's identity is known.",
+      "enum": [
+        "schema-arg",
+        "hash-pair",
+        "lease-window",
+        "authority",
+        "assertion"
+      ],
+      "title": "EdgeEvidence",
+      "type": "string"
+    },
+    "EdgeRole": {
+      "description": "Which side of a transform a provenance edge sits on.",
+      "enum": [
+        "used",
+        "generated"
+      ],
+      "title": "EdgeRole",
+      "type": "string"
+    },
+    "EnvironmentRecord": {
+      "description": "Nested schema for a transform's non-secret execution environment.",
+      "properties": {
+        "arch": {
+          "default": "",
+          "title": "Arch",
+          "type": "string"
+        },
+        "clio_version": {
+          "default": "",
+          "title": "Clio Version",
+          "type": "string"
+        },
+        "image_digest": {
+          "default": "",
+          "title": "Image Digest",
+          "type": "string"
+        },
+        "launcher_fingerprint": {
+          "default": "",
+          "title": "Launcher Fingerprint",
+          "type": "string"
+        },
+        "lockfile_sha256": {
+          "default": "",
+          "title": "Lockfile Sha256",
+          "type": "string"
+        },
+        "model_id": {
+          "default": "",
+          "title": "Model Id",
+          "type": "string"
+        },
+        "model_source": {
+          "default": "",
+          "title": "Model Source",
+          "type": "string"
+        },
+        "model_variant": {
+          "default": "",
+          "title": "Model Variant",
+          "type": "string"
+        },
+        "os": {
+          "default": "",
+          "title": "Os",
+          "type": "string"
+        },
+        "provider_id": {
+          "default": "",
+          "title": "Provider Id",
+          "type": "string"
+        },
+        "python_version": {
+          "default": "",
+          "title": "Python Version",
+          "type": "string"
+        },
+        "sandbox_mechanism": {
+          "default": "",
+          "title": "Sandbox Mechanism",
+          "type": "string"
+        },
+        "sandbox_reason": {
+          "default": "",
+          "title": "Sandbox Reason",
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/EnvironmentTier",
+          "default": "declared"
+        }
+      },
+      "title": "EnvironmentRecord",
+      "type": "object"
+    },
+    "EnvironmentTier": {
+      "description": "How precisely an execution environment is pinned.",
+      "enum": [
+        "declared",
+        "lockfile-hash",
+        "image-digest"
+      ],
+      "title": "EnvironmentTier",
+      "type": "string"
+    },
+    "EvidenceClass": {
+      "description": "How an artifact version's identity is known.",
+      "enum": [
+        "hashed-at-use",
+        "authority-asserted",
+        "stat-pinned"
+      ],
+      "title": "EvidenceClass",
+      "type": "string"
+    },
+    "IdentityEvidence": {
+      "description": "The evidence basis on which an artifact's content is pinned.",
+      "properties": {
+        "authority": {
+          "default": "",
+          "title": "Authority",
+          "type": "string"
+        },
+        "evidence_class": {
+          "$ref": "#/$defs/EvidenceClass"
+        },
+        "mtime": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mtime"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "size_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size Bytes"
+        }
+      },
+      "required": [
+        "evidence_class"
+      ],
+      "title": "IdentityEvidence",
+      "type": "object"
+    },
+    "Instrument": {
+      "description": "The tool or script that produced a transform.",
+      "properties": {
+        "args": {
+          "additionalProperties": true,
+          "title": "Args",
+          "type": "object"
+        },
+        "cmd": {
+          "default": "",
+          "title": "Cmd",
+          "type": "string"
+        },
+        "script_artifact_id": {
+          "default": "",
+          "title": "Script Artifact Id",
+          "type": "string"
+        },
+        "script_hash": {
+          "default": "",
+          "title": "Script Hash",
+          "type": "string"
+        },
+        "tool": {
+          "default": "",
+          "title": "Tool",
+          "type": "string"
+        }
+      },
+      "title": "Instrument",
+      "type": "object"
+    },
+    "Mechanism": {
+      "description": "What produced an artifact record.",
+      "enum": [
+        "harness",
+        "tool-schema",
+        "change-feed",
+        "model",
+        "none"
+      ],
+      "title": "Mechanism",
+      "type": "string"
+    },
+    "ProvEdge": {
+      "description": "One used or generated provenance edge with its own evidence.",
+      "properties": {
+        "arg": {
+          "default": "",
+          "title": "Arg",
+          "type": "string"
+        },
+        "artifact_id": {
+          "default": "",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "authority": {
+          "default": "",
+          "title": "Authority",
+          "type": "string"
+        },
+        "cross_workspace_bind": {
+          "default": false,
+          "title": "Cross Workspace Bind",
+          "type": "boolean"
+        },
+        "evidence": {
+          "$ref": "#/$defs/EdgeEvidence"
+        },
+        "external_ref": {
+          "default": "",
+          "title": "External Ref",
+          "type": "string"
+        },
+        "fence_proven": {
+          "default": false,
+          "title": "Fence Proven",
+          "type": "boolean"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "net_at": {
+          "default": "",
+          "title": "Net At",
+          "type": "string"
+        },
+        "net_domain": {
+          "default": "",
+          "title": "Net Domain",
+          "type": "string"
+        },
+        "net_mechanism": {
+          "default": "",
+          "title": "Net Mechanism",
+          "type": "string"
+        },
+        "net_resolved_ip": {
+          "default": "",
+          "title": "Net Resolved Ip",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "path": {
+          "default": "",
+          "title": "Path",
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/EdgeRole"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        }
+      },
+      "required": [
+        "role",
+        "evidence"
+      ],
+      "title": "ProvEdge",
+      "type": "object"
+    },
+    "ReplayContract": {
+      "description": "The permanent replay guarantee stamped on a transform.",
+      "enum": [
+        "reproducible",
+        "re-runnable"
+      ],
+      "title": "ReplayContract",
+      "type": "string"
+    },
+    "TransformKind": {
+      "description": "Whether provenance was observed under exclusive or contended custody.",
+      "enum": [
+        "ordinary",
+        "contended"
+      ],
+      "title": "TransformKind",
+      "type": "string"
+    },
+    "TransformRecord": {
+      "description": "One coarse transform keyed by the observer call id.",
+      "properties": {
+        "agent_id": {
+          "default": "",
+          "title": "Agent Id",
+          "type": "string"
+        },
+        "agent_role": {
+          "$ref": "#/$defs/AgentRole",
+          "default": "executing"
+        },
+        "annotation": {
+          "default": "",
+          "title": "Annotation",
+          "type": "string"
+        },
+        "call_id": {
+          "title": "Call Id",
+          "type": "string"
+        },
+        "candidates": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "ended_at": {
+          "default": "",
+          "title": "Ended At",
+          "type": "string"
+        },
+        "environment": {
+          "$ref": "#/$defs/EnvironmentRecord"
+        },
+        "event_id": {
+          "default": "",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "generated": {
+          "items": {
+            "$ref": "#/$defs/ProvEdge"
+          },
+          "title": "Generated",
+          "type": "array"
+        },
+        "instrument": {
+          "$ref": "#/$defs/Instrument"
+        },
+        "kind": {
+          "$ref": "#/$defs/TransformKind",
+          "default": "ordinary"
+        },
+        "notes": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "replay": {
+          "$ref": "#/$defs/ReplayContract",
+          "default": "re-runnable"
+        },
+        "replay_reason": {
+          "default": "",
+          "title": "Replay Reason",
+          "type": "string"
+        },
+        "session_id": {
+          "default": "",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "started_at": {
+          "default": "",
+          "title": "Started At",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/TransformStatus",
+          "default": "success"
+        },
+        "turn_id": {
+          "default": "",
+          "title": "Turn Id",
+          "type": "string"
+        },
+        "used": {
+          "items": {
+            "$ref": "#/$defs/ProvEdge"
+          },
+          "title": "Used",
+          "type": "array"
+        },
+        "workspace_id": {
+          "default": "",
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call_id"
+      ],
+      "title": "TransformRecord",
+      "type": "object"
+    },
+    "TransformStatus": {
+      "description": "Whether the producing call succeeded.",
+      "enum": [
+        "success",
+        "failed"
+      ],
+      "title": "TransformStatus",
+      "type": "string"
     }
   },
   "$id": "https://schemas.iowarp.dev/clio-schemas/index.json",
@@ -74,11 +640,26 @@
   "additionalProperties": false,
   "description": "Aggregate of all canonical clio-schemas records with shared definitions emitted once. Used to generate TypeScript without duplicate declarations.",
   "properties": {
-    "ProbeBatch": {
-      "$ref": "#/$defs/ProbeBatch"
+    "ArtifactRecord": {
+      "$ref": "#/$defs/ArtifactRecord"
     },
-    "SchemaProbe": {
-      "$ref": "#/$defs/SchemaProbe"
+    "ArtifactVersion": {
+      "$ref": "#/$defs/ArtifactVersion"
+    },
+    "EnvironmentRecord": {
+      "$ref": "#/$defs/EnvironmentRecord"
+    },
+    "IdentityEvidence": {
+      "$ref": "#/$defs/IdentityEvidence"
+    },
+    "Instrument": {
+      "$ref": "#/$defs/Instrument"
+    },
+    "ProvEdge": {
+      "$ref": "#/$defs/ProvEdge"
+    },
+    "TransformRecord": {
+      "$ref": "#/$defs/TransformRecord"
     }
   },
   "title": "ClioSchemaRegistry",

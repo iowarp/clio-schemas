@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "EdgeEvidence": {
+      "description": "How a provenance edge's identity is known.",
+      "enum": [
+        "schema-arg",
+        "hash-pair",
+        "lease-window",
+        "authority",
+        "assertion"
+      ],
+      "title": "EdgeEvidence",
+      "type": "string"
+    },
+    "EdgeRole": {
+      "description": "Which side of a transform a provenance edge sits on.",
+      "enum": [
+        "used",
+        "generated"
+      ],
+      "title": "EdgeRole",
+      "type": "string"
+    }
+  },
+  "description": "One used or generated provenance edge with its own evidence.",
+  "properties": {
+    "arg": {
+      "default": "",
+      "title": "Arg",
+      "type": "string"
+    },
+    "artifact_id": {
+      "default": "",
+      "title": "Artifact Id",
+      "type": "string"
+    },
+    "authority": {
+      "default": "",
+      "title": "Authority",
+      "type": "string"
+    },
+    "cross_workspace_bind": {
+      "default": false,
+      "title": "Cross Workspace Bind",
+      "type": "boolean"
+    },
+    "evidence": {
+      "$ref": "#/$defs/EdgeEvidence"
+    },
+    "external_ref": {
+      "default": "",
+      "title": "External Ref",
+      "type": "string"
+    },
+    "fence_proven": {
+      "default": false,
+      "title": "Fence Proven",
+      "type": "boolean"
+    },
+    "name": {
+      "default": "",
+      "title": "Name",
+      "type": "string"
+    },
+    "net_at": {
+      "default": "",
+      "title": "Net At",
+      "type": "string"
+    },
+    "net_domain": {
+      "default": "",
+      "title": "Net Domain",
+      "type": "string"
+    },
+    "net_mechanism": {
+      "default": "",
+      "title": "Net Mechanism",
+      "type": "string"
+    },
+    "net_resolved_ip": {
+      "default": "",
+      "title": "Net Resolved Ip",
+      "type": "string"
+    },
+    "note": {
+      "default": "",
+      "title": "Note",
+      "type": "string"
+    },
+    "path": {
+      "default": "",
+      "title": "Path",
+      "type": "string"
+    },
+    "role": {
+      "$ref": "#/$defs/EdgeRole"
+    },
+    "sha256": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sha256"
+    },
+    "version": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Version"
+    }
+  },
+  "required": [
+    "role",
+    "evidence"
+  ],
+  "title": "ProvEdge",
+  "type": "object"
+}

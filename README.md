@@ -2,19 +2,17 @@
 
 **The single source of truth for the record shapes shared across the CLIO
 system.** `clio-agent`, `clio-relay`, and `gact-tui` all speak the same wire
-records — `TaskRecord`, `ArtifactRef`, `ArtifactUse`, and the part-record
-shapes. Historically each service hand-wrote its own copy of these types and
+records — artifact versions/chains and transform provenance records. Historically
+each service hand-wrote its own copy of these types and
 they drifted. This package makes the shapes canonical: they are defined once as
 [pydantic](https://docs.pydantic.dev/) v2 models here and exported to JSON
 Schema. Python consumers import the models; TypeScript consumers **generate**
 types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
-> **Status: bootstrap (P0.6 / issue #1110).** Only the *pipeline* exists right
-> now, proven end to end by two placeholder models (`SchemaProbe` and
-> `ProbeBatch`, which references it and shares an enum). The real record content
-> lands in slice **P2.1 (#1120)**. Do not depend on the placeholders — they are
-> deleted when the real models arrive.
+> **Status: P2.1 records landed (version 0.2.0 / issue #1120).** The bootstrap
+> placeholders are gone. `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`,
+> `TransformRecord`, their nested value models, and their enums are canonical.
 
 ---
 
@@ -45,8 +43,9 @@ clio-schemas/
 │   ├── export.py                      # copy / check / regenerate / verify
 │   ├── py.typed                       # ships type information
 │   └── schemas/                       # COMMITTED immutable artifacts (in the wheel)
-│       ├── schema_probe.json          #   per-model, self-contained
-│       ├── probe_batch.json           #   per-model, self-contained
+│       ├── artifact_version.json      #   per-model, self-contained
+│       ├── artifact_record.json       #   per-model, self-contained
+│       ├── transform_record.json      #   plus provenance/value model schemas
 │       ├── index.json                 #   aggregate: shared $defs emitted once
 │       └── HASHES.json                #   canonical sha256 manifest
 ├── tools/ts-gen/
@@ -55,10 +54,11 @@ clio-schemas/
 │   └── package.json / package-lock.json
 ├── scripts/check_version_bump.py      # CI: schema change ⇒ version bump
 ├── tests/
-│   ├── test_roundtrip.py              # golden anti-drift + conformance tests
+│   ├── test_roundtrip.py              # JSON/TS golden anti-drift tests
+│   ├── test_legacy_parity.py          # original clio-agent byte fixtures
 │   ├── test_version_bump.py           # unit tests for the bump-enforcement core
 │   └── golden/                        # committed golden TS directory
-│       ├── _models.ts index.ts probe_batch.ts schema_probe.ts
+│       ├── _models.ts index.ts artifact_version.ts transform_record.ts ...
 └── ci-drafts/                         # workflow drafts for this repo + both consumers
 ```
 
@@ -73,7 +73,7 @@ Every hop is **deterministic**: JSON is emitted with sorted keys and a stable
 `$defs` order; the TypeScript generator uses a fixed banner (no timestamp),
 sorted file order, and pinned formatting. The aggregate `index.json` carries all
 models under a single shared `$defs`, so the generator emits each shared
-definition (e.g. the `ProbeKind` enum, the nested `SchemaProbe`) **exactly
+definition (e.g. the `ArtifactKind` enum and nested `IdentityEvidence`) **exactly
 once** — the generated module graph has no duplicate declarations.
 
 ## Export command modes
@@ -103,6 +103,15 @@ uv run pytest                                          # golden round-trip + con
 
 cd tools/ts-gen && npm ci && npm run check            # generate TS + strict typecheck
 ```
+
+## Legacy extraction compatibility
+
+The P2.1 artifact/provenance records use `LegacyToleranceBase` so their
+clio-agent behavior remains byte- and validation-compatible: unknown keys are
+ignored, ordinary Pydantic coercion remains enabled, immutable records stay
+frozen, and `ArtifactRecord` stays mutable. Moving existing records to the
+strict `ClioSchemaBase` contract would be a wire change; that coordinated
+convergence is tracked in iowarp/clio-agent#1121.
 
 ## How to add a model
 
@@ -136,7 +145,7 @@ different shapes and reintroduce drift. Therefore:
 - The version lives in exactly two places that must agree: `pyproject.toml`
   `version` and `clio_schemas.__version__`; CI verifies they match.
 
-### Wire evolution (forward-looking; full protocol designed in P2.1)
+### Wire evolution
 
 Exact-pin lockstep is the bootstrap rule. As the real records land and the
 system runs mixed versions during rollouts, the intended evolution discipline
@@ -146,8 +155,8 @@ is:
   enum member) ship to *readers* before *writers*: deploy the version that can
   *accept* the new shape everywhere first, then deploy the writers that *emit*
   it. Readers must ignore-or-tolerate unknown-but-optional additions during the
-  transition. (Note: today's `extra="forbid"` is deliberately strict for the
-  bootstrap; P2.1 defines exactly which surfaces relax to reader-tolerant.)
+  transition. Extracted P2.1 records preserve their legacy reader-tolerant
+  behavior through `LegacyToleranceBase`; new records use `ClioSchemaBase`.
 - **N / N-1 compatibility.** Once real schemas exist, adjacent versions are
   expected to interoperate: a service on version *N* and one on *N-1* must be
   able to exchange the records they share for the duration of a rollout.
@@ -157,9 +166,8 @@ is:
   *writers* of a new shape before the *readers* that understand it, so a rolled
   -back writer never emits a shape an already-rolled-back reader would reject.
 
-P2.1 (#1120) designs the full protocol (compatibility classes, the deprecation
-window, and the migration tooling); this section records the intended direction
-so the bootstrap does not bake in an incompatible assumption.
+Convergence of the extracted records on stricter validation is tracked by
+iowarp/clio-agent#1121 and requires a coordinated consumer migration.
 
 ## How consumers regenerate
 
@@ -173,4 +181,3 @@ so the bootstrap does not bake in an incompatible assumption.
   pinned via its lockfile) to produce `.ts`. Its CI regenerates into a clean dir
   and compares exact file *sets* + bytes so untracked/orphaned files are caught
   (see `ci-drafts/gact-tui-ts-gen.yml`).
-```
