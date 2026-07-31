@@ -44,7 +44,7 @@ class LegacyToleranceBase(BaseModel):
     model_config = ConfigDict(extra="ignore", strict=False, frozen=True)
 
 
-class ArtifactKind(str, Enum):
+class ArtifactKind(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """The curated kinds an artifact version may take."""
 
     DATASET = "dataset"
@@ -61,7 +61,7 @@ class ArtifactKind(str, Enum):
 RESERVED_KINDS: frozenset[ArtifactKind] = frozenset({ArtifactKind.PLAN})
 
 
-class Custody(str, Enum):
+class Custody(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """Where artifact bytes live and what custody guarantee applies."""
 
     CAS = "cas"
@@ -69,7 +69,7 @@ class Custody(str, Enum):
     EXTERNAL_REFERENCED = "external-referenced"
 
 
-class Mechanism(str, Enum):
+class Mechanism(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """What produced an artifact record."""
 
     HARNESS = "harness"
@@ -79,7 +79,7 @@ class Mechanism(str, Enum):
     NONE = "none"
 
 
-class EvidenceClass(str, Enum):
+class EvidenceClass(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """How an artifact version's identity is known."""
 
     HASHED_AT_USE = "hashed-at-use"
@@ -249,14 +249,14 @@ class ArtifactRecord(LegacyToleranceBase):
         return (self.head.version + 1) if self.head is not None else 1
 
 
-class EdgeRole(str, Enum):
+class EdgeRole(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """Which side of a transform a provenance edge sits on."""
 
     USED = "used"
     GENERATED = "generated"
 
 
-class EdgeEvidence(str, Enum):
+class EdgeEvidence(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """How a provenance edge's identity is known."""
 
     SCHEMA_ARG = "schema-arg"
@@ -266,28 +266,28 @@ class EdgeEvidence(str, Enum):
     ASSERTION = "assertion"
 
 
-class TransformStatus(str, Enum):
+class TransformStatus(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """Whether the producing call succeeded."""
 
     SUCCESS = "success"
     FAILED = "failed"
 
 
-class AgentRole(str, Enum):
+class AgentRole(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """Whether the agent executed or annotated the transform."""
 
     EXECUTING = "executing"
     ANNOTATING = "annotating"
 
 
-class TransformKind(str, Enum):
+class TransformKind(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """Whether provenance was observed under exclusive or contended custody."""
 
     ORDINARY = "ordinary"
     CONTENDED = "contended"
 
 
-class ReplayContract(str, Enum):
+class ReplayContract(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """The permanent replay guarantee stamped on a transform."""
 
     REPRODUCIBLE = "reproducible"
@@ -333,7 +333,7 @@ class Instrument(LegacyToleranceBase):
     script_artifact_id: str = ""
 
 
-class EnvironmentTier(str, Enum):
+class EnvironmentTier(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)
     """How precisely an execution environment is pinned."""
 
     DECLARED = "declared"
