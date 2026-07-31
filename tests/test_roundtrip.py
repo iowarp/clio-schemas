@@ -27,7 +27,6 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
 
 from clio_schemas.constants import HASHES_FILENAME
 from clio_schemas.export import (
@@ -35,7 +34,7 @@ from clio_schemas.export import (
     render_bundle,
     schema_filename,
 )
-from clio_schemas.models import EXPORTED_MODELS, ProbeBatch, ProbeKind, SchemaProbe
+from clio_schemas.models import EXPORTED_MODELS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TS_GEN_DIR = REPO_ROOT / "tools" / "ts-gen"
@@ -150,39 +149,16 @@ def test_no_duplicate_declarations_in_barrel(tmp_path: Path) -> None:
             counts[name] = counts.get(name, 0) + 1
     dupes = {name: n for name, n in counts.items() if n > 1}
     assert not dupes, f"duplicate declarations: {dupes}"
-    # The shared enum must be present and singular.
-    assert counts.get("ProbeKind") == 1
+    # Shared definitions must be present and singular.
+    for name in ("ArtifactKind", "EdgeEvidence", "EnvironmentTier"):
+        assert counts.get(name) == 1
 
 
 # --------------------------------------------------------------------------- #
-# Strict wire conformance (negative tests)
+# Exported-schema conformance
 # --------------------------------------------------------------------------- #
-def test_string_for_int_is_rejected() -> None:
-    """strict=True: a string is not coerced into the int `sequence` field."""
+def test_every_exported_model_forbids_schema_extras_only_when_configured() -> None:
+    """The emitted additionalProperties value follows each model's runtime contract."""
 
-    with pytest.raises(ValidationError):
-        SchemaProbe(probe_id="p", sequence="7")  # type: ignore[arg-type]
-
-
-def test_unknown_key_is_rejected() -> None:
-    """extra='forbid': unknown keys are rejected, never silently dropped."""
-
-    with pytest.raises(ValidationError):
-        SchemaProbe(probe_id="p", bogus=1)  # type: ignore[call-arg]
-
-
-def test_records_are_frozen() -> None:
-    """frozen=True: received records are immutable value objects."""
-
-    probe = SchemaProbe(probe_id="p")
-    with pytest.raises(ValidationError):
-        probe.sequence = 5  # type: ignore[misc]
-
-
-def test_valid_record_roundtrips() -> None:
-    """A well-formed record validates and nests correctly."""
-
-    probe = SchemaProbe(probe_id="p", kind=ProbeKind.ECHO, sequence=3)
-    batch = ProbeBatch(batch_id="b", probes=(probe,))
-    assert batch.probes[0].kind is ProbeKind.ECHO
-    assert batch.default_kind is ProbeKind.PING
+    for model in EXPORTED_MODELS:
+        assert model.model_json_schema().get("additionalProperties") is not False

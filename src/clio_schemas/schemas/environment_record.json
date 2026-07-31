@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "EnvironmentTier": {
+      "description": "How precisely an execution environment is pinned.",
+      "enum": [
+        "declared",
+        "lockfile-hash",
+        "image-digest"
+      ],
+      "title": "EnvironmentTier",
+      "type": "string"
+    }
+  },
+  "description": "Nested schema for a transform's non-secret execution environment.",
+  "properties": {
+    "arch": {
+      "default": "",
+      "title": "Arch",
+      "type": "string"
+    },
+    "clio_version": {
+      "default": "",
+      "title": "Clio Version",
+      "type": "string"
+    },
+    "image_digest": {
+      "default": "",
+      "title": "Image Digest",
+      "type": "string"
+    },
+    "launcher_fingerprint": {
+      "default": "",
+      "title": "Launcher Fingerprint",
+      "type": "string"
+    },
+    "lockfile_sha256": {
+      "default": "",
+      "title": "Lockfile Sha256",
+      "type": "string"
+    },
+    "model_id": {
+      "default": "",
+      "title": "Model Id",
+      "type": "string"
+    },
+    "model_source": {
+      "default": "",
+      "title": "Model Source",
+      "type": "string"
+    },
+    "model_variant": {
+      "default": "",
+      "title": "Model Variant",
+      "type": "string"
+    },
+    "os": {
+      "default": "",
+      "title": "Os",
+      "type": "string"
+    },
+    "provider_id": {
+      "default": "",
+      "title": "Provider Id",
+      "type": "string"
+    },
+    "python_version": {
+      "default": "",
+      "title": "Python Version",
+      "type": "string"
+    },
+    "sandbox_mechanism": {
+      "default": "",
+      "title": "Sandbox Mechanism",
+      "type": "string"
+    },
+    "sandbox_reason": {
+      "default": "",
+      "title": "Sandbox Reason",
+      "type": "string"
+    },
+    "tier": {
+      "$ref": "#/$defs/EnvironmentTier",
+      "default": "declared"
+    }
+  },
+  "title": "EnvironmentRecord",
+  "type": "object"
+}

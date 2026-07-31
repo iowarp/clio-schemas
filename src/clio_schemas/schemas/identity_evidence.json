@@ -1,0 +1,66 @@
+{
+  "$defs": {
+    "EvidenceClass": {
+      "description": "How an artifact version's identity is known.",
+      "enum": [
+        "hashed-at-use",
+        "authority-asserted",
+        "stat-pinned"
+      ],
+      "title": "EvidenceClass",
+      "type": "string"
+    }
+  },
+  "description": "The evidence basis on which an artifact's content is pinned.",
+  "properties": {
+    "authority": {
+      "default": "",
+      "title": "Authority",
+      "type": "string"
+    },
+    "evidence_class": {
+      "$ref": "#/$defs/EvidenceClass"
+    },
+    "mtime": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mtime"
+    },
+    "sha256": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sha256"
+    },
+    "size_bytes": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Size Bytes"
+    }
+  },
+  "required": [
+    "evidence_class"
+  ],
+  "title": "IdentityEvidence",
+  "type": "object"
+}

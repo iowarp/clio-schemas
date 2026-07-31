@@ -1,0 +1,212 @@
+{
+  "$defs": {
+    "ArtifactKind": {
+      "description": "The curated kinds an artifact version may take.",
+      "enum": [
+        "dataset",
+        "image",
+        "report",
+        "plan",
+        "script",
+        "config",
+        "model",
+        "ui_payload",
+        "other"
+      ],
+      "title": "ArtifactKind",
+      "type": "string"
+    },
+    "Custody": {
+      "description": "Where artifact bytes live and what custody guarantee applies.",
+      "enum": [
+        "cas",
+        "workspace-referenced",
+        "external-referenced"
+      ],
+      "title": "Custody",
+      "type": "string"
+    },
+    "EvidenceClass": {
+      "description": "How an artifact version's identity is known.",
+      "enum": [
+        "hashed-at-use",
+        "authority-asserted",
+        "stat-pinned"
+      ],
+      "title": "EvidenceClass",
+      "type": "string"
+    },
+    "IdentityEvidence": {
+      "description": "The evidence basis on which an artifact's content is pinned.",
+      "properties": {
+        "authority": {
+          "default": "",
+          "title": "Authority",
+          "type": "string"
+        },
+        "evidence_class": {
+          "$ref": "#/$defs/EvidenceClass"
+        },
+        "mtime": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mtime"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "size_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size Bytes"
+        }
+      },
+      "required": [
+        "evidence_class"
+      ],
+      "title": "IdentityEvidence",
+      "type": "object"
+    },
+    "Mechanism": {
+      "description": "What produced an artifact record.",
+      "enum": [
+        "harness",
+        "tool-schema",
+        "change-feed",
+        "model",
+        "none"
+      ],
+      "title": "Mechanism",
+      "type": "string"
+    }
+  },
+  "description": "One immutable version of a logical artifact.",
+  "properties": {
+    "annotation": {
+      "default": "",
+      "title": "Annotation",
+      "type": "string"
+    },
+    "artifact_id": {
+      "title": "Artifact Id",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "",
+      "title": "Created At",
+      "type": "string"
+    },
+    "custody": {
+      "$ref": "#/$defs/Custody",
+      "default": "workspace-referenced"
+    },
+    "custody_gap": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Custody Gap"
+    },
+    "evidence": {
+      "$ref": "#/$defs/IdentityEvidence"
+    },
+    "kind": {
+      "$ref": "#/$defs/ArtifactKind",
+      "default": "other"
+    },
+    "kind_warning": {
+      "default": "",
+      "title": "Kind Warning",
+      "type": "string"
+    },
+    "mechanism": {
+      "$ref": "#/$defs/Mechanism",
+      "default": "tool-schema"
+    },
+    "not_ingested_size": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Not Ingested Size"
+    },
+    "path": {
+      "default": "",
+      "title": "Path",
+      "type": "string"
+    },
+    "prior_sha256": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prior Sha256"
+    },
+    "prior_version": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prior Version"
+    },
+    "producer": {
+      "additionalProperties": true,
+      "title": "Producer",
+      "type": "object"
+    },
+    "version": {
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "evidence"
+  ],
+  "title": "ArtifactVersion",
+  "type": "object"
+}

@@ -77,7 +77,7 @@ _CAMEL_BOUNDARY = re.compile(r"(?<!^)(?=[A-Z])")
 def schema_filename(model: type[BaseModel]) -> str:
     """Return the deterministic snake_case ``.json`` filename for a model.
 
-    ``SchemaProbe`` -> ``schema_probe.json``.
+    ``ArtifactVersion`` -> ``artifact_version.json``.
     """
 
     return f"{_CAMEL_BOUNDARY.sub('_', model.__name__).lower()}.json"

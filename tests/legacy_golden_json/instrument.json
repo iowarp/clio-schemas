@@ -1,0 +1,1 @@
+{"tool":"fs_write","args":{"path":"data/output.csv","rows":3,"options":["x",2]},"cmd":"python make.py","script_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","script_artifact_id":"artifact_script_fixture"}

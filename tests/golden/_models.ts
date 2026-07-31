@@ -5,62 +5,252 @@
  *   node schemas-to-ts.mjs --in <schema-dir> --out <ts-dir>
  */
 
+export type Name = string;
+export type Annotation = string;
+export type ArtifactId = string;
+export type CreatedAt = string;
 /**
- * Opaque identifier for this batch.
+ * Where artifact bytes live and what custody guarantee applies.
  */
-export type BatchId = string;
+export type Custody = "cas" | "workspace-referenced" | "external-referenced";
+export type CustodyGap = {
+  [k: string]: unknown | undefined;
+} | null;
+export type Authority = string;
 /**
- * Discriminator enum shared by more than one model.
- *
- * Exists so the bootstrap exercises enum handling through the whole
- * pydantic -> JSON Schema -> TypeScript pipeline (enums are a common source of
- * generator drift) and, because it is referenced by both `SchemaProbe` and
- * `ProbeBatch`, proves that a shared definition is emitted exactly once.
+ * How an artifact version's identity is known.
  */
-export type ProbeKind = "ping" | "echo" | "noop";
+export type EvidenceClass = "hashed-at-use" | "authority-asserted" | "stat-pinned";
+export type Mtime = number | null;
+export type Sha256 = string | null;
+export type SizeBytes = number | null;
 /**
- * Opaque identifier for this probe record.
+ * The curated kinds an artifact version may take.
  */
-export type ProbeId = string;
+export type ArtifactKind =
+  "dataset" | "image" | "report" | "plan" | "script" | "config" | "model" | "ui_payload" | "other";
+export type KindWarning = string;
 /**
- * Monotonic sequence number within a probe stream.
+ * What produced an artifact record.
  */
-export type Sequence = number;
+export type Mechanism = "harness" | "tool-schema" | "change-feed" | "model" | "none";
+export type NotIngestedSize = number | null;
+export type Path = string;
+export type PriorSha256 = string | null;
+export type PriorVersion = number | null;
+export type Version = number;
+export type Versions = ArtifactVersion[];
+export type WorkspaceId = string;
+export type Arch = string;
+export type ClioVersion = string;
+export type ImageDigest = string;
+export type LauncherFingerprint = string;
+export type LockfileSha256 = string;
+export type ModelId = string;
+export type ModelSource = string;
+export type ModelVariant = string;
+export type Os = string;
+export type ProviderId = string;
+export type PythonVersion = string;
+export type SandboxMechanism = string;
+export type SandboxReason = string;
 /**
- * The probe records in this batch (order-significant).
+ * How precisely an execution environment is pinned.
  */
-export type Probes = SchemaProbe[];
+export type EnvironmentTier = "declared" | "lockfile-hash" | "image-digest";
+export type Cmd = string;
+export type ScriptArtifactId = string;
+export type ScriptHash = string;
+export type Tool = string;
+export type Arg = string;
+export type ArtifactId1 = string;
+export type Authority1 = string;
+export type CrossWorkspaceBind = boolean;
+/**
+ * How a provenance edge's identity is known.
+ */
+export type EdgeEvidence = "schema-arg" | "hash-pair" | "lease-window" | "authority" | "assertion";
+export type ExternalRef = string;
+export type FenceProven = boolean;
+export type Name1 = string;
+export type NetAt = string;
+export type NetDomain = string;
+export type NetMechanism = string;
+export type NetResolvedIp = string;
+export type Note = string;
+export type Path1 = string;
+/**
+ * Which side of a transform a provenance edge sits on.
+ */
+export type EdgeRole = "used" | "generated";
+export type Sha2561 = string | null;
+export type Version1 = number | null;
+export type AgentId = string;
+/**
+ * Whether the agent executed or annotated the transform.
+ */
+export type AgentRole = "executing" | "annotating";
+export type Annotation1 = string;
+export type CallId = string;
+export type Candidates = string[];
+export type EndedAt = string;
+export type EventId = string;
+export type Generated = ProvEdge[];
+/**
+ * Whether provenance was observed under exclusive or contended custody.
+ */
+export type TransformKind = "ordinary" | "contended";
+export type Notes = {
+  [k: string]: unknown | undefined;
+}[];
+/**
+ * The permanent replay guarantee stamped on a transform.
+ */
+export type ReplayContract = "reproducible" | "re-runnable";
+export type ReplayReason = string;
+export type SessionId = string;
+export type StartedAt = string;
+/**
+ * Whether the producing call succeeded.
+ */
+export type TransformStatus = "success" | "failed";
+export type TurnId = string;
+export type Used = ProvEdge[];
+export type WorkspaceId1 = string;
 
 /**
  * Aggregate of all canonical clio-schemas records with shared definitions emitted once. Used to generate TypeScript without duplicate declarations.
  */
 export interface ClioSchemaRegistry {
-  ProbeBatch?: ProbeBatch;
-  SchemaProbe?: SchemaProbe;
+  ArtifactRecord?: ArtifactRecord;
+  ArtifactVersion?: ArtifactVersion;
+  EnvironmentRecord?: EnvironmentRecord;
+  IdentityEvidence?: IdentityEvidence;
+  Instrument?: Instrument;
+  ProvEdge?: ProvEdge;
+  TransformRecord?: TransformRecord;
 }
 /**
- * Placeholder aggregate proving multi-root / shared-definition handling.
- *
- * References `SchemaProbe` (a nested model) and reuses `ProbeKind` (a shared
- * enum). The exporter emits both `ProbeKind` and `SchemaProbe` exactly once in
- * the aggregate schema, and the TypeScript generator must not duplicate their
- * declarations — the anti-duplication proof for P2.1's richer record graph.
+ * A mutable logical artifact chain keyed by workspace and name.
  */
-export interface ProbeBatch {
-  batch_id: BatchId;
-  default_kind?: ProbeKind;
-  probes?: Probes;
+export interface ArtifactRecord {
+  aliases?: Aliases;
+  name: Name;
+  versions?: Versions;
+  workspace_id: WorkspaceId;
+}
+export interface Aliases {
+  [k: string]: number | undefined;
 }
 /**
- * Placeholder record proving the schema export pipeline works end to end.
- *
- * Intentionally trivial; removed once the real shared records land in P2.1. It
- * carries one required string, one typed enum, and one integer with a default
- * so required/optional handling, enum generation, and defaults are all
- * exercised by the golden round-trip test.
+ * One immutable version of a logical artifact.
  */
-export interface SchemaProbe {
-  kind?: ProbeKind;
-  probe_id: ProbeId;
-  sequence?: Sequence;
+export interface ArtifactVersion {
+  annotation?: Annotation;
+  artifact_id?: ArtifactId;
+  created_at?: CreatedAt;
+  custody?: Custody;
+  custody_gap?: CustodyGap;
+  evidence: IdentityEvidence;
+  kind?: ArtifactKind;
+  kind_warning?: KindWarning;
+  mechanism?: Mechanism;
+  not_ingested_size?: NotIngestedSize;
+  path?: Path;
+  prior_sha256?: PriorSha256;
+  prior_version?: PriorVersion;
+  producer?: Producer;
+  version?: Version;
+}
+/**
+ * The evidence basis on which an artifact's content is pinned.
+ */
+export interface IdentityEvidence {
+  authority?: Authority;
+  evidence_class: EvidenceClass;
+  mtime?: Mtime;
+  sha256?: Sha256;
+  size_bytes?: SizeBytes;
+}
+export interface Producer {
+  [k: string]: unknown | undefined;
+}
+/**
+ * Nested schema for a transform's non-secret execution environment.
+ */
+export interface EnvironmentRecord {
+  arch?: Arch;
+  clio_version?: ClioVersion;
+  image_digest?: ImageDigest;
+  launcher_fingerprint?: LauncherFingerprint;
+  lockfile_sha256?: LockfileSha256;
+  model_id?: ModelId;
+  model_source?: ModelSource;
+  model_variant?: ModelVariant;
+  os?: Os;
+  provider_id?: ProviderId;
+  python_version?: PythonVersion;
+  sandbox_mechanism?: SandboxMechanism;
+  sandbox_reason?: SandboxReason;
+  tier?: EnvironmentTier;
+}
+/**
+ * The tool or script that produced a transform.
+ */
+export interface Instrument {
+  args?: Args;
+  cmd?: Cmd;
+  script_artifact_id?: ScriptArtifactId;
+  script_hash?: ScriptHash;
+  tool?: Tool;
+}
+export interface Args {
+  [k: string]: unknown | undefined;
+}
+/**
+ * One used or generated provenance edge with its own evidence.
+ */
+export interface ProvEdge {
+  arg?: Arg;
+  artifact_id?: ArtifactId1;
+  authority?: Authority1;
+  cross_workspace_bind?: CrossWorkspaceBind;
+  evidence: EdgeEvidence;
+  external_ref?: ExternalRef;
+  fence_proven?: FenceProven;
+  name?: Name1;
+  net_at?: NetAt;
+  net_domain?: NetDomain;
+  net_mechanism?: NetMechanism;
+  net_resolved_ip?: NetResolvedIp;
+  note?: Note;
+  path?: Path1;
+  role: EdgeRole;
+  sha256?: Sha2561;
+  version?: Version1;
+}
+/**
+ * One coarse transform keyed by the observer call id.
+ */
+export interface TransformRecord {
+  agent_id?: AgentId;
+  agent_role?: AgentRole;
+  annotation?: Annotation1;
+  call_id: CallId;
+  candidates?: Candidates;
+  ended_at?: EndedAt;
+  environment?: EnvironmentRecord;
+  event_id?: EventId;
+  generated?: Generated;
+  instrument?: Instrument;
+  kind?: TransformKind;
+  notes?: Notes;
+  replay?: ReplayContract;
+  replay_reason?: ReplayReason;
+  session_id?: SessionId;
+  started_at?: StartedAt;
+  status?: TransformStatus;
+  turn_id?: TurnId;
+  used?: Used;
+  workspace_id?: WorkspaceId1;
 }

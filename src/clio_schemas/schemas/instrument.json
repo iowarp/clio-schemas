@@ -1,0 +1,32 @@
+{
+  "description": "The tool or script that produced a transform.",
+  "properties": {
+    "args": {
+      "additionalProperties": true,
+      "title": "Args",
+      "type": "object"
+    },
+    "cmd": {
+      "default": "",
+      "title": "Cmd",
+      "type": "string"
+    },
+    "script_artifact_id": {
+      "default": "",
+      "title": "Script Artifact Id",
+      "type": "string"
+    },
+    "script_hash": {
+      "default": "",
+      "title": "Script Hash",
+      "type": "string"
+    },
+    "tool": {
+      "default": "",
+      "title": "Tool",
+      "type": "string"
+    }
+  },
+  "title": "Instrument",
+  "type": "object"
+}
