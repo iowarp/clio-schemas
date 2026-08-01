@@ -1,0 +1,22 @@
+# PyPI publication via OIDC trusted publishing (same pattern as clio-agent's
+# release.yml). Requires the PyPI-side pending-publisher registration
+# (project clio-schemas, owner iowarp, repo clio-schemas, workflow
+# release.yml, environment pypi) and a GitHub environment named `pypi`.
+name: release
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Build
+        run: uv build
+      - name: Publish (OIDC trusted publishing)
+        run: uv publish
