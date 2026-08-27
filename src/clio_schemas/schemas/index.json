@@ -343,18 +343,35 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "actions": {
-          "title": "Actions"
+          "items": {
+            "$ref": "#/$defs/_CardAction"
+          },
+          "maxItems": 6,
+          "title": "Actions",
+          "type": "array"
         },
         "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Body"
         },
         "component": {
@@ -368,14 +385,28 @@
           "type": "string"
         },
         "severity": {
-          "title": "Severity"
+          "title": "Severity",
+          "type": "string"
         },
         "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Title"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -539,16 +570,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "actions": {
-          "title": "Actions"
+          "items": {
+            "$ref": "#/$defs/_CardAction"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
         },
         "component": {
           "const": "clio.approval.v1",
@@ -561,17 +599,52 @@
           "type": "string"
         },
         "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Reason"
         },
         "risk": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Risk"
         },
         "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Title"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -595,17 +668,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "action": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
             {
               "type": "null"
             }
@@ -624,14 +703,34 @@
           "type": "string"
         },
         "mediaType": {
-          "title": "Mediatype"
+          "title": "Mediatype",
+          "type": "string"
         },
         "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Name"
         },
         "size": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -640,11 +739,14 @@
           "title": "Size"
         },
         "uri": {
-          "title": "Uri"
+          "title": "Uri",
+          "type": "string"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -899,27 +1001,34 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "action": {
           "anyOf": [
-            {},
             {
-              "type": "null"
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
             }
           ],
-          "default": null,
           "title": "Action"
         },
         "checks": {
           "anyOf": [
-            {},
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
             {
               "type": "null"
             }
@@ -928,7 +1037,8 @@
           "title": "Checks"
         },
         "child": {
-          "title": "Child"
+          "title": "Child",
+          "type": "string"
         },
         "component": {
           "const": "Button",
@@ -940,29 +1050,16 @@
           "title": "Id",
           "type": "string"
         },
-        "isValid": {
-          "anyOf": [
-            {},
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Isvalid"
-        },
-        "validationErrors": {
-          "anyOf": [
-            {},
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Validationerrors"
-        },
         "variant": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "default",
+                "primary",
+                "borderless"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -972,7 +1069,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -983,7 +1082,8 @@
       },
       "required": [
         "id",
-        "child"
+        "child",
+        "action"
       ],
       "title": "ButtonComponent",
       "type": "object"
@@ -993,17 +1093,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "action": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
             {
               "type": "null"
             }
@@ -1012,6 +1118,17 @@
           "title": "Action"
         },
         "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Body"
         },
         "component": {
@@ -1025,14 +1142,28 @@
           "type": "string"
         },
         "severity": {
-          "title": "Severity"
+          "title": "Severity",
+          "type": "string"
         },
         "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Title"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -1055,17 +1186,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "checks": {
           "anyOf": [
-            {},
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
             {
               "type": "null"
             }
@@ -1083,35 +1220,39 @@
           "title": "Id",
           "type": "string"
         },
-        "isValid": {
+        "label": {
           "anyOf": [
-            {},
             {
-              "type": "null"
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
             }
           ],
-          "default": null,
-          "title": "Isvalid"
-        },
-        "label": {
           "title": "Label"
         },
-        "validationErrors": {
+        "value": {
           "anyOf": [
-            {},
             {
-              "type": "null"
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_BooleanFunctionCall"
             }
           ],
-          "default": null,
-          "title": "Validationerrors"
-        },
-        "value": {
           "title": "Value"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -1133,17 +1274,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "checks": {
           "anyOf": [
-            {},
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
             {
               "type": "null"
             }
@@ -1159,7 +1306,13 @@
         },
         "displayStyle": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "checkbox",
+                "chips"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -1169,7 +1322,9 @@
         },
         "filterable": {
           "anyOf": [
-            {},
+            {
+              "type": "boolean"
+            },
             {
               "type": "null"
             }
@@ -1181,38 +1336,57 @@
           "title": "Id",
           "type": "string"
         },
-        "isValid": {
+        "label": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "title": "Isvalid"
-        },
-        "label": {
           "title": "Label"
         },
         "options": {
-          "title": "Options"
-        },
-        "validationErrors": {
-          "anyOf": [
-            {},
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Validationerrors"
+          "items": {
+            "$ref": "#/$defs/_ChoiceOption"
+          },
+          "title": "Options",
+          "type": "array"
         },
         "value": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_ArrayFunctionCall"
+            }
+          ],
           "title": "Value"
         },
         "variant": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "multipleSelection",
+                "mutuallyExclusive"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -1222,7 +1396,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -1233,7 +1409,6 @@
       },
       "required": [
         "id",
-        "label",
         "options",
         "value"
       ],
@@ -1325,15 +1500,27 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Code"
         },
         "component": {
@@ -1347,11 +1534,20 @@
           "type": "string"
         },
         "language": {
-          "title": "Language"
+          "title": "Language",
+          "type": "string"
         },
         "title": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -1361,7 +1557,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -1383,17 +1581,26 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "align": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -1402,6 +1609,17 @@
           "title": "Align"
         },
         "children": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_ChildTemplate"
+            }
+          ],
           "title": "Children"
         },
         "component": {
@@ -1416,7 +1634,18 @@
         },
         "justify": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "spaceBetween",
+                "spaceAround",
+                "spaceEvenly",
+                "stretch"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -1426,7 +1655,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -1457,17 +1688,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "action": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
             {
               "type": "null"
             }
@@ -1476,7 +1713,18 @@
           "title": "Action"
         },
         "columns": {
-          "title": "Columns"
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/_DataTableColumn"
+              }
+            ]
+          },
+          "title": "Columns",
+          "type": "array"
         },
         "component": {
           "const": "clio.data-table.v1",
@@ -1489,11 +1737,20 @@
           "type": "string"
         },
         "rows": {
-          "title": "Rows"
+          "items": {
+            "additionalProperties": {
+              "$ref": "#/$defs/JsonValue"
+            },
+            "type": "object"
+          },
+          "title": "Rows",
+          "type": "array"
         },
         "selection": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -1503,7 +1760,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -1525,17 +1784,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "action": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
             {
               "type": "null"
             }
@@ -1550,6 +1815,17 @@
           "type": "string"
         },
         "diff": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Diff"
         },
         "id": {
@@ -1557,11 +1833,20 @@
           "type": "string"
         },
         "path": {
-          "title": "Path"
+          "title": "Path",
+          "type": "string"
         },
         "status": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -1571,7 +1856,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -1673,17 +1960,24 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "axis": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "vertical",
+                "horizontal"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -1703,7 +1997,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -1925,16 +2221,18 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "child": {
-          "title": "Child"
+          "title": "Child",
+          "type": "string"
         },
         "component": {
           "const": "Frame",
@@ -1944,7 +2242,15 @@
         },
         "description": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -1958,7 +2264,15 @@
         },
         "title": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -1968,7 +2282,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -1989,18 +2305,32 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "children": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "columns": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "title": "Accessibility"
-        },
-        "children": {
-          "title": "Children"
-        },
-        "columns": {
           "title": "Columns"
         },
         "component": {
@@ -2011,7 +2341,9 @@
         },
         "gap": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -2025,7 +2357,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -2036,8 +2370,7 @@
       },
       "required": [
         "id",
-        "children",
-        "columns"
+        "children"
       ],
       "title": "GridComponent",
       "type": "object"
@@ -2047,13 +2380,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "Icon",
@@ -2066,11 +2400,24 @@
           "type": "string"
         },
         "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_IconSvgPath"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            }
+          ],
           "title": "Name"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -2145,13 +2492,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "Image",
@@ -2161,7 +2509,15 @@
         },
         "description": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2171,7 +2527,16 @@
         },
         "fit": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "contain",
+                "cover",
+                "fill",
+                "none",
+                "scaleDown"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -2184,11 +2549,32 @@
           "type": "string"
         },
         "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Url"
         },
         "variant": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "icon",
+                "avatar",
+                "smallFeature",
+                "mediumFeature",
+                "largeFeature",
+                "header"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -2198,7 +2584,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -2246,22 +2634,32 @@
       "title": "Instrument",
       "type": "object"
     },
+    "JsonValue": {},
     "ListComponent": {
       "additionalProperties": false,
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "align": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -2270,6 +2668,17 @@
           "title": "Align"
         },
         "children": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_ChildTemplate"
+            }
+          ],
           "title": "Children"
         },
         "component": {
@@ -2280,7 +2689,13 @@
         },
         "direction": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "vertical",
+                "horizontal"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -2292,19 +2707,11 @@
           "title": "Id",
           "type": "string"
         },
-        "listStyle": {
-          "anyOf": [
-            {},
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Liststyle"
-        },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -2326,17 +2733,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "action": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
             {
               "type": "null"
             }
@@ -2346,7 +2759,15 @@
         },
         "actionLabel": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2388,7 +2809,15 @@
         },
         "title": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2497,13 +2926,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "clio.mermaid.v1",
@@ -2516,11 +2946,30 @@
           "type": "string"
         },
         "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Source"
         },
         "title": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2530,7 +2979,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -2614,13 +3065,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "clio.metric.v1",
@@ -2630,7 +3082,15 @@
         },
         "detail": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2643,11 +3103,30 @@
           "type": "string"
         },
         "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Label"
         },
         "trend": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2657,7 +3136,15 @@
         },
         "unit": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2666,11 +3153,36 @@
           "title": "Unit"
         },
         "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_FunctionCall"
+            }
+          ],
           "title": "Value"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -2692,13 +3204,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "Modal",
@@ -2707,18 +3220,22 @@
           "type": "string"
         },
         "content": {
-          "title": "Content"
+          "title": "Content",
+          "type": "string"
         },
         "id": {
           "title": "Id",
           "type": "string"
         },
         "trigger": {
-          "title": "Trigger"
+          "title": "Trigger",
+          "type": "string"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -2827,13 +3344,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "clio.progress.v1",
@@ -2843,7 +3361,15 @@
         },
         "detail": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2856,11 +3382,30 @@
           "type": "string"
         },
         "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Label"
         },
         "max": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2870,7 +3415,15 @@
         },
         "state": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2880,7 +3433,15 @@
         },
         "value": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -2890,7 +3451,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -3236,17 +3799,26 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "align": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -3255,6 +3827,17 @@
           "title": "Align"
         },
         "children": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_ChildTemplate"
+            }
+          ],
           "title": "Children"
         },
         "component": {
@@ -3269,7 +3852,18 @@
         },
         "justify": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "spaceBetween",
+                "spaceAround",
+                "spaceEvenly",
+                "stretch"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -3279,7 +3873,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -3300,17 +3896,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "checks": {
           "anyOf": [
-            {},
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
             {
               "type": "null"
             }
@@ -3328,41 +3930,59 @@
           "title": "Id",
           "type": "string"
         },
-        "isValid": {
+        "label": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "title": "Isvalid"
-        },
-        "label": {
           "title": "Label"
         },
         "max": {
-          "title": "Max"
+          "title": "Max",
+          "type": "number"
         },
         "min": {
-          "title": "Min"
-        },
-        "validationErrors": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "title": "Validationerrors"
+          "title": "Min"
         },
         "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            }
+          ],
           "title": "Value"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -3373,8 +3993,6 @@
       },
       "required": [
         "id",
-        "label",
-        "min",
         "max",
         "value"
       ],
@@ -3386,13 +4004,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "clio.status.v1",
@@ -3402,7 +4021,15 @@
         },
         "detail": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -3412,7 +4039,15 @@
         },
         "elapsedMs": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -3425,14 +4060,38 @@
           "type": "string"
         },
         "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Label"
         },
         "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "State"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -3529,13 +4188,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "Tabs",
@@ -3548,11 +4208,18 @@
           "type": "string"
         },
         "tabs": {
-          "title": "Tabs"
+          "items": {
+            "$ref": "#/$defs/_TabDefinition"
+          },
+          "minItems": 1,
+          "title": "Tabs",
+          "type": "array"
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -3648,13 +4315,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "Text",
@@ -3667,11 +4335,33 @@
           "type": "string"
         },
         "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
           "title": "Text"
         },
         "variant": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "caption",
+                "body"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -3681,7 +4371,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -3702,17 +4394,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "checks": {
           "anyOf": [
-            {},
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
             {
               "type": "null"
             }
@@ -3730,32 +4428,25 @@
           "title": "Id",
           "type": "string"
         },
-        "isValid": {
-          "anyOf": [
-            {},
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Isvalid"
-        },
         "label": {
-          "title": "Label"
-        },
-        "validationErrors": {
           "anyOf": [
-            {},
             {
-              "type": "null"
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
             }
           ],
-          "default": null,
-          "title": "Validationerrors"
+          "title": "Label"
         },
         "validationRegexp": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -3764,11 +4455,34 @@
           "title": "Validationregexp"
         },
         "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "title": "Value"
         },
         "variant": {
           "anyOf": [
-            {},
+            {
+              "enum": [
+                "longText",
+                "number",
+                "shortText",
+                "obscured"
+              ],
+              "type": "string"
+            },
             {
               "type": "null"
             }
@@ -3778,7 +4492,9 @@
         },
         "weight": {
           "anyOf": [
-            {},
+            {
+              "type": "number"
+            },
             {
               "type": "null"
             }
@@ -3789,8 +4505,7 @@
       },
       "required": [
         "id",
-        "label",
-        "value"
+        "label"
       ],
       "title": "TextFieldComponent",
       "type": "object"
@@ -3888,13 +4603,14 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "component": {
           "const": "clio.time-series.v1",
@@ -3954,7 +4670,15 @@
         },
         "title": {
           "anyOf": [
-            {},
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
             {
               "type": "null"
             }
@@ -4219,17 +4943,23 @@
       "properties": {
         "accessibility": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Accessibility"
+          "default": null
         },
         "action": {
           "anyOf": [
-            {},
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
             {
               "type": "null"
             }
@@ -4371,6 +5101,470 @@
         "label"
       ],
       "title": "WorkflowNode",
+      "type": "object"
+    },
+    "_Accessibility": {
+      "additionalProperties": false,
+      "description": "Supplemental accessible name and description for one component.",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "title": "_Accessibility",
+      "type": "object"
+    },
+    "_ArrayFunctionCall": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "const": "array",
+          "default": "array",
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_ArrayFunctionCall",
+      "type": "object"
+    },
+    "_BooleanFunctionCall": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "const": "boolean",
+          "default": "boolean",
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_BooleanFunctionCall",
+      "type": "object"
+    },
+    "_CardAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            }
+          ],
+          "title": "Action"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "tone": {
+          "anyOf": [
+            {
+              "enum": [
+                "default",
+                "destructive"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tone"
+        }
+      },
+      "required": [
+        "label",
+        "action"
+      ],
+      "title": "_CardAction",
+      "type": "object"
+    },
+    "_CheckRule": {
+      "additionalProperties": false,
+      "description": "One official client-side component validation rule.",
+      "properties": {
+        "condition": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_BooleanFunctionCall"
+            }
+          ],
+          "title": "Condition"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "condition",
+        "message"
+      ],
+      "title": "_CheckRule",
+      "type": "object"
+    },
+    "_ChildTemplate": {
+      "additionalProperties": false,
+      "description": "Template for generating repeated child components from bound data.",
+      "properties": {
+        "componentId": {
+          "title": "Componentid",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "componentId",
+        "path"
+      ],
+      "title": "_ChildTemplate",
+      "type": "object"
+    },
+    "_ChoiceOption": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Label"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ],
+      "title": "_ChoiceOption",
+      "type": "object"
+    },
+    "_DataBinding": {
+      "additionalProperties": false,
+      "description": "A JSON Pointer into the A2UI surface data model.",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "_DataBinding",
+      "type": "object"
+    },
+    "_DataTableColumn": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "label"
+      ],
+      "title": "_DataTableColumn",
+      "type": "object"
+    },
+    "_EventAction": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "$ref": "#/$defs/_ServerEvent"
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "title": "_EventAction",
+      "type": "object"
+    },
+    "_FunctionAction": {
+      "additionalProperties": false,
+      "properties": {
+        "functionCall": {
+          "$ref": "#/$defs/_FunctionCall"
+        }
+      },
+      "required": [
+        "functionCall"
+      ],
+      "title": "_FunctionAction",
+      "type": "object"
+    },
+    "_FunctionCall": {
+      "additionalProperties": false,
+      "description": "A typed client-side function invocation.",
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "default": "boolean",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "array",
+            "object",
+            "any",
+            "void"
+          ],
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_FunctionCall",
+      "type": "object"
+    },
+    "_IconSvgPath": {
+      "additionalProperties": false,
+      "properties": {
+        "svgPath": {
+          "title": "Svgpath",
+          "type": "string"
+        }
+      },
+      "required": [
+        "svgPath"
+      ],
+      "title": "_IconSvgPath",
+      "type": "object"
+    },
+    "_NumberFunctionCall": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "const": "number",
+          "default": "number",
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_NumberFunctionCall",
+      "type": "object"
+    },
+    "_ServerEvent": {
+      "additionalProperties": false,
+      "description": "Official server-side A2UI event action.",
+      "properties": {
+        "context": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "items": {
+                      "$ref": "#/$defs/JsonValue"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "$ref": "#/$defs/_DataBinding"
+                  },
+                  {
+                    "$ref": "#/$defs/_FunctionCall"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "_ServerEvent",
+      "type": "object"
+    },
+    "_StringFunctionCall": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "const": "string",
+          "default": "string",
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_StringFunctionCall",
+      "type": "object"
+    },
+    "_TabDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "child": {
+          "title": "Child",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Title"
+        }
+      },
+      "required": [
+        "title",
+        "child"
+      ],
+      "title": "_TabDefinition",
       "type": "object"
     }
   },

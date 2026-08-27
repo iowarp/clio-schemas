@@ -83,6 +83,96 @@ def test_catalog_names_are_closed_and_preserve_official_checkbox_spelling() -> N
         )
 
 
+@pytest.mark.parametrize(
+    "component",
+    [
+        {"id": "text_1", "component": "Text", "text": 42},
+        {
+            "id": "grid_1",
+            "component": "Grid",
+            "children": ["text_1"],
+            "columns": "two",
+        },
+        {
+            "id": "table_1",
+            "component": "clio.data-table.v1",
+            "columns": ["station"],
+            "rows": "not rows",
+        },
+        {
+            "id": "slider_1",
+            "component": "Slider",
+            "label": "Effort",
+            "min": "zero",
+            "max": 5,
+            "value": 2,
+        },
+        {
+            "id": "code_1",
+            "component": "clio.code.v1",
+            "code": "print('hello')",
+            "language": {"name": "python"},
+        },
+        {"id": "text_1", "component": "Text", "text": "hello", "weight": "heavy"},
+        {
+            "id": "button_1",
+            "component": "Button",
+            "child": "text_1",
+            "action": "agent.submit",
+        },
+        {
+            "id": "list_1",
+            "component": "List",
+            "children": ["text_1"],
+            "listStyle": "invented",
+        },
+        {
+            "id": "field_1",
+            "component": "TextField",
+            "label": "Query",
+            "value": "value",
+            "isValid": True,
+        },
+    ],
+)
+def test_catalog_rejects_wrong_types_and_unsupported_properties(
+    component: dict[str, object],
+) -> None:
+    """The producer boundary rejects values the React catalog cannot render."""
+
+    with pytest.raises(ValidationError):
+        A2UIComponent.model_validate(component)
+
+
+def test_catalog_accepts_official_dynamic_bindings_and_actions() -> None:
+    """Official bindings and event actions remain valid after closing property types."""
+
+    text = A2UIComponent.model_validate(
+        {
+            "id": "text_1",
+            "component": "Text",
+            "text": {"path": "/summary"},
+            "accessibility": {"label": {"path": "/summaryLabel"}},
+        }
+    )
+    button = A2UIComponent.model_validate(
+        {
+            "id": "button_1",
+            "component": "Button",
+            "child": "text_1",
+            "action": {
+                "event": {
+                    "name": "agent.submit",
+                    "context": {"prompt": {"path": "/prompt"}},
+                }
+            },
+        }
+    )
+
+    assert text.root.model_dump()["component"] == "Text"
+    assert button.root.model_dump()["component"] == "Button"
+
+
 def test_catalog_enforces_map_time_series_and_workflow_limits() -> None:
     """Renderer resource bounds are part of the cross-repository contract."""
 
