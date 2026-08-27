@@ -11,7 +11,7 @@ Schema. Python consumers import the models; TypeScript consumers **generate**
 types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
-> **Status: canonical records and live UI vocabularies (version 0.2.2).**
+> **Status: canonical records and live UI vocabularies (version 0.2.3).**
 > `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 13 GACT 0.3
 > message blocks, and the A2UI 0.9.1 catalog/action envelopes are canonical.
 
