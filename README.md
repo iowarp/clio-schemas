@@ -2,7 +2,8 @@
 
 **The single source of truth for the record shapes shared across the CLIO
 system.** `clio-agent`, `clio-relay`, and `gact-tui` all speak the same wire
-records — artifact versions/chains and transform provenance records. Historically
+records — artifact versions/chains, transform provenance records, the closed GACT 0.3
+message-block union, and the trusted A2UI 0.9.1 component/action catalog. Historically
 each service hand-wrote its own copy of these types and
 they drifted. This package makes the shapes canonical: they are defined once as
 [pydantic](https://docs.pydantic.dev/) v2 models here and exported to JSON
@@ -10,9 +11,9 @@ Schema. Python consumers import the models; TypeScript consumers **generate**
 types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
-> **Status: P2.1 records landed (version 0.2.0 / issue #1120).** The bootstrap
-> placeholders are gone. `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`,
-> `TransformRecord`, their nested value models, and their enums are canonical.
+> **Status: canonical records and live UI vocabularies (version 0.2.2).**
+> `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 13 GACT 0.3
+> message blocks, and the A2UI 0.9.1 catalog/action envelopes are canonical.
 
 ---
 

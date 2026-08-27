@@ -1,12 +1,15 @@
 {
   "algorithm": "sha256",
   "files": {
+    "a2_u_i_client_action_message.json": "e1a3a1344eab650c0ed006f3bd9ae9b6f1aa7db0c15d7b9ae8269162df7b47ea",
+    "a2_u_i_component.json": "9db30d5a474ba8e2c2b965606e938982d135f31c9b7e773e20907de1dd839228",
     "artifact_record.json": "cc2bdf9e06bc943fb0b4e7507fb81d99109ecad24e6781965f651a2ef9144345",
     "artifact_version.json": "747b005cee6392e7cbdf4436783f0dbc6170a2a7f26ba128689b12d01d9877a2",
     "environment_record.json": "f49ed295a42e1f6339b397e148fd67d23ded450cb7645336f3a1052746feb750",
     "identity_evidence.json": "e333287055167d9fe39e6bf23105a242030519dda8d6db207431c2ced17c89e3",
-    "index.json": "fcc5707e9225a0ab77d3ffc03bd1c55c921c822fe3b1241a6f3cfbbf588ae4ba",
+    "index.json": "6dcbf5120793adb7a06fa461963bb97fc12e630e1b475c46242df713268c44d3",
     "instrument.json": "cbdc64b639e4ba9ca65f274b17519c20ac4239125e75e2faab34330fd6c944ea",
+    "message_block.json": "83467a53976958278af2988499473b7d0db147ab154bfa3cb733b66d87fb4c00",
     "prov_edge.json": "262ad2564a1dc90da9dde26dad49be4d8ece3353db4ba22806f44d5183add1bb",
     "transform_record.json": "40f82754aecd22f2ae74fdaff9783b66fba7580b901e5183e14eb0e63757621d"
   }

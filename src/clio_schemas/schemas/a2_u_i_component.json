@@ -1,0 +1,2399 @@
+{
+  "$defs": {
+    "ActionCardComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "actions": {
+          "title": "Actions"
+        },
+        "body": {
+          "title": "Body"
+        },
+        "component": {
+          "const": "clio.action-card.v1",
+          "default": "clio.action-card.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity"
+        },
+        "title": {
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "severity",
+        "actions"
+      ],
+      "title": "ActionCardComponent",
+      "type": "object"
+    },
+    "ApprovalComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "actions": {
+          "title": "Actions"
+        },
+        "component": {
+          "const": "clio.approval.v1",
+          "default": "clio.approval.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason"
+        },
+        "risk": {
+          "title": "Risk"
+        },
+        "title": {
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "reason",
+        "risk",
+        "actions"
+      ],
+      "title": "ApprovalComponent",
+      "type": "object"
+    },
+    "ArtifactComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "component": {
+          "const": "clio.artifact.v1",
+          "default": "clio.artifact.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "mediaType": {
+          "title": "Mediatype"
+        },
+        "name": {
+          "title": "Name"
+        },
+        "size": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size"
+        },
+        "uri": {
+          "title": "Uri"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "uri",
+        "mediaType"
+      ],
+      "title": "ArtifactComponent",
+      "type": "object"
+    },
+    "ButtonComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "child": {
+          "title": "Child"
+        },
+        "component": {
+          "const": "Button",
+          "default": "Button",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "child"
+      ],
+      "title": "ButtonComponent",
+      "type": "object"
+    },
+    "CalloutComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "body": {
+          "title": "Body"
+        },
+        "component": {
+          "const": "clio.callout.v1",
+          "default": "clio.callout.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity"
+        },
+        "title": {
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "severity"
+      ],
+      "title": "CalloutComponent",
+      "type": "object"
+    },
+    "CheckBoxComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "CheckBox",
+          "default": "CheckBox",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "value"
+      ],
+      "title": "CheckBoxComponent",
+      "type": "object"
+    },
+    "ChoicePickerComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "ChoicePicker",
+          "default": "ChoicePicker",
+          "title": "Component",
+          "type": "string"
+        },
+        "displayStyle": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Displaystyle"
+        },
+        "filterable": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Filterable"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "options": {
+          "title": "Options"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "options",
+        "value"
+      ],
+      "title": "ChoicePickerComponent",
+      "type": "object"
+    },
+    "CodeComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "code": {
+          "title": "Code"
+        },
+        "component": {
+          "const": "clio.code.v1",
+          "default": "clio.code.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "language": {
+          "title": "Language"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "language"
+      ],
+      "title": "CodeComponent",
+      "type": "object"
+    },
+    "ColumnComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "align": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "children": {
+          "title": "Children"
+        },
+        "component": {
+          "const": "Column",
+          "default": "Column",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "justify": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Justify"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "ColumnComponent",
+      "type": "object"
+    },
+    "DataTableComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "columns": {
+          "title": "Columns"
+        },
+        "component": {
+          "const": "clio.data-table.v1",
+          "default": "clio.data-table.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "rows": {
+          "title": "Rows"
+        },
+        "selection": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selection"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "columns",
+        "rows"
+      ],
+      "title": "DataTableComponent",
+      "type": "object"
+    },
+    "DiffComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "component": {
+          "const": "clio.diff.v1",
+          "default": "clio.diff.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "diff": {
+          "title": "Diff"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path"
+        },
+        "status": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "diff"
+      ],
+      "title": "DiffComponent",
+      "type": "object"
+    },
+    "DividerComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "axis": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis"
+        },
+        "component": {
+          "const": "Divider",
+          "default": "Divider",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DividerComponent",
+      "type": "object"
+    },
+    "FrameComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "child": {
+          "title": "Child"
+        },
+        "component": {
+          "const": "Frame",
+          "default": "Frame",
+          "title": "Component",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "child"
+      ],
+      "title": "FrameComponent",
+      "type": "object"
+    },
+    "GridComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "children": {
+          "title": "Children"
+        },
+        "columns": {
+          "title": "Columns"
+        },
+        "component": {
+          "const": "Grid",
+          "default": "Grid",
+          "title": "Component",
+          "type": "string"
+        },
+        "gap": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gap"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children",
+        "columns"
+      ],
+      "title": "GridComponent",
+      "type": "object"
+    },
+    "IconComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Icon",
+          "default": "Icon",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "IconComponent",
+      "type": "object"
+    },
+    "ImageComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Image",
+          "default": "Image",
+          "title": "Component",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "fit": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fit"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "url"
+      ],
+      "title": "ImageComponent",
+      "type": "object"
+    },
+    "ListComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "align": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "children": {
+          "title": "Children"
+        },
+        "component": {
+          "const": "List",
+          "default": "List",
+          "title": "Component",
+          "type": "string"
+        },
+        "direction": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direction"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "listStyle": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Liststyle"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "ListComponent",
+      "type": "object"
+    },
+    "MapComponent": {
+      "additionalProperties": false,
+      "description": "Interactive bounded geospatial component.",
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "actionLabel": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actionlabel"
+        },
+        "component": {
+          "const": "clio.map.v1",
+          "default": "clio.map.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/MapPoint"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "title": "Points",
+          "type": "array"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "points"
+      ],
+      "title": "MapComponent",
+      "type": "object"
+    },
+    "MapPoint": {
+      "additionalProperties": false,
+      "description": "One bounded point in the interactive map component.",
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "latitude": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Longitude",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "latitude",
+        "longitude"
+      ],
+      "title": "MapPoint",
+      "type": "object"
+    },
+    "MermaidComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.mermaid.v1",
+          "default": "clio.mermaid.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "source"
+      ],
+      "title": "MermaidComponent",
+      "type": "object"
+    },
+    "MetricComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.metric.v1",
+          "default": "clio.metric.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "trend": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trend"
+        },
+        "unit": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "value"
+      ],
+      "title": "MetricComponent",
+      "type": "object"
+    },
+    "ModalComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Modal",
+          "default": "Modal",
+          "title": "Component",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "trigger": {
+          "title": "Trigger"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "trigger",
+        "content"
+      ],
+      "title": "ModalComponent",
+      "type": "object"
+    },
+    "ProgressComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.progress.v1",
+          "default": "clio.progress.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "max": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "state": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State"
+        },
+        "value": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "ProgressComponent",
+      "type": "object"
+    },
+    "RowComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "align": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "children": {
+          "title": "Children"
+        },
+        "component": {
+          "const": "Row",
+          "default": "Row",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "justify": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Justify"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "RowComponent",
+      "type": "object"
+    },
+    "SliderComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "Slider",
+          "default": "Slider",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "max": {
+          "title": "Max"
+        },
+        "min": {
+          "title": "Min"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "min",
+        "max",
+        "value"
+      ],
+      "title": "SliderComponent",
+      "type": "object"
+    },
+    "StatusComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.status.v1",
+          "default": "clio.status.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "elapsedMs": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsedms"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "state": {
+          "title": "State"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "state"
+      ],
+      "title": "StatusComponent",
+      "type": "object"
+    },
+    "TabsComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Tabs",
+          "default": "Tabs",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "tabs": {
+          "title": "Tabs"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "tabs"
+      ],
+      "title": "TabsComponent",
+      "type": "object"
+    },
+    "TextComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Text",
+          "default": "Text",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "TextComponent",
+      "type": "object"
+    },
+    "TextFieldComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "TextField",
+          "default": "TextField",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "validationRegexp": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationregexp"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "value"
+      ],
+      "title": "TextFieldComponent",
+      "type": "object"
+    },
+    "TimeSeriesComponent": {
+      "additionalProperties": false,
+      "description": "Inline or artifact-backed interactive time-series component.",
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.time-series.v1",
+          "default": "clio.time-series.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "dataUri": {
+          "anyOf": [
+            {
+              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Datauri"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "series": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              "maxItems": 10000,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Series"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        },
+        "xKey": {
+          "minLength": 1,
+          "title": "Xkey",
+          "type": "string"
+        },
+        "yKeys": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Ykeys",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "xKey",
+        "yKeys"
+      ],
+      "title": "TimeSeriesComponent",
+      "type": "object"
+    },
+    "WorkflowComponent": {
+      "additionalProperties": false,
+      "description": "Bounded interactive workflow topology.",
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "component": {
+          "const": "clio.workflow.v1",
+          "default": "clio.workflow.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/WorkflowEdge"
+          },
+          "maxItems": 256,
+          "title": "Edges",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/WorkflowNode"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "title": "Nodes",
+          "type": "array"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "nodes",
+        "edges"
+      ],
+      "title": "WorkflowComponent",
+      "type": "object"
+    },
+    "WorkflowEdge": {
+      "additionalProperties": false,
+      "description": "One directed relationship in a workflow graph.",
+      "properties": {
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "WorkflowEdge",
+      "type": "object"
+    },
+    "WorkflowNode": {
+      "additionalProperties": false,
+      "description": "One node in a bounded workflow graph.",
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "WorkflowNode",
+      "type": "object"
+    }
+  },
+  "description": "Closed union of every trusted A2UI 0.9.1 catalog component.",
+  "discriminator": {
+    "mapping": {
+      "Button": "#/$defs/ButtonComponent",
+      "CheckBox": "#/$defs/CheckBoxComponent",
+      "ChoicePicker": "#/$defs/ChoicePickerComponent",
+      "Column": "#/$defs/ColumnComponent",
+      "Divider": "#/$defs/DividerComponent",
+      "Frame": "#/$defs/FrameComponent",
+      "Grid": "#/$defs/GridComponent",
+      "Icon": "#/$defs/IconComponent",
+      "Image": "#/$defs/ImageComponent",
+      "List": "#/$defs/ListComponent",
+      "Modal": "#/$defs/ModalComponent",
+      "Row": "#/$defs/RowComponent",
+      "Slider": "#/$defs/SliderComponent",
+      "Tabs": "#/$defs/TabsComponent",
+      "Text": "#/$defs/TextComponent",
+      "TextField": "#/$defs/TextFieldComponent",
+      "clio.action-card.v1": "#/$defs/ActionCardComponent",
+      "clio.approval.v1": "#/$defs/ApprovalComponent",
+      "clio.artifact.v1": "#/$defs/ArtifactComponent",
+      "clio.callout.v1": "#/$defs/CalloutComponent",
+      "clio.code.v1": "#/$defs/CodeComponent",
+      "clio.data-table.v1": "#/$defs/DataTableComponent",
+      "clio.diff.v1": "#/$defs/DiffComponent",
+      "clio.map.v1": "#/$defs/MapComponent",
+      "clio.mermaid.v1": "#/$defs/MermaidComponent",
+      "clio.metric.v1": "#/$defs/MetricComponent",
+      "clio.progress.v1": "#/$defs/ProgressComponent",
+      "clio.status.v1": "#/$defs/StatusComponent",
+      "clio.time-series.v1": "#/$defs/TimeSeriesComponent",
+      "clio.workflow.v1": "#/$defs/WorkflowComponent"
+    },
+    "propertyName": "component"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/TextComponent"
+    },
+    {
+      "$ref": "#/$defs/IconComponent"
+    },
+    {
+      "$ref": "#/$defs/ImageComponent"
+    },
+    {
+      "$ref": "#/$defs/RowComponent"
+    },
+    {
+      "$ref": "#/$defs/ColumnComponent"
+    },
+    {
+      "$ref": "#/$defs/GridComponent"
+    },
+    {
+      "$ref": "#/$defs/ListComponent"
+    },
+    {
+      "$ref": "#/$defs/FrameComponent"
+    },
+    {
+      "$ref": "#/$defs/TabsComponent"
+    },
+    {
+      "$ref": "#/$defs/ModalComponent"
+    },
+    {
+      "$ref": "#/$defs/DividerComponent"
+    },
+    {
+      "$ref": "#/$defs/ButtonComponent"
+    },
+    {
+      "$ref": "#/$defs/CheckBoxComponent"
+    },
+    {
+      "$ref": "#/$defs/TextFieldComponent"
+    },
+    {
+      "$ref": "#/$defs/ChoicePickerComponent"
+    },
+    {
+      "$ref": "#/$defs/SliderComponent"
+    },
+    {
+      "$ref": "#/$defs/StatusComponent"
+    },
+    {
+      "$ref": "#/$defs/MetricComponent"
+    },
+    {
+      "$ref": "#/$defs/ProgressComponent"
+    },
+    {
+      "$ref": "#/$defs/CalloutComponent"
+    },
+    {
+      "$ref": "#/$defs/DataTableComponent"
+    },
+    {
+      "$ref": "#/$defs/TimeSeriesComponent"
+    },
+    {
+      "$ref": "#/$defs/MermaidComponent"
+    },
+    {
+      "$ref": "#/$defs/MapComponent"
+    },
+    {
+      "$ref": "#/$defs/WorkflowComponent"
+    },
+    {
+      "$ref": "#/$defs/ArtifactComponent"
+    },
+    {
+      "$ref": "#/$defs/CodeComponent"
+    },
+    {
+      "$ref": "#/$defs/DiffComponent"
+    },
+    {
+      "$ref": "#/$defs/ActionCardComponent"
+    },
+    {
+      "$ref": "#/$defs/ApprovalComponent"
+    }
+  ],
+  "title": "A2UIComponent"
+}

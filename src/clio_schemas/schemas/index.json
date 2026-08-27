@@ -1,5 +1,530 @@
 {
   "$defs": {
+    "A2UIClientAction": {
+      "additionalProperties": true,
+      "description": "Known client-action fields with tolerated protocol extensions.",
+      "properties": {
+        "context": {
+          "additionalProperties": true,
+          "title": "Context",
+          "type": "object"
+        },
+        "name": {
+          "enum": [
+            "agent.submit",
+            "approval.respond",
+            "form.submit",
+            "run.retry",
+            "run.cancel"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "sourceComponentId": {
+          "minLength": 1,
+          "title": "Sourcecomponentid",
+          "type": "string"
+        },
+        "surfaceId": {
+          "title": "Surfaceid",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "surfaceId",
+        "sourceComponentId",
+        "timestamp",
+        "context"
+      ],
+      "title": "A2UIClientAction",
+      "type": "object"
+    },
+    "A2UIClientActionMessage": {
+      "additionalProperties": true,
+      "description": "Official 0.9.1 client action envelope with extension-key tolerance.",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/A2UIClientAction"
+        },
+        "version": {
+          "const": "v0.9.1",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "action"
+      ],
+      "title": "A2UIClientActionMessage",
+      "type": "object"
+    },
+    "A2UIComponent": {
+      "description": "Closed union of every trusted A2UI 0.9.1 catalog component.",
+      "discriminator": {
+        "mapping": {
+          "Button": "#/$defs/ButtonComponent",
+          "CheckBox": "#/$defs/CheckBoxComponent",
+          "ChoicePicker": "#/$defs/ChoicePickerComponent",
+          "Column": "#/$defs/ColumnComponent",
+          "Divider": "#/$defs/DividerComponent",
+          "Frame": "#/$defs/FrameComponent",
+          "Grid": "#/$defs/GridComponent",
+          "Icon": "#/$defs/IconComponent",
+          "Image": "#/$defs/ImageComponent",
+          "List": "#/$defs/ListComponent",
+          "Modal": "#/$defs/ModalComponent",
+          "Row": "#/$defs/RowComponent",
+          "Slider": "#/$defs/SliderComponent",
+          "Tabs": "#/$defs/TabsComponent",
+          "Text": "#/$defs/TextComponent",
+          "TextField": "#/$defs/TextFieldComponent",
+          "clio.action-card.v1": "#/$defs/ActionCardComponent",
+          "clio.approval.v1": "#/$defs/ApprovalComponent",
+          "clio.artifact.v1": "#/$defs/ArtifactComponent",
+          "clio.callout.v1": "#/$defs/CalloutComponent",
+          "clio.code.v1": "#/$defs/CodeComponent",
+          "clio.data-table.v1": "#/$defs/DataTableComponent",
+          "clio.diff.v1": "#/$defs/DiffComponent",
+          "clio.map.v1": "#/$defs/MapComponent",
+          "clio.mermaid.v1": "#/$defs/MermaidComponent",
+          "clio.metric.v1": "#/$defs/MetricComponent",
+          "clio.progress.v1": "#/$defs/ProgressComponent",
+          "clio.status.v1": "#/$defs/StatusComponent",
+          "clio.time-series.v1": "#/$defs/TimeSeriesComponent",
+          "clio.workflow.v1": "#/$defs/WorkflowComponent"
+        },
+        "propertyName": "component"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TextComponent"
+        },
+        {
+          "$ref": "#/$defs/IconComponent"
+        },
+        {
+          "$ref": "#/$defs/ImageComponent"
+        },
+        {
+          "$ref": "#/$defs/RowComponent"
+        },
+        {
+          "$ref": "#/$defs/ColumnComponent"
+        },
+        {
+          "$ref": "#/$defs/GridComponent"
+        },
+        {
+          "$ref": "#/$defs/ListComponent"
+        },
+        {
+          "$ref": "#/$defs/FrameComponent"
+        },
+        {
+          "$ref": "#/$defs/TabsComponent"
+        },
+        {
+          "$ref": "#/$defs/ModalComponent"
+        },
+        {
+          "$ref": "#/$defs/DividerComponent"
+        },
+        {
+          "$ref": "#/$defs/ButtonComponent"
+        },
+        {
+          "$ref": "#/$defs/CheckBoxComponent"
+        },
+        {
+          "$ref": "#/$defs/TextFieldComponent"
+        },
+        {
+          "$ref": "#/$defs/ChoicePickerComponent"
+        },
+        {
+          "$ref": "#/$defs/SliderComponent"
+        },
+        {
+          "$ref": "#/$defs/StatusComponent"
+        },
+        {
+          "$ref": "#/$defs/MetricComponent"
+        },
+        {
+          "$ref": "#/$defs/ProgressComponent"
+        },
+        {
+          "$ref": "#/$defs/CalloutComponent"
+        },
+        {
+          "$ref": "#/$defs/DataTableComponent"
+        },
+        {
+          "$ref": "#/$defs/TimeSeriesComponent"
+        },
+        {
+          "$ref": "#/$defs/MermaidComponent"
+        },
+        {
+          "$ref": "#/$defs/MapComponent"
+        },
+        {
+          "$ref": "#/$defs/WorkflowComponent"
+        },
+        {
+          "$ref": "#/$defs/ArtifactComponent"
+        },
+        {
+          "$ref": "#/$defs/CodeComponent"
+        },
+        {
+          "$ref": "#/$defs/DiffComponent"
+        },
+        {
+          "$ref": "#/$defs/ActionCardComponent"
+        },
+        {
+          "$ref": "#/$defs/ApprovalComponent"
+        }
+      ],
+      "title": "A2UIComponent"
+    },
+    "A2UIMessageBlock": {
+      "additionalProperties": false,
+      "description": "Reference to one durable A2UI surface.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "surface_id": {
+          "title": "Surface Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "a2ui",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "surface_id"
+      ],
+      "title": "A2UIMessageBlock",
+      "type": "object"
+    },
+    "ActionCardAction": {
+      "additionalProperties": false,
+      "description": "One action exposed by an action card.",
+      "properties": {
+        "behavior": {
+          "$ref": "#/$defs/ActionCardBehavior"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "behavior"
+      ],
+      "title": "ActionCardAction",
+      "type": "object"
+    },
+    "ActionCardBehavior": {
+      "additionalProperties": true,
+      "description": "Registered action-card behavior with forward-compatible parameters.",
+      "properties": {
+        "handle_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Handle Id"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "ActionCardBehavior",
+      "type": "object"
+    },
+    "ActionCardComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "actions": {
+          "title": "Actions"
+        },
+        "body": {
+          "title": "Body"
+        },
+        "component": {
+          "const": "clio.action-card.v1",
+          "default": "clio.action-card.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity"
+        },
+        "title": {
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "severity",
+        "actions"
+      ],
+      "title": "ActionCardComponent",
+      "type": "object"
+    },
+    "ActionCardMessageBlock": {
+      "additionalProperties": false,
+      "description": "Interactive action-card block.",
+      "properties": {
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/ActionCardAction"
+          },
+          "title": "Actions",
+          "type": "array"
+        },
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Severity"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "type": {
+          "const": "action_card",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "title",
+        "actions"
+      ],
+      "title": "ActionCardMessageBlock",
+      "type": "object"
+    },
     "AgentRole": {
       "description": "Whether the agent executed or annotated the transform.",
       "enum": [
@@ -8,6 +533,134 @@
       ],
       "title": "AgentRole",
       "type": "string"
+    },
+    "ApprovalComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "actions": {
+          "title": "Actions"
+        },
+        "component": {
+          "const": "clio.approval.v1",
+          "default": "clio.approval.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason"
+        },
+        "risk": {
+          "title": "Risk"
+        },
+        "title": {
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "reason",
+        "risk",
+        "actions"
+      ],
+      "title": "ApprovalComponent",
+      "type": "object"
+    },
+    "ArtifactComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "component": {
+          "const": "clio.artifact.v1",
+          "default": "clio.artifact.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "mediaType": {
+          "title": "Mediatype"
+        },
+        "name": {
+          "title": "Name"
+        },
+        "size": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size"
+        },
+        "uri": {
+          "title": "Uri"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "uri",
+        "mediaType"
+      ],
+      "title": "ArtifactComponent",
+      "type": "object"
     },
     "ArtifactKind": {
       "description": "The curated kinds an artifact version may take.",
@@ -24,6 +677,81 @@
       ],
       "title": "ArtifactKind",
       "type": "string"
+    },
+    "ArtifactMessageBlock": {
+      "additionalProperties": false,
+      "description": "Reference to one artifact.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "artifact_id": {
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "artifact",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "artifact_id"
+      ],
+      "title": "ArtifactMessageBlock",
+      "type": "object"
     },
     "ArtifactRecord": {
       "description": "A mutable logical artifact chain keyed by workspace and name.",
@@ -166,6 +894,554 @@
       "title": "ArtifactVersion",
       "type": "object"
     },
+    "ButtonComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "child": {
+          "title": "Child"
+        },
+        "component": {
+          "const": "Button",
+          "default": "Button",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "child"
+      ],
+      "title": "ButtonComponent",
+      "type": "object"
+    },
+    "CalloutComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "body": {
+          "title": "Body"
+        },
+        "component": {
+          "const": "clio.callout.v1",
+          "default": "clio.callout.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity"
+        },
+        "title": {
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "severity"
+      ],
+      "title": "CalloutComponent",
+      "type": "object"
+    },
+    "CheckBoxComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "CheckBox",
+          "default": "CheckBox",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "value"
+      ],
+      "title": "CheckBoxComponent",
+      "type": "object"
+    },
+    "ChoicePickerComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "ChoicePicker",
+          "default": "ChoicePicker",
+          "title": "Component",
+          "type": "string"
+        },
+        "displayStyle": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Displaystyle"
+        },
+        "filterable": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Filterable"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "options": {
+          "title": "Options"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "options",
+        "value"
+      ],
+      "title": "ChoicePickerComponent",
+      "type": "object"
+    },
+    "CitationMessageBlock": {
+      "additionalProperties": false,
+      "description": "Citation label and target URI.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "citation",
+          "title": "Type",
+          "type": "string"
+        },
+        "uri": {
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "label",
+        "uri"
+      ],
+      "title": "CitationMessageBlock",
+      "type": "object"
+    },
+    "CodeComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "code": {
+          "title": "Code"
+        },
+        "component": {
+          "const": "clio.code.v1",
+          "default": "clio.code.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "language": {
+          "title": "Language"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "language"
+      ],
+      "title": "CodeComponent",
+      "type": "object"
+    },
+    "ColumnComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "align": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "children": {
+          "title": "Children"
+        },
+        "component": {
+          "const": "Column",
+          "default": "Column",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "justify": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Justify"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "ColumnComponent",
+      "type": "object"
+    },
     "Custody": {
       "description": "Where artifact bytes live and what custody guarantee applies.",
       "enum": [
@@ -175,6 +1451,272 @@
       ],
       "title": "Custody",
       "type": "string"
+    },
+    "DataTableComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "columns": {
+          "title": "Columns"
+        },
+        "component": {
+          "const": "clio.data-table.v1",
+          "default": "clio.data-table.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "rows": {
+          "title": "Rows"
+        },
+        "selection": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selection"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "columns",
+        "rows"
+      ],
+      "title": "DataTableComponent",
+      "type": "object"
+    },
+    "DiffComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "component": {
+          "const": "clio.diff.v1",
+          "default": "clio.diff.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "diff": {
+          "title": "Diff"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path"
+        },
+        "status": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "diff"
+      ],
+      "title": "DiffComponent",
+      "type": "object"
+    },
+    "DiffMessageBlock": {
+      "additionalProperties": false,
+      "description": "Unified file diff.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "diff",
+          "title": "Type",
+          "type": "string"
+        },
+        "unified_diff": {
+          "title": "Unified Diff",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "path",
+        "unified_diff"
+      ],
+      "title": "DiffMessageBlock",
+      "type": "object"
+    },
+    "DividerComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "axis": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis"
+        },
+        "component": {
+          "const": "Divider",
+          "default": "Divider",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DividerComponent",
+      "type": "object"
     },
     "EdgeEvidence": {
       "description": "How a provenance edge's identity is known.",
@@ -283,6 +1825,91 @@
       "title": "EnvironmentTier",
       "type": "string"
     },
+    "ErrorMessageBlock": {
+      "additionalProperties": false,
+      "description": "Typed, recoverable or terminal error.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "recoverable": {
+          "title": "Recoverable",
+          "type": "boolean"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "error",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "code",
+        "message",
+        "recoverable"
+      ],
+      "title": "ErrorMessageBlock",
+      "type": "object"
+    },
     "EvidenceClass": {
       "description": "How an artifact version's identity is known.",
       "enum": [
@@ -292,6 +1919,172 @@
       ],
       "title": "EvidenceClass",
       "type": "string"
+    },
+    "FrameComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "child": {
+          "title": "Child"
+        },
+        "component": {
+          "const": "Frame",
+          "default": "Frame",
+          "title": "Component",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "child"
+      ],
+      "title": "FrameComponent",
+      "type": "object"
+    },
+    "GridComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "children": {
+          "title": "Children"
+        },
+        "columns": {
+          "title": "Columns"
+        },
+        "component": {
+          "const": "Grid",
+          "default": "Grid",
+          "title": "Component",
+          "type": "string"
+        },
+        "gap": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gap"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children",
+        "columns"
+      ],
+      "title": "GridComponent",
+      "type": "object"
+    },
+    "IconComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Icon",
+          "default": "Icon",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "IconComponent",
+      "type": "object"
     },
     "IdentityEvidence": {
       "description": "The evidence basis on which an artifact's content is pinned.",
@@ -347,6 +2140,80 @@
       "title": "IdentityEvidence",
       "type": "object"
     },
+    "ImageComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Image",
+          "default": "Image",
+          "title": "Component",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "fit": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fit"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "url"
+      ],
+      "title": "ImageComponent",
+      "type": "object"
+    },
     "Instrument": {
       "description": "The tool or script that produced a transform.",
       "properties": {
@@ -379,6 +2246,240 @@
       "title": "Instrument",
       "type": "object"
     },
+    "ListComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "align": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "children": {
+          "title": "Children"
+        },
+        "component": {
+          "const": "List",
+          "default": "List",
+          "title": "Component",
+          "type": "string"
+        },
+        "direction": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direction"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "listStyle": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Liststyle"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "ListComponent",
+      "type": "object"
+    },
+    "MapComponent": {
+      "additionalProperties": false,
+      "description": "Interactive bounded geospatial component.",
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "actionLabel": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actionlabel"
+        },
+        "component": {
+          "const": "clio.map.v1",
+          "default": "clio.map.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/MapPoint"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "title": "Points",
+          "type": "array"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "points"
+      ],
+      "title": "MapComponent",
+      "type": "object"
+    },
+    "MapPoint": {
+      "additionalProperties": false,
+      "description": "One bounded point in the interactive map component.",
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "latitude": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Longitude",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "latitude",
+        "longitude"
+      ],
+      "title": "MapPoint",
+      "type": "object"
+    },
     "Mechanism": {
       "description": "What produced an artifact record.",
       "enum": [
@@ -390,6 +2491,420 @@
       ],
       "title": "Mechanism",
       "type": "string"
+    },
+    "MermaidComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.mermaid.v1",
+          "default": "clio.mermaid.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "source"
+      ],
+      "title": "MermaidComponent",
+      "type": "object"
+    },
+    "MessageBlock": {
+      "description": "Closed discriminated union of the 13 GACT 0.3 message-block types.",
+      "discriminator": {
+        "mapping": {
+          "a2ui": "#/$defs/A2UIMessageBlock",
+          "action_card": "#/$defs/ActionCardMessageBlock",
+          "artifact": "#/$defs/ArtifactMessageBlock",
+          "citation": "#/$defs/CitationMessageBlock",
+          "diff": "#/$defs/DiffMessageBlock",
+          "error": "#/$defs/ErrorMessageBlock",
+          "plan": "#/$defs/PlanMessageBlock",
+          "reasoning": "#/$defs/ReasoningMessageBlock",
+          "routing": "#/$defs/RoutingMessageBlock",
+          "subagent": "#/$defs/SubagentMessageBlock",
+          "task": "#/$defs/TaskMessageBlock",
+          "text": "#/$defs/TextMessageBlock",
+          "tool": "#/$defs/ToolMessageBlock"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TextMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/ReasoningMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/ToolMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/PlanMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/TaskMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/SubagentMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/ArtifactMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/ActionCardMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/A2UIMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/CitationMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/DiffMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/ErrorMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/RoutingMessageBlock"
+        }
+      ],
+      "title": "MessageBlock"
+    },
+    "MetricComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.metric.v1",
+          "default": "clio.metric.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "trend": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trend"
+        },
+        "unit": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "value"
+      ],
+      "title": "MetricComponent",
+      "type": "object"
+    },
+    "ModalComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Modal",
+          "default": "Modal",
+          "title": "Component",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "trigger": {
+          "title": "Trigger"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "trigger",
+        "content"
+      ],
+      "title": "ModalComponent",
+      "type": "object"
+    },
+    "PlanMessageBlock": {
+      "additionalProperties": false,
+      "description": "Plan content emitted in causal order.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "type": {
+          "const": "plan",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "title"
+      ],
+      "title": "PlanMessageBlock",
+      "type": "object"
+    },
+    "ProgressComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.progress.v1",
+          "default": "clio.progress.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "max": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "state": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State"
+        },
+        "value": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "ProgressComponent",
+      "type": "object"
     },
     "ProvEdge": {
       "description": "One used or generated provenance edge with its own evidence.",
@@ -497,6 +3012,129 @@
       "title": "ProvEdge",
       "type": "object"
     },
+    "ReasoningMessageBlock": {
+      "additionalProperties": false,
+      "description": "Provider reasoning or semantic next-thought narration.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "default_collapsed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default Collapsed"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "provider_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Source"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "streaming": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Streaming"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "type": {
+          "const": "reasoning",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "text"
+      ],
+      "title": "ReasoningMessageBlock",
+      "type": "object"
+    },
     "ReplayContract": {
       "description": "The permanent replay guarantee stamped on a transform.",
       "enum": [
@@ -505,6 +3143,947 @@
       ],
       "title": "ReplayContract",
       "type": "string"
+    },
+    "RoutingMessageBlock": {
+      "additionalProperties": false,
+      "description": "Routing or compaction metadata visible to the user.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "routing",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "label"
+      ],
+      "title": "RoutingMessageBlock",
+      "type": "object"
+    },
+    "RowComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "align": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "children": {
+          "title": "Children"
+        },
+        "component": {
+          "const": "Row",
+          "default": "Row",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "justify": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Justify"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "RowComponent",
+      "type": "object"
+    },
+    "SliderComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "Slider",
+          "default": "Slider",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "max": {
+          "title": "Max"
+        },
+        "min": {
+          "title": "Min"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "min",
+        "max",
+        "value"
+      ],
+      "title": "SliderComponent",
+      "type": "object"
+    },
+    "StatusComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.status.v1",
+          "default": "clio.status.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "elapsedMs": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsedms"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "state": {
+          "title": "State"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "state"
+      ],
+      "title": "StatusComponent",
+      "type": "object"
+    },
+    "SubagentMessageBlock": {
+      "additionalProperties": false,
+      "description": "Reference to one child-agent run.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "subagent_id": {
+          "title": "Subagent Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "subagent",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "subagent_id"
+      ],
+      "title": "SubagentMessageBlock",
+      "type": "object"
+    },
+    "TabsComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Tabs",
+          "default": "Tabs",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "tabs": {
+          "title": "Tabs"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "tabs"
+      ],
+      "title": "TabsComponent",
+      "type": "object"
+    },
+    "TaskMessageBlock": {
+      "additionalProperties": false,
+      "description": "Reference to one task.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "task_id"
+      ],
+      "title": "TaskMessageBlock",
+      "type": "object"
+    },
+    "TextComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "Text",
+          "default": "Text",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "TextComponent",
+      "type": "object"
+    },
+    "TextFieldComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "checks": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "TextField",
+          "default": "TextField",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "isValid": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isvalid"
+        },
+        "label": {
+          "title": "Label"
+        },
+        "validationErrors": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationerrors"
+        },
+        "validationRegexp": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationregexp"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "variant": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "value"
+      ],
+      "title": "TextFieldComponent",
+      "type": "object"
+    },
+    "TextMessageBlock": {
+      "additionalProperties": false,
+      "description": "Assistant or user prose.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "streaming": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Streaming"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "type": {
+          "const": "text",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "text"
+      ],
+      "title": "TextMessageBlock",
+      "type": "object"
+    },
+    "TimeSeriesComponent": {
+      "additionalProperties": false,
+      "description": "Inline or artifact-backed interactive time-series component.",
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "component": {
+          "const": "clio.time-series.v1",
+          "default": "clio.time-series.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "dataUri": {
+          "anyOf": [
+            {
+              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Datauri"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "series": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              "maxItems": 10000,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Series"
+        },
+        "title": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        },
+        "xKey": {
+          "minLength": 1,
+          "title": "Xkey",
+          "type": "string"
+        },
+        "yKeys": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Ykeys",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "xKey",
+        "yKeys"
+      ],
+      "title": "TimeSeriesComponent",
+      "type": "object"
+    },
+    "ToolMessageBlock": {
+      "additionalProperties": false,
+      "description": "Reference to one tool invocation.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "thought": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Thought"
+        },
+        "tool_id": {
+          "title": "Tool Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "tool",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "tool_id"
+      ],
+      "title": "ToolMessageBlock",
+      "type": "object"
     },
     "TransformKind": {
       "description": "Whether provenance was observed under exclusive or contended custody.",
@@ -633,6 +4212,166 @@
       ],
       "title": "TransformStatus",
       "type": "string"
+    },
+    "WorkflowComponent": {
+      "additionalProperties": false,
+      "description": "Bounded interactive workflow topology.",
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessibility"
+        },
+        "action": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "component": {
+          "const": "clio.workflow.v1",
+          "default": "clio.workflow.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/WorkflowEdge"
+          },
+          "maxItems": 256,
+          "title": "Edges",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/WorkflowNode"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "title": "Nodes",
+          "type": "array"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "nodes",
+        "edges"
+      ],
+      "title": "WorkflowComponent",
+      "type": "object"
+    },
+    "WorkflowEdge": {
+      "additionalProperties": false,
+      "description": "One directed relationship in a workflow graph.",
+      "properties": {
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "WorkflowEdge",
+      "type": "object"
+    },
+    "WorkflowNode": {
+      "additionalProperties": false,
+      "description": "One node in a bounded workflow graph.",
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "WorkflowNode",
+      "type": "object"
     }
   },
   "$id": "https://schemas.iowarp.dev/clio-schemas/index.json",
@@ -640,6 +4379,12 @@
   "additionalProperties": false,
   "description": "Aggregate of all canonical clio-schemas records with shared definitions emitted once. Used to generate TypeScript without duplicate declarations.",
   "properties": {
+    "A2UIClientActionMessage": {
+      "$ref": "#/$defs/A2UIClientActionMessage"
+    },
+    "A2UIComponent": {
+      "$ref": "#/$defs/A2UIComponent"
+    },
     "ArtifactRecord": {
       "$ref": "#/$defs/ArtifactRecord"
     },
@@ -654,6 +4399,9 @@
     },
     "Instrument": {
       "$ref": "#/$defs/Instrument"
+    },
+    "MessageBlock": {
+      "$ref": "#/$defs/MessageBlock"
     },
     "ProvEdge": {
       "$ref": "#/$defs/ProvEdge"
