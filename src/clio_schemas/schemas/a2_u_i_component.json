@@ -1,0 +1,3593 @@
+{
+  "$defs": {
+    "ActionCardComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/_CardAction"
+          },
+          "maxItems": 6,
+          "title": "Actions",
+          "type": "array"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Body"
+        },
+        "component": {
+          "const": "clio.action-card.v1",
+          "default": "clio.action-card.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "severity",
+        "actions"
+      ],
+      "title": "ActionCardComponent",
+      "type": "object"
+    },
+    "ApprovalComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/_CardAction"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        },
+        "component": {
+          "const": "clio.approval.v1",
+          "default": "clio.approval.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Reason"
+        },
+        "risk": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Risk"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "reason",
+        "risk",
+        "actions"
+      ],
+      "title": "ApprovalComponent",
+      "type": "object"
+    },
+    "ArtifactComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "component": {
+          "const": "clio.artifact.v1",
+          "default": "clio.artifact.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "mediaType": {
+          "title": "Mediatype",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Name"
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size"
+        },
+        "uri": {
+          "title": "Uri",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "uri",
+        "mediaType"
+      ],
+      "title": "ArtifactComponent",
+      "type": "object"
+    },
+    "ButtonComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            }
+          ],
+          "title": "Action"
+        },
+        "checks": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "child": {
+          "title": "Child",
+          "type": "string"
+        },
+        "component": {
+          "const": "Button",
+          "default": "Button",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "variant": {
+          "anyOf": [
+            {
+              "enum": [
+                "default",
+                "primary",
+                "borderless"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "child",
+        "action"
+      ],
+      "title": "ButtonComponent",
+      "type": "object"
+    },
+    "CalloutComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Body"
+        },
+        "component": {
+          "const": "clio.callout.v1",
+          "default": "clio.callout.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "severity"
+      ],
+      "title": "CalloutComponent",
+      "type": "object"
+    },
+    "CheckBoxComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "checks": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "CheckBox",
+          "default": "CheckBox",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Label"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_BooleanFunctionCall"
+            }
+          ],
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "value"
+      ],
+      "title": "CheckBoxComponent",
+      "type": "object"
+    },
+    "ChoicePickerComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "checks": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "ChoicePicker",
+          "default": "ChoicePicker",
+          "title": "Component",
+          "type": "string"
+        },
+        "displayStyle": {
+          "anyOf": [
+            {
+              "enum": [
+                "checkbox",
+                "chips"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Displaystyle"
+        },
+        "filterable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Filterable"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/_ChoiceOption"
+          },
+          "title": "Options",
+          "type": "array"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_ArrayFunctionCall"
+            }
+          ],
+          "title": "Value"
+        },
+        "variant": {
+          "anyOf": [
+            {
+              "enum": [
+                "multipleSelection",
+                "mutuallyExclusive"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "options",
+        "value"
+      ],
+      "title": "ChoicePickerComponent",
+      "type": "object"
+    },
+    "CodeComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Code"
+        },
+        "component": {
+          "const": "clio.code.v1",
+          "default": "clio.code.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "language": {
+          "title": "Language",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "language"
+      ],
+      "title": "CodeComponent",
+      "type": "object"
+    },
+    "ColumnComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "align": {
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "children": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_ChildTemplate"
+            }
+          ],
+          "title": "Children"
+        },
+        "component": {
+          "const": "Column",
+          "default": "Column",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "justify": {
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "spaceBetween",
+                "spaceAround",
+                "spaceEvenly",
+                "stretch"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Justify"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "ColumnComponent",
+      "type": "object"
+    },
+    "DataTableComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "columns": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/_DataTableColumn"
+              }
+            ]
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "component": {
+          "const": "clio.data-table.v1",
+          "default": "clio.data-table.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "additionalProperties": {
+              "$ref": "#/$defs/JsonValue"
+            },
+            "type": "object"
+          },
+          "title": "Rows",
+          "type": "array"
+        },
+        "selection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selection"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "columns",
+        "rows"
+      ],
+      "title": "DataTableComponent",
+      "type": "object"
+    },
+    "DiffComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "component": {
+          "const": "clio.diff.v1",
+          "default": "clio.diff.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "diff": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Diff"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "diff"
+      ],
+      "title": "DiffComponent",
+      "type": "object"
+    },
+    "DividerComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "axis": {
+          "anyOf": [
+            {
+              "enum": [
+                "vertical",
+                "horizontal"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis"
+        },
+        "component": {
+          "const": "Divider",
+          "default": "Divider",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DividerComponent",
+      "type": "object"
+    },
+    "FrameComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "child": {
+          "title": "Child",
+          "type": "string"
+        },
+        "component": {
+          "const": "Frame",
+          "default": "Frame",
+          "title": "Component",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "child"
+      ],
+      "title": "FrameComponent",
+      "type": "object"
+    },
+    "GridComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "children": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "columns": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Columns"
+        },
+        "component": {
+          "const": "Grid",
+          "default": "Grid",
+          "title": "Component",
+          "type": "string"
+        },
+        "gap": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gap"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "GridComponent",
+      "type": "object"
+    },
+    "IconComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "Icon",
+          "default": "Icon",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_IconSvgPath"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            }
+          ],
+          "title": "Name"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "IconComponent",
+      "type": "object"
+    },
+    "ImageComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "Image",
+          "default": "Image",
+          "title": "Component",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "fit": {
+          "anyOf": [
+            {
+              "enum": [
+                "contain",
+                "cover",
+                "fill",
+                "none",
+                "scaleDown"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fit"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Url"
+        },
+        "variant": {
+          "anyOf": [
+            {
+              "enum": [
+                "icon",
+                "avatar",
+                "smallFeature",
+                "mediumFeature",
+                "largeFeature",
+                "header"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "url"
+      ],
+      "title": "ImageComponent",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "ListComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "align": {
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "children": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_ChildTemplate"
+            }
+          ],
+          "title": "Children"
+        },
+        "component": {
+          "const": "List",
+          "default": "List",
+          "title": "Component",
+          "type": "string"
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "enum": [
+                "vertical",
+                "horizontal"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direction"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "ListComponent",
+      "type": "object"
+    },
+    "MapComponent": {
+      "additionalProperties": false,
+      "description": "Interactive bounded geospatial component.",
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "actionLabel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actionlabel"
+        },
+        "component": {
+          "const": "clio.map.v1",
+          "default": "clio.map.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/MapPoint"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "title": "Points",
+          "type": "array"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "points"
+      ],
+      "title": "MapComponent",
+      "type": "object"
+    },
+    "MapPoint": {
+      "additionalProperties": false,
+      "description": "One bounded point in the interactive map component.",
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "latitude": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Longitude",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "latitude",
+        "longitude"
+      ],
+      "title": "MapPoint",
+      "type": "object"
+    },
+    "MermaidComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "clio.mermaid.v1",
+          "default": "clio.mermaid.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Source"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "source"
+      ],
+      "title": "MermaidComponent",
+      "type": "object"
+    },
+    "MetricComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "clio.metric.v1",
+          "default": "clio.metric.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Label"
+        },
+        "trend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trend"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_FunctionCall"
+            }
+          ],
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "value"
+      ],
+      "title": "MetricComponent",
+      "type": "object"
+    },
+    "ModalComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "Modal",
+          "default": "Modal",
+          "title": "Component",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "trigger": {
+          "title": "Trigger",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "trigger",
+        "content"
+      ],
+      "title": "ModalComponent",
+      "type": "object"
+    },
+    "ProgressComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "clio.progress.v1",
+          "default": "clio.progress.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Label"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "ProgressComponent",
+      "type": "object"
+    },
+    "RowComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "align": {
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Align"
+        },
+        "children": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "$ref": "#/$defs/_ChildTemplate"
+            }
+          ],
+          "title": "Children"
+        },
+        "component": {
+          "const": "Row",
+          "default": "Row",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "justify": {
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "spaceBetween",
+                "spaceAround",
+                "spaceEvenly",
+                "stretch"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Justify"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "children"
+      ],
+      "title": "RowComponent",
+      "type": "object"
+    },
+    "SliderComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "checks": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "Slider",
+          "default": "Slider",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "max": {
+          "title": "Max",
+          "type": "number"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            }
+          ],
+          "title": "Value"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "max",
+        "value"
+      ],
+      "title": "SliderComponent",
+      "type": "object"
+    },
+    "StatusComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "clio.status.v1",
+          "default": "clio.status.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "elapsedMs": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_NumberFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsedms"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Label"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "State"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "state"
+      ],
+      "title": "StatusComponent",
+      "type": "object"
+    },
+    "TabsComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "Tabs",
+          "default": "Tabs",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "tabs": {
+          "items": {
+            "$ref": "#/$defs/_TabDefinition"
+          },
+          "minItems": 1,
+          "title": "Tabs",
+          "type": "array"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "tabs"
+      ],
+      "title": "TabsComponent",
+      "type": "object"
+    },
+    "TextComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "Text",
+          "default": "Text",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Text"
+        },
+        "variant": {
+          "anyOf": [
+            {
+              "enum": [
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "caption",
+                "body"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "TextComponent",
+      "type": "object"
+    },
+    "TextFieldComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "checks": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/_CheckRule"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checks"
+        },
+        "component": {
+          "const": "TextField",
+          "default": "TextField",
+          "title": "Component",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Label"
+        },
+        "validationRegexp": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validationregexp"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "variant": {
+          "anyOf": [
+            {
+              "enum": [
+                "longText",
+                "number",
+                "shortText",
+                "obscured"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "TextFieldComponent",
+      "type": "object"
+    },
+    "TimeSeriesComponent": {
+      "additionalProperties": false,
+      "description": "Inline or artifact-backed interactive time-series component.",
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component": {
+          "const": "clio.time-series.v1",
+          "default": "clio.time-series.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "dataUri": {
+          "anyOf": [
+            {
+              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Datauri"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "series": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              "maxItems": 10000,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Series"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        },
+        "xKey": {
+          "minLength": 1,
+          "title": "Xkey",
+          "type": "string"
+        },
+        "yKeys": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Ykeys",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "xKey",
+        "yKeys"
+      ],
+      "title": "TimeSeriesComponent",
+      "type": "object"
+    },
+    "WorkflowComponent": {
+      "additionalProperties": false,
+      "description": "Bounded interactive workflow topology.",
+      "properties": {
+        "accessibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_Accessibility"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "component": {
+          "const": "clio.workflow.v1",
+          "default": "clio.workflow.v1",
+          "title": "Component",
+          "type": "string"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/WorkflowEdge"
+          },
+          "maxItems": 256,
+          "title": "Edges",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/WorkflowNode"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "title": "Nodes",
+          "type": "array"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "nodes",
+        "edges"
+      ],
+      "title": "WorkflowComponent",
+      "type": "object"
+    },
+    "WorkflowEdge": {
+      "additionalProperties": false,
+      "description": "One directed relationship in a workflow graph.",
+      "properties": {
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "WorkflowEdge",
+      "type": "object"
+    },
+    "WorkflowNode": {
+      "additionalProperties": false,
+      "description": "One node in a bounded workflow graph.",
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "WorkflowNode",
+      "type": "object"
+    },
+    "_Accessibility": {
+      "additionalProperties": false,
+      "description": "Supplemental accessible name and description for one component.",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "title": "_Accessibility",
+      "type": "object"
+    },
+    "_ArrayFunctionCall": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "const": "array",
+          "default": "array",
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_ArrayFunctionCall",
+      "type": "object"
+    },
+    "_BooleanFunctionCall": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "const": "boolean",
+          "default": "boolean",
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_BooleanFunctionCall",
+      "type": "object"
+    },
+    "_CardAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/_EventAction"
+            },
+            {
+              "$ref": "#/$defs/_FunctionAction"
+            }
+          ],
+          "title": "Action"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "tone": {
+          "anyOf": [
+            {
+              "enum": [
+                "default",
+                "destructive"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tone"
+        }
+      },
+      "required": [
+        "label",
+        "action"
+      ],
+      "title": "_CardAction",
+      "type": "object"
+    },
+    "_CheckRule": {
+      "additionalProperties": false,
+      "description": "One official client-side component validation rule.",
+      "properties": {
+        "condition": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_BooleanFunctionCall"
+            }
+          ],
+          "title": "Condition"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "condition",
+        "message"
+      ],
+      "title": "_CheckRule",
+      "type": "object"
+    },
+    "_ChildTemplate": {
+      "additionalProperties": false,
+      "description": "Template for generating repeated child components from bound data.",
+      "properties": {
+        "componentId": {
+          "title": "Componentid",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "componentId",
+        "path"
+      ],
+      "title": "_ChildTemplate",
+      "type": "object"
+    },
+    "_ChoiceOption": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Label"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ],
+      "title": "_ChoiceOption",
+      "type": "object"
+    },
+    "_DataBinding": {
+      "additionalProperties": false,
+      "description": "A JSON Pointer into the A2UI surface data model.",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "_DataBinding",
+      "type": "object"
+    },
+    "_DataTableColumn": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "label"
+      ],
+      "title": "_DataTableColumn",
+      "type": "object"
+    },
+    "_EventAction": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "$ref": "#/$defs/_ServerEvent"
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "title": "_EventAction",
+      "type": "object"
+    },
+    "_FunctionAction": {
+      "additionalProperties": false,
+      "properties": {
+        "functionCall": {
+          "$ref": "#/$defs/_FunctionCall"
+        }
+      },
+      "required": [
+        "functionCall"
+      ],
+      "title": "_FunctionAction",
+      "type": "object"
+    },
+    "_FunctionCall": {
+      "additionalProperties": false,
+      "description": "A typed client-side function invocation.",
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "default": "boolean",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "array",
+            "object",
+            "any",
+            "void"
+          ],
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_FunctionCall",
+      "type": "object"
+    },
+    "_IconSvgPath": {
+      "additionalProperties": false,
+      "properties": {
+        "svgPath": {
+          "title": "Svgpath",
+          "type": "string"
+        }
+      },
+      "required": [
+        "svgPath"
+      ],
+      "title": "_IconSvgPath",
+      "type": "object"
+    },
+    "_NumberFunctionCall": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "const": "number",
+          "default": "number",
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_NumberFunctionCall",
+      "type": "object"
+    },
+    "_ServerEvent": {
+      "additionalProperties": false,
+      "description": "Official server-side A2UI event action.",
+      "properties": {
+        "context": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "items": {
+                      "$ref": "#/$defs/JsonValue"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "$ref": "#/$defs/_DataBinding"
+                  },
+                  {
+                    "$ref": "#/$defs/_FunctionCall"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "_ServerEvent",
+      "type": "object"
+    },
+    "_StringFunctionCall": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        },
+        "returnType": {
+          "const": "string",
+          "default": "string",
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "_StringFunctionCall",
+      "type": "object"
+    },
+    "_TabDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "child": {
+          "title": "Child",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/_DataBinding"
+            },
+            {
+              "$ref": "#/$defs/_StringFunctionCall"
+            }
+          ],
+          "title": "Title"
+        }
+      },
+      "required": [
+        "title",
+        "child"
+      ],
+      "title": "_TabDefinition",
+      "type": "object"
+    }
+  },
+  "description": "Closed union of every trusted A2UI 0.9.1 catalog component.",
+  "discriminator": {
+    "mapping": {
+      "Button": "#/$defs/ButtonComponent",
+      "CheckBox": "#/$defs/CheckBoxComponent",
+      "ChoicePicker": "#/$defs/ChoicePickerComponent",
+      "Column": "#/$defs/ColumnComponent",
+      "Divider": "#/$defs/DividerComponent",
+      "Frame": "#/$defs/FrameComponent",
+      "Grid": "#/$defs/GridComponent",
+      "Icon": "#/$defs/IconComponent",
+      "Image": "#/$defs/ImageComponent",
+      "List": "#/$defs/ListComponent",
+      "Modal": "#/$defs/ModalComponent",
+      "Row": "#/$defs/RowComponent",
+      "Slider": "#/$defs/SliderComponent",
+      "Tabs": "#/$defs/TabsComponent",
+      "Text": "#/$defs/TextComponent",
+      "TextField": "#/$defs/TextFieldComponent",
+      "clio.action-card.v1": "#/$defs/ActionCardComponent",
+      "clio.approval.v1": "#/$defs/ApprovalComponent",
+      "clio.artifact.v1": "#/$defs/ArtifactComponent",
+      "clio.callout.v1": "#/$defs/CalloutComponent",
+      "clio.code.v1": "#/$defs/CodeComponent",
+      "clio.data-table.v1": "#/$defs/DataTableComponent",
+      "clio.diff.v1": "#/$defs/DiffComponent",
+      "clio.map.v1": "#/$defs/MapComponent",
+      "clio.mermaid.v1": "#/$defs/MermaidComponent",
+      "clio.metric.v1": "#/$defs/MetricComponent",
+      "clio.progress.v1": "#/$defs/ProgressComponent",
+      "clio.status.v1": "#/$defs/StatusComponent",
+      "clio.time-series.v1": "#/$defs/TimeSeriesComponent",
+      "clio.workflow.v1": "#/$defs/WorkflowComponent"
+    },
+    "propertyName": "component"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/TextComponent"
+    },
+    {
+      "$ref": "#/$defs/IconComponent"
+    },
+    {
+      "$ref": "#/$defs/ImageComponent"
+    },
+    {
+      "$ref": "#/$defs/RowComponent"
+    },
+    {
+      "$ref": "#/$defs/ColumnComponent"
+    },
+    {
+      "$ref": "#/$defs/GridComponent"
+    },
+    {
+      "$ref": "#/$defs/ListComponent"
+    },
+    {
+      "$ref": "#/$defs/FrameComponent"
+    },
+    {
+      "$ref": "#/$defs/TabsComponent"
+    },
+    {
+      "$ref": "#/$defs/ModalComponent"
+    },
+    {
+      "$ref": "#/$defs/DividerComponent"
+    },
+    {
+      "$ref": "#/$defs/ButtonComponent"
+    },
+    {
+      "$ref": "#/$defs/CheckBoxComponent"
+    },
+    {
+      "$ref": "#/$defs/TextFieldComponent"
+    },
+    {
+      "$ref": "#/$defs/ChoicePickerComponent"
+    },
+    {
+      "$ref": "#/$defs/SliderComponent"
+    },
+    {
+      "$ref": "#/$defs/StatusComponent"
+    },
+    {
+      "$ref": "#/$defs/MetricComponent"
+    },
+    {
+      "$ref": "#/$defs/ProgressComponent"
+    },
+    {
+      "$ref": "#/$defs/CalloutComponent"
+    },
+    {
+      "$ref": "#/$defs/DataTableComponent"
+    },
+    {
+      "$ref": "#/$defs/TimeSeriesComponent"
+    },
+    {
+      "$ref": "#/$defs/MermaidComponent"
+    },
+    {
+      "$ref": "#/$defs/MapComponent"
+    },
+    {
+      "$ref": "#/$defs/WorkflowComponent"
+    },
+    {
+      "$ref": "#/$defs/ArtifactComponent"
+    },
+    {
+      "$ref": "#/$defs/CodeComponent"
+    },
+    {
+      "$ref": "#/$defs/DiffComponent"
+    },
+    {
+      "$ref": "#/$defs/ActionCardComponent"
+    },
+    {
+      "$ref": "#/$defs/ApprovalComponent"
+    }
+  ],
+  "title": "A2UIComponent"
+}

@@ -5,7 +5,347 @@
  *   node schemas-to-ts.mjs --in <schema-dir> --out <ts-dir>
  */
 
-export type Name = string;
+export type Name = "agent.submit" | "approval.respond" | "form.submit" | "run.retry" | "run.cancel";
+export type Sourcecomponentid = string;
+export type Surfaceid = string;
+export type Timestamp = string;
+export type Version = "v0.9.1";
+/**
+ * Closed union of every trusted A2UI 0.9.1 catalog component.
+ */
+export type A2UIComponent =
+  | TextComponent
+  | IconComponent
+  | ImageComponent
+  | RowComponent
+  | ColumnComponent
+  | GridComponent
+  | ListComponent
+  | FrameComponent
+  | TabsComponent
+  | ModalComponent
+  | DividerComponent
+  | ButtonComponent
+  | CheckBoxComponent
+  | TextFieldComponent
+  | ChoicePickerComponent
+  | SliderComponent
+  | StatusComponent
+  | MetricComponent
+  | ProgressComponent
+  | CalloutComponent
+  | DataTableComponent
+  | TimeSeriesComponent
+  | MermaidComponent
+  | MapComponent
+  | WorkflowComponent
+  | ArtifactComponent
+  | CodeComponent
+  | DiffComponent
+  | ActionCardComponent
+  | ApprovalComponent;
+export type Description = string | _DataBinding | _StringFunctionCall | null;
+export type Path = string;
+export type JsonValue = unknown | undefined;
+export type Call = string;
+export type Returntype = "string";
+export type Label = string | _DataBinding | _StringFunctionCall | null;
+export type Component = "Text";
+export type Id = string;
+export type Text = string | _DataBinding | _StringFunctionCall;
+export type Variant = ("h1" | "h2" | "h3" | "h4" | "h5" | "caption" | "body") | null;
+export type Weight = number | null;
+export type Component1 = "Icon";
+export type Id1 = string;
+export type Name1 = string | _IconSvgPath | _DataBinding;
+export type Svgpath = string;
+export type Weight1 = number | null;
+export type Component2 = "Image";
+export type Description1 = string | _DataBinding | _StringFunctionCall | null;
+export type Fit = ("contain" | "cover" | "fill" | "none" | "scaleDown") | null;
+export type Id2 = string;
+export type Url = string | _DataBinding | _StringFunctionCall;
+export type Variant1 =
+  ("icon" | "avatar" | "smallFeature" | "mediumFeature" | "largeFeature" | "header") | null;
+export type Weight2 = number | null;
+export type Align = ("start" | "center" | "end" | "stretch") | null;
+export type Children = string[] | _ChildTemplate;
+export type Componentid = string;
+export type Path1 = string;
+export type Component3 = "Row";
+export type Id3 = string;
+export type Justify =
+  ("start" | "center" | "end" | "spaceBetween" | "spaceAround" | "spaceEvenly" | "stretch") | null;
+export type Weight3 = number | null;
+export type Align1 = ("start" | "center" | "end" | "stretch") | null;
+export type Children1 = string[] | _ChildTemplate;
+export type Component4 = "Column";
+export type Id4 = string;
+export type Justify1 =
+  ("start" | "center" | "end" | "spaceBetween" | "spaceAround" | "spaceEvenly" | "stretch") | null;
+export type Weight4 = number | null;
+export type Children2 = string[];
+export type Columns = number | null;
+export type Component5 = "Grid";
+export type Gap = number | null;
+export type Id5 = string;
+export type Weight5 = number | null;
+export type Align2 = ("start" | "center" | "end" | "stretch") | null;
+export type Children3 = string[] | _ChildTemplate;
+export type Component6 = "List";
+export type Direction = ("vertical" | "horizontal") | null;
+export type Id6 = string;
+export type Weight6 = number | null;
+export type Child = string;
+export type Component7 = "Frame";
+export type Description2 = string | _DataBinding | _StringFunctionCall | null;
+export type Id7 = string;
+export type Title = string | _DataBinding | _StringFunctionCall | null;
+export type Weight7 = number | null;
+export type Component8 = "Tabs";
+export type Id8 = string;
+/**
+ * @minItems 1
+ */
+export type Tabs = [_TabDefinition, ..._TabDefinition[]];
+export type Child1 = string;
+export type Title1 = string | _DataBinding | _StringFunctionCall;
+export type Weight8 = number | null;
+export type Component9 = "Modal";
+export type Content = string;
+export type Id9 = string;
+export type Trigger = string;
+export type Weight9 = number | null;
+export type Axis = ("vertical" | "horizontal") | null;
+export type Component10 = "Divider";
+export type Id10 = string;
+export type Weight10 = number | null;
+export type Action = _EventAction | _FunctionAction;
+export type Context1 = {
+  [k: string]:
+    | (string | number | boolean | JsonValue | undefined[] | _DataBinding | _FunctionCall)
+    | undefined;
+} | null;
+export type Call1 = string;
+export type Returntype1 = "string" | "number" | "boolean" | "array" | "object" | "any" | "void";
+export type Name2 = string;
+export type Checks = _CheckRule[] | null;
+export type Condition = boolean | _DataBinding | _BooleanFunctionCall;
+export type Call2 = string;
+export type Returntype2 = "boolean";
+export type Message = string;
+export type Child2 = string;
+export type Component11 = "Button";
+export type Id11 = string;
+export type Variant2 = ("default" | "primary" | "borderless") | null;
+export type Weight11 = number | null;
+export type Checks1 = _CheckRule[] | null;
+export type Component12 = "CheckBox";
+export type Id12 = string;
+export type Label1 = string | _DataBinding | _StringFunctionCall;
+export type Value = boolean | _DataBinding | _BooleanFunctionCall;
+export type Weight12 = number | null;
+export type Checks2 = _CheckRule[] | null;
+export type Component13 = "TextField";
+export type Id13 = string;
+export type Label2 = string | _DataBinding | _StringFunctionCall;
+export type Validationregexp = string | null;
+export type Value1 = string | _DataBinding | _StringFunctionCall | null;
+export type Variant3 = ("longText" | "number" | "shortText" | "obscured") | null;
+export type Weight13 = number | null;
+export type Checks3 = _CheckRule[] | null;
+export type Component14 = "ChoicePicker";
+export type Displaystyle = ("checkbox" | "chips") | null;
+export type Filterable = boolean | null;
+export type Id14 = string;
+export type Label3 = string | _DataBinding | _StringFunctionCall | null;
+export type Label4 = string | _DataBinding | _StringFunctionCall;
+export type Value2 = string;
+export type Options = _ChoiceOption[];
+export type Value3 = string[] | _DataBinding | _ArrayFunctionCall;
+export type Call3 = string;
+export type Returntype3 = "array";
+export type Variant4 = ("multipleSelection" | "mutuallyExclusive") | null;
+export type Weight14 = number | null;
+export type Checks4 = _CheckRule[] | null;
+export type Component15 = "Slider";
+export type Id15 = string;
+export type Label5 = string | _DataBinding | _StringFunctionCall | null;
+export type Max = number;
+export type Min = number | null;
+export type Value4 = number | _DataBinding | _NumberFunctionCall;
+export type Call4 = string;
+export type Returntype4 = "number";
+export type Weight15 = number | null;
+export type Component16 = "clio.status.v1";
+export type Detail = string | _DataBinding | _StringFunctionCall | null;
+export type Elapsedms = number | _DataBinding | _NumberFunctionCall | null;
+export type Id16 = string;
+export type Label6 = string | _DataBinding | _StringFunctionCall;
+export type State = string | _DataBinding | _StringFunctionCall;
+export type Weight16 = number | null;
+export type Component17 = "clio.metric.v1";
+export type Detail1 = string | _DataBinding | _StringFunctionCall | null;
+export type Id17 = string;
+export type Label7 = string | _DataBinding | _StringFunctionCall;
+export type Trend = string | _DataBinding | _StringFunctionCall | null;
+export type Unit = string | _DataBinding | _StringFunctionCall | null;
+export type Value5 =
+  string | number | boolean | JsonValue | undefined[] | _DataBinding | _FunctionCall;
+export type Weight17 = number | null;
+export type Component18 = "clio.progress.v1";
+export type Detail2 = string | _DataBinding | _StringFunctionCall | null;
+export type Id18 = string;
+export type Label8 = string | _DataBinding | _StringFunctionCall;
+export type Max1 = number | _DataBinding | _NumberFunctionCall | null;
+export type State1 = string | _DataBinding | _StringFunctionCall | null;
+export type Value6 = number | _DataBinding | _NumberFunctionCall | null;
+export type Weight18 = number | null;
+export type Action1 = _EventAction | _FunctionAction | null;
+export type Body = string | _DataBinding | _StringFunctionCall;
+export type Component19 = "clio.callout.v1";
+export type Id19 = string;
+export type Severity = string;
+export type Title2 = string | _DataBinding | _StringFunctionCall;
+export type Weight19 = number | null;
+export type Action2 = _EventAction | _FunctionAction | null;
+export type Key = string;
+export type Label9 = string;
+export type Columns1 = (string | _DataTableColumn)[];
+export type Component20 = "clio.data-table.v1";
+export type Id20 = string;
+export type Rows = {
+  [k: string]: JsonValue | undefined;
+}[];
+export type Selection = string | null;
+export type Weight20 = number | null;
+export type Component21 = "clio.time-series.v1";
+export type Datauri = string | null;
+export type Id21 = string;
+export type Series =
+  | [
+      {
+        [k: string]: (string | number | number | null) | undefined;
+      },
+      ...{
+        [k: string]: (string | number | number | null) | undefined;
+      }[]
+    ]
+  | null;
+export type Title3 = string | _DataBinding | _StringFunctionCall | null;
+export type Weight21 = number | null;
+export type Xkey = string;
+/**
+ * @minItems 1
+ * @maxItems 5
+ */
+export type Ykeys =
+  | [string]
+  | [string, string]
+  | [string, string, string]
+  | [string, string, string, string]
+  | [string, string, string, string, string];
+export type Component22 = "clio.mermaid.v1";
+export type Id22 = string;
+export type Source = string | _DataBinding | _StringFunctionCall;
+export type Title4 = string | _DataBinding | _StringFunctionCall | null;
+export type Weight22 = number | null;
+export type Action3 = _EventAction | _FunctionAction | null;
+export type Actionlabel = string | _DataBinding | _StringFunctionCall | null;
+export type Component23 = "clio.map.v1";
+export type Id23 = string;
+/**
+ * @minItems 1
+ * @maxItems 500
+ */
+export type Points = [MapPoint, ...MapPoint[]];
+export type Category = string | null;
+export type Detail3 = string | null;
+export type Id24 = string;
+export type Label10 = string;
+export type Latitude = number;
+export type Longitude = number;
+export type Selected = string | null;
+export type Title5 = string | _DataBinding | _StringFunctionCall | null;
+export type Weight23 = number | null;
+export type Action4 = _EventAction | _FunctionAction | null;
+export type Component24 = "clio.workflow.v1";
+export type Label11 = string | null;
+export type Source1 = string;
+export type Target = string;
+/**
+ * @maxItems 256
+ */
+export type Edges = WorkflowEdge[];
+export type Id25 = string;
+/**
+ * @minItems 1
+ * @maxItems 128
+ */
+export type Nodes = [WorkflowNode, ...WorkflowNode[]];
+export type Detail4 = string | null;
+export type Id26 = string;
+export type Label12 = string;
+export type State2 = string | null;
+export type Selected1 = string | null;
+export type Weight24 = number | null;
+export type Action5 = _EventAction | _FunctionAction | null;
+export type Component25 = "clio.artifact.v1";
+export type Id27 = string;
+export type Mediatype = string;
+export type Name3 = string | _DataBinding | _StringFunctionCall;
+export type Size = number | _DataBinding | _NumberFunctionCall | null;
+export type Uri = string;
+export type Weight25 = number | null;
+export type Code = string | _DataBinding | _StringFunctionCall;
+export type Component26 = "clio.code.v1";
+export type Id28 = string;
+export type Language = string;
+export type Title6 = string | _DataBinding | _StringFunctionCall | null;
+export type Weight26 = number | null;
+export type Action6 = _EventAction | _FunctionAction | null;
+export type Component27 = "clio.diff.v1";
+export type Diff = string | _DataBinding | _StringFunctionCall;
+export type Id29 = string;
+export type Path2 = string;
+export type Status = string | _DataBinding | _StringFunctionCall | null;
+export type Weight27 = number | null;
+/**
+ * @maxItems 6
+ */
+export type Actions =
+  | []
+  | [_CardAction]
+  | [_CardAction, _CardAction]
+  | [_CardAction, _CardAction, _CardAction]
+  | [_CardAction, _CardAction, _CardAction, _CardAction]
+  | [_CardAction, _CardAction, _CardAction, _CardAction, _CardAction]
+  | [_CardAction, _CardAction, _CardAction, _CardAction, _CardAction, _CardAction];
+export type Action7 = _EventAction | _FunctionAction;
+export type Label13 = string;
+export type Tone = ("default" | "destructive") | null;
+export type Body1 = string | _DataBinding | _StringFunctionCall;
+export type Component28 = "clio.action-card.v1";
+export type Id30 = string;
+export type Severity1 = string;
+export type Title7 = string | _DataBinding | _StringFunctionCall;
+export type Weight28 = number | null;
+/**
+ * @minItems 1
+ * @maxItems 4
+ */
+export type Actions1 =
+  | [_CardAction]
+  | [_CardAction, _CardAction]
+  | [_CardAction, _CardAction, _CardAction]
+  | [_CardAction, _CardAction, _CardAction, _CardAction];
+export type Component29 = "clio.approval.v1";
+export type Id31 = string;
+export type Reason = string | _DataBinding | _StringFunctionCall;
+export type Risk = string | _DataBinding | _StringFunctionCall;
+export type Title8 = string | _DataBinding | _StringFunctionCall;
+export type Weight29 = number | null;
+export type Name4 = string;
 export type Annotation = string;
 export type ArtifactId = string;
 export type CreatedAt = string;
@@ -35,10 +375,10 @@ export type KindWarning = string;
  */
 export type Mechanism = "harness" | "tool-schema" | "change-feed" | "model" | "none";
 export type NotIngestedSize = number | null;
-export type Path = string;
+export type Path3 = string;
 export type PriorSha256 = string | null;
 export type PriorVersion = number | null;
-export type Version = number;
+export type Version1 = number;
 export type Versions = ArtifactVersion[];
 export type WorkspaceId = string;
 export type Arch = string;
@@ -62,8 +402,139 @@ export type Cmd = string;
 export type ScriptArtifactId = string;
 export type ScriptHash = string;
 export type Tool = string;
-export type Arg = string;
+/**
+ * Closed discriminated union of the 13 GACT 0.3 message-block types.
+ */
+export type MessageBlock =
+  | TextMessageBlock
+  | ReasoningMessageBlock
+  | ToolMessageBlock
+  | PlanMessageBlock
+  | TaskMessageBlock
+  | SubagentMessageBlock
+  | ArtifactMessageBlock
+  | ActionCardMessageBlock
+  | A2UIMessageBlock
+  | CitationMessageBlock
+  | DiffMessageBlock
+  | ErrorMessageBlock
+  | RoutingMessageBlock;
+export type AgentId = string | null;
+export type Channel = string | null;
+export type Id32 = string;
+export type Sequence = number | null;
+export type StreamSource = string | null;
+export type Streaming = boolean | null;
+export type Text1 = string;
+export type Type = "text";
+export type AgentId1 = string | null;
+export type Channel1 = string | null;
+export type DefaultCollapsed = boolean | null;
+export type Id33 = string;
+export type ProviderSource = string | null;
+export type Sequence1 = number | null;
+export type Source2 = string | null;
+export type StreamSource1 = string | null;
+export type Streaming1 = boolean | null;
+export type Text2 = string;
+export type Type1 = "reasoning";
+export type AgentId2 = string | null;
+export type Channel2 = string | null;
+export type Id34 = string;
+export type Sequence2 = number | null;
+export type StreamSource2 = string | null;
+export type Thought = string | null;
+export type ToolId = string;
+export type Type2 = "tool";
+export type AgentId3 = string | null;
+export type Channel3 = string | null;
+export type Detail5 = string | null;
+export type Id35 = string;
+export type Sequence3 = number | null;
+export type StreamSource3 = string | null;
+export type Title9 = string;
+export type Type3 = "plan";
+export type AgentId4 = string | null;
+export type Channel4 = string | null;
+export type Id36 = string;
+export type Sequence4 = number | null;
+export type StreamSource4 = string | null;
+export type TaskId = string;
+export type Type4 = "task";
+export type AgentId5 = string | null;
+export type Channel5 = string | null;
+export type Id37 = string;
+export type Sequence5 = number | null;
+export type StreamSource5 = string | null;
+export type SubagentId = string;
+export type Type5 = "subagent";
+export type AgentId6 = string | null;
 export type ArtifactId1 = string;
+export type Channel6 = string | null;
+export type Id38 = string;
+export type Sequence6 = number | null;
+export type StreamSource6 = string | null;
+export type Type6 = "artifact";
+export type HandleId = string | null;
+export type Kind = string;
+export type Reason1 = string | null;
+export type Enabled = boolean;
+export type Id39 = string;
+export type Label14 = string;
+export type Actions2 = ActionCardAction[];
+export type AgentId7 = string | null;
+export type Channel7 = string | null;
+export type Detail6 = string | null;
+export type Id40 = string;
+export type Sequence7 = number | null;
+export type Severity2 = string | null;
+export type Source3 = string | null;
+export type Status1 = string | null;
+export type StreamSource7 = string | null;
+export type Title10 = string;
+export type Type7 = "action_card";
+export type AgentId8 = string | null;
+export type Channel8 = string | null;
+export type Id41 = string;
+export type Sequence8 = number | null;
+export type StreamSource8 = string | null;
+export type SurfaceId = string;
+export type Type8 = "a2ui";
+export type AgentId9 = string | null;
+export type Channel9 = string | null;
+export type Id42 = string;
+export type Label15 = string;
+export type Sequence9 = number | null;
+export type StreamSource9 = string | null;
+export type Type9 = "citation";
+export type Uri1 = string;
+export type AgentId10 = string | null;
+export type Channel10 = string | null;
+export type Id43 = string;
+export type Path4 = string;
+export type Sequence10 = number | null;
+export type StreamSource10 = string | null;
+export type Type10 = "diff";
+export type UnifiedDiff = string;
+export type AgentId11 = string | null;
+export type Channel11 = string | null;
+export type Code1 = string;
+export type Id44 = string;
+export type Message1 = string;
+export type Recoverable = boolean;
+export type Sequence11 = number | null;
+export type StreamSource11 = string | null;
+export type Type11 = "error";
+export type AgentId12 = string | null;
+export type Channel12 = string | null;
+export type Detail7 = string | null;
+export type Id45 = string;
+export type Label16 = string;
+export type Sequence12 = number | null;
+export type StreamSource12 = string | null;
+export type Type12 = "routing";
+export type Arg = string;
+export type ArtifactId2 = string;
 export type Authority1 = string;
 export type CrossWorkspaceBind = boolean;
 /**
@@ -72,20 +543,20 @@ export type CrossWorkspaceBind = boolean;
 export type EdgeEvidence = "schema-arg" | "hash-pair" | "lease-window" | "authority" | "assertion";
 export type ExternalRef = string;
 export type FenceProven = boolean;
-export type Name1 = string;
+export type Name5 = string;
 export type NetAt = string;
 export type NetDomain = string;
 export type NetMechanism = string;
 export type NetResolvedIp = string;
 export type Note = string;
-export type Path1 = string;
+export type Path5 = string;
 /**
  * Which side of a transform a provenance edge sits on.
  */
 export type EdgeRole = "used" | "generated";
 export type Sha2561 = string | null;
-export type Version1 = number | null;
-export type AgentId = string;
+export type Version2 = number | null;
+export type AgentId13 = string;
 /**
  * Whether the agent executed or annotated the transform.
  */
@@ -122,20 +593,473 @@ export type WorkspaceId1 = string;
  * Aggregate of all canonical clio-schemas records with shared definitions emitted once. Used to generate TypeScript without duplicate declarations.
  */
 export interface ClioSchemaRegistry {
+  A2UIClientActionMessage?: A2UIClientActionMessage;
+  A2UIComponent?: A2UIComponent;
   ArtifactRecord?: ArtifactRecord;
   ArtifactVersion?: ArtifactVersion;
   EnvironmentRecord?: EnvironmentRecord;
   IdentityEvidence?: IdentityEvidence;
   Instrument?: Instrument;
+  MessageBlock?: MessageBlock;
   ProvEdge?: ProvEdge;
   TransformRecord?: TransformRecord;
+}
+/**
+ * Official 0.9.1 client action envelope with extension-key tolerance.
+ */
+export interface A2UIClientActionMessage {
+  action: A2UIClientAction;
+  version: Version;
+  [k: string]: unknown | undefined;
+}
+/**
+ * Known client-action fields with tolerated protocol extensions.
+ */
+export interface A2UIClientAction {
+  context: Context;
+  name: Name;
+  sourceComponentId: Sourcecomponentid;
+  surfaceId: Surfaceid;
+  timestamp: Timestamp;
+  [k: string]: unknown | undefined;
+}
+export interface Context {
+  [k: string]: unknown | undefined;
+}
+export interface TextComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component;
+  id: Id;
+  text: Text;
+  variant?: Variant;
+  weight?: Weight;
+}
+/**
+ * Supplemental accessible name and description for one component.
+ */
+export interface _Accessibility {
+  description?: Description;
+  label?: Label;
+}
+/**
+ * A JSON Pointer into the A2UI surface data model.
+ */
+export interface _DataBinding {
+  path: Path;
+}
+export interface _StringFunctionCall {
+  args?: Args;
+  call: Call;
+  returnType?: Returntype;
+}
+export interface Args {
+  [k: string]: JsonValue | undefined;
+}
+export interface IconComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component1;
+  id: Id1;
+  name: Name1;
+  weight?: Weight1;
+}
+export interface _IconSvgPath {
+  svgPath: Svgpath;
+}
+export interface ImageComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component2;
+  description?: Description1;
+  fit?: Fit;
+  id: Id2;
+  url: Url;
+  variant?: Variant1;
+  weight?: Weight2;
+}
+export interface RowComponent {
+  accessibility?: _Accessibility | null;
+  align?: Align;
+  children: Children;
+  component?: Component3;
+  id: Id3;
+  justify?: Justify;
+  weight?: Weight3;
+}
+/**
+ * Template for generating repeated child components from bound data.
+ */
+export interface _ChildTemplate {
+  componentId: Componentid;
+  path: Path1;
+}
+export interface ColumnComponent {
+  accessibility?: _Accessibility | null;
+  align?: Align1;
+  children: Children1;
+  component?: Component4;
+  id: Id4;
+  justify?: Justify1;
+  weight?: Weight4;
+}
+export interface GridComponent {
+  accessibility?: _Accessibility | null;
+  children: Children2;
+  columns?: Columns;
+  component?: Component5;
+  gap?: Gap;
+  id: Id5;
+  weight?: Weight5;
+}
+export interface ListComponent {
+  accessibility?: _Accessibility | null;
+  align?: Align2;
+  children: Children3;
+  component?: Component6;
+  direction?: Direction;
+  id: Id6;
+  weight?: Weight6;
+}
+export interface FrameComponent {
+  accessibility?: _Accessibility | null;
+  child: Child;
+  component?: Component7;
+  description?: Description2;
+  id: Id7;
+  title?: Title;
+  weight?: Weight7;
+}
+export interface TabsComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component8;
+  id: Id8;
+  tabs: Tabs;
+  weight?: Weight8;
+}
+export interface _TabDefinition {
+  child: Child1;
+  title: Title1;
+}
+export interface ModalComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component9;
+  content: Content;
+  id: Id9;
+  trigger: Trigger;
+  weight?: Weight9;
+}
+export interface DividerComponent {
+  accessibility?: _Accessibility | null;
+  axis?: Axis;
+  component?: Component10;
+  id: Id10;
+  weight?: Weight10;
+}
+export interface ButtonComponent {
+  accessibility?: _Accessibility | null;
+  action: Action;
+  checks?: Checks;
+  child: Child2;
+  component?: Component11;
+  id: Id11;
+  variant?: Variant2;
+  weight?: Weight11;
+}
+export interface _EventAction {
+  event: _ServerEvent;
+}
+/**
+ * Official server-side A2UI event action.
+ */
+export interface _ServerEvent {
+  context?: Context1;
+  name: Name2;
+}
+/**
+ * A typed client-side function invocation.
+ */
+export interface _FunctionCall {
+  args?: Args1;
+  call: Call1;
+  returnType?: Returntype1;
+}
+export interface Args1 {
+  [k: string]: JsonValue | undefined;
+}
+export interface _FunctionAction {
+  functionCall: _FunctionCall;
+}
+/**
+ * One official client-side component validation rule.
+ */
+export interface _CheckRule {
+  condition: Condition;
+  message: Message;
+}
+export interface _BooleanFunctionCall {
+  args?: Args2;
+  call: Call2;
+  returnType?: Returntype2;
+}
+export interface Args2 {
+  [k: string]: JsonValue | undefined;
+}
+export interface CheckBoxComponent {
+  accessibility?: _Accessibility | null;
+  checks?: Checks1;
+  component?: Component12;
+  id: Id12;
+  label: Label1;
+  value: Value;
+  weight?: Weight12;
+}
+export interface TextFieldComponent {
+  accessibility?: _Accessibility | null;
+  checks?: Checks2;
+  component?: Component13;
+  id: Id13;
+  label: Label2;
+  validationRegexp?: Validationregexp;
+  value?: Value1;
+  variant?: Variant3;
+  weight?: Weight13;
+}
+export interface ChoicePickerComponent {
+  accessibility?: _Accessibility | null;
+  checks?: Checks3;
+  component?: Component14;
+  displayStyle?: Displaystyle;
+  filterable?: Filterable;
+  id: Id14;
+  label?: Label3;
+  options: Options;
+  value: Value3;
+  variant?: Variant4;
+  weight?: Weight14;
+}
+export interface _ChoiceOption {
+  label: Label4;
+  value: Value2;
+}
+export interface _ArrayFunctionCall {
+  args?: Args3;
+  call: Call3;
+  returnType?: Returntype3;
+}
+export interface Args3 {
+  [k: string]: JsonValue | undefined;
+}
+export interface SliderComponent {
+  accessibility?: _Accessibility | null;
+  checks?: Checks4;
+  component?: Component15;
+  id: Id15;
+  label?: Label5;
+  max: Max;
+  min?: Min;
+  value: Value4;
+  weight?: Weight15;
+}
+export interface _NumberFunctionCall {
+  args?: Args4;
+  call: Call4;
+  returnType?: Returntype4;
+}
+export interface Args4 {
+  [k: string]: JsonValue | undefined;
+}
+export interface StatusComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component16;
+  detail?: Detail;
+  elapsedMs?: Elapsedms;
+  id: Id16;
+  label: Label6;
+  state: State;
+  weight?: Weight16;
+}
+export interface MetricComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component17;
+  detail?: Detail1;
+  id: Id17;
+  label: Label7;
+  trend?: Trend;
+  unit?: Unit;
+  value: Value5;
+  weight?: Weight17;
+}
+export interface ProgressComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component18;
+  detail?: Detail2;
+  id: Id18;
+  label: Label8;
+  max?: Max1;
+  state?: State1;
+  value?: Value6;
+  weight?: Weight18;
+}
+export interface CalloutComponent {
+  accessibility?: _Accessibility | null;
+  action?: Action1;
+  body: Body;
+  component?: Component19;
+  id: Id19;
+  severity: Severity;
+  title: Title2;
+  weight?: Weight19;
+}
+export interface DataTableComponent {
+  accessibility?: _Accessibility | null;
+  action?: Action2;
+  columns: Columns1;
+  component?: Component20;
+  id: Id20;
+  rows: Rows;
+  selection?: Selection;
+  weight?: Weight20;
+}
+export interface _DataTableColumn {
+  key: Key;
+  label: Label9;
+}
+/**
+ * Inline or artifact-backed interactive time-series component.
+ */
+export interface TimeSeriesComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component21;
+  dataUri?: Datauri;
+  id: Id21;
+  series?: Series;
+  title?: Title3;
+  weight?: Weight21;
+  xKey: Xkey;
+  yKeys: Ykeys;
+}
+export interface MermaidComponent {
+  accessibility?: _Accessibility | null;
+  component?: Component22;
+  id: Id22;
+  source: Source;
+  title?: Title4;
+  weight?: Weight22;
+}
+/**
+ * Interactive bounded geospatial component.
+ */
+export interface MapComponent {
+  accessibility?: _Accessibility | null;
+  action?: Action3;
+  actionLabel?: Actionlabel;
+  component?: Component23;
+  id: Id23;
+  points: Points;
+  selected?: Selected;
+  title?: Title5;
+  weight?: Weight23;
+}
+/**
+ * One bounded point in the interactive map component.
+ */
+export interface MapPoint {
+  category?: Category;
+  detail?: Detail3;
+  id: Id24;
+  label: Label10;
+  latitude: Latitude;
+  longitude: Longitude;
+}
+/**
+ * Bounded interactive workflow topology.
+ */
+export interface WorkflowComponent {
+  accessibility?: _Accessibility | null;
+  action?: Action4;
+  component?: Component24;
+  edges: Edges;
+  id: Id25;
+  nodes: Nodes;
+  selected?: Selected1;
+  weight?: Weight24;
+}
+/**
+ * One directed relationship in a workflow graph.
+ */
+export interface WorkflowEdge {
+  label?: Label11;
+  source: Source1;
+  target: Target;
+}
+/**
+ * One node in a bounded workflow graph.
+ */
+export interface WorkflowNode {
+  detail?: Detail4;
+  id: Id26;
+  label: Label12;
+  state?: State2;
+}
+export interface ArtifactComponent {
+  accessibility?: _Accessibility | null;
+  action?: Action5;
+  component?: Component25;
+  id: Id27;
+  mediaType: Mediatype;
+  name: Name3;
+  size?: Size;
+  uri: Uri;
+  weight?: Weight25;
+}
+export interface CodeComponent {
+  accessibility?: _Accessibility | null;
+  code: Code;
+  component?: Component26;
+  id: Id28;
+  language: Language;
+  title?: Title6;
+  weight?: Weight26;
+}
+export interface DiffComponent {
+  accessibility?: _Accessibility | null;
+  action?: Action6;
+  component?: Component27;
+  diff: Diff;
+  id: Id29;
+  path: Path2;
+  status?: Status;
+  weight?: Weight27;
+}
+export interface ActionCardComponent {
+  accessibility?: _Accessibility | null;
+  actions: Actions;
+  body: Body1;
+  component?: Component28;
+  id: Id30;
+  severity: Severity1;
+  title: Title7;
+  weight?: Weight28;
+}
+export interface _CardAction {
+  action: Action7;
+  label: Label13;
+  tone?: Tone;
+}
+export interface ApprovalComponent {
+  accessibility?: _Accessibility | null;
+  actions: Actions1;
+  component?: Component29;
+  id: Id31;
+  reason: Reason;
+  risk: Risk;
+  title: Title8;
+  weight?: Weight29;
 }
 /**
  * A mutable logical artifact chain keyed by workspace and name.
  */
 export interface ArtifactRecord {
   aliases?: Aliases;
-  name: Name;
+  name: Name4;
   versions?: Versions;
   workspace_id: WorkspaceId;
 }
@@ -156,11 +1080,11 @@ export interface ArtifactVersion {
   kind_warning?: KindWarning;
   mechanism?: Mechanism;
   not_ingested_size?: NotIngestedSize;
-  path?: Path;
+  path?: Path3;
   prior_sha256?: PriorSha256;
   prior_version?: PriorVersion;
   producer?: Producer;
-  version?: Version;
+  version?: Version1;
 }
 /**
  * The evidence basis on which an artifact's content is pinned.
@@ -198,42 +1122,233 @@ export interface EnvironmentRecord {
  * The tool or script that produced a transform.
  */
 export interface Instrument {
-  args?: Args;
+  args?: Args5;
   cmd?: Cmd;
   script_artifact_id?: ScriptArtifactId;
   script_hash?: ScriptHash;
   tool?: Tool;
 }
-export interface Args {
+export interface Args5 {
   [k: string]: unknown | undefined;
+}
+/**
+ * Assistant or user prose.
+ */
+export interface TextMessageBlock {
+  agent_id?: AgentId;
+  channel?: Channel;
+  id: Id32;
+  sequence?: Sequence;
+  stream_source?: StreamSource;
+  streaming?: Streaming;
+  text: Text1;
+  type: Type;
+}
+/**
+ * Provider reasoning or semantic next-thought narration.
+ */
+export interface ReasoningMessageBlock {
+  agent_id?: AgentId1;
+  channel?: Channel1;
+  default_collapsed?: DefaultCollapsed;
+  id: Id33;
+  provider_source?: ProviderSource;
+  sequence?: Sequence1;
+  source?: Source2;
+  stream_source?: StreamSource1;
+  streaming?: Streaming1;
+  text: Text2;
+  type: Type1;
+}
+/**
+ * Reference to one tool invocation.
+ */
+export interface ToolMessageBlock {
+  agent_id?: AgentId2;
+  channel?: Channel2;
+  id: Id34;
+  sequence?: Sequence2;
+  stream_source?: StreamSource2;
+  thought?: Thought;
+  tool_id: ToolId;
+  type: Type2;
+}
+/**
+ * Plan content emitted in causal order.
+ */
+export interface PlanMessageBlock {
+  agent_id?: AgentId3;
+  channel?: Channel3;
+  detail?: Detail5;
+  id: Id35;
+  sequence?: Sequence3;
+  stream_source?: StreamSource3;
+  title: Title9;
+  type: Type3;
+}
+/**
+ * Reference to one task.
+ */
+export interface TaskMessageBlock {
+  agent_id?: AgentId4;
+  channel?: Channel4;
+  id: Id36;
+  sequence?: Sequence4;
+  stream_source?: StreamSource4;
+  task_id: TaskId;
+  type: Type4;
+}
+/**
+ * Reference to one child-agent run.
+ */
+export interface SubagentMessageBlock {
+  agent_id?: AgentId5;
+  channel?: Channel5;
+  id: Id37;
+  sequence?: Sequence5;
+  stream_source?: StreamSource5;
+  subagent_id: SubagentId;
+  type: Type5;
+}
+/**
+ * Reference to one artifact.
+ */
+export interface ArtifactMessageBlock {
+  agent_id?: AgentId6;
+  artifact_id: ArtifactId1;
+  channel?: Channel6;
+  id: Id38;
+  sequence?: Sequence6;
+  stream_source?: StreamSource6;
+  type: Type6;
+}
+/**
+ * Interactive action-card block.
+ */
+export interface ActionCardMessageBlock {
+  actions: Actions2;
+  agent_id?: AgentId7;
+  channel?: Channel7;
+  detail?: Detail6;
+  id: Id40;
+  sequence?: Sequence7;
+  severity?: Severity2;
+  source?: Source3;
+  status?: Status1;
+  stream_source?: StreamSource7;
+  title: Title10;
+  type: Type7;
+}
+/**
+ * One action exposed by an action card.
+ */
+export interface ActionCardAction {
+  behavior: ActionCardBehavior;
+  enabled?: Enabled;
+  id: Id39;
+  label: Label14;
+}
+/**
+ * Registered action-card behavior with forward-compatible parameters.
+ */
+export interface ActionCardBehavior {
+  handle_id?: HandleId;
+  kind: Kind;
+  reason?: Reason1;
+  [k: string]: unknown | undefined;
+}
+/**
+ * Reference to one durable A2UI surface.
+ */
+export interface A2UIMessageBlock {
+  agent_id?: AgentId8;
+  channel?: Channel8;
+  id: Id41;
+  sequence?: Sequence8;
+  stream_source?: StreamSource8;
+  surface_id: SurfaceId;
+  type: Type8;
+}
+/**
+ * Citation label and target URI.
+ */
+export interface CitationMessageBlock {
+  agent_id?: AgentId9;
+  channel?: Channel9;
+  id: Id42;
+  label: Label15;
+  sequence?: Sequence9;
+  stream_source?: StreamSource9;
+  type: Type9;
+  uri: Uri1;
+}
+/**
+ * Unified file diff.
+ */
+export interface DiffMessageBlock {
+  agent_id?: AgentId10;
+  channel?: Channel10;
+  id: Id43;
+  path: Path4;
+  sequence?: Sequence10;
+  stream_source?: StreamSource10;
+  type: Type10;
+  unified_diff: UnifiedDiff;
+}
+/**
+ * Typed, recoverable or terminal error.
+ */
+export interface ErrorMessageBlock {
+  agent_id?: AgentId11;
+  channel?: Channel11;
+  code: Code1;
+  id: Id44;
+  message: Message1;
+  recoverable: Recoverable;
+  sequence?: Sequence11;
+  stream_source?: StreamSource11;
+  type: Type11;
+}
+/**
+ * Routing or compaction metadata visible to the user.
+ */
+export interface RoutingMessageBlock {
+  agent_id?: AgentId12;
+  channel?: Channel12;
+  detail?: Detail7;
+  id: Id45;
+  label: Label16;
+  sequence?: Sequence12;
+  stream_source?: StreamSource12;
+  type: Type12;
 }
 /**
  * One used or generated provenance edge with its own evidence.
  */
 export interface ProvEdge {
   arg?: Arg;
-  artifact_id?: ArtifactId1;
+  artifact_id?: ArtifactId2;
   authority?: Authority1;
   cross_workspace_bind?: CrossWorkspaceBind;
   evidence: EdgeEvidence;
   external_ref?: ExternalRef;
   fence_proven?: FenceProven;
-  name?: Name1;
+  name?: Name5;
   net_at?: NetAt;
   net_domain?: NetDomain;
   net_mechanism?: NetMechanism;
   net_resolved_ip?: NetResolvedIp;
   note?: Note;
-  path?: Path1;
+  path?: Path5;
   role: EdgeRole;
   sha256?: Sha2561;
-  version?: Version1;
+  version?: Version2;
 }
 /**
  * One coarse transform keyed by the observer call id.
  */
 export interface TransformRecord {
-  agent_id?: AgentId;
+  agent_id?: AgentId13;
   agent_role?: AgentRole;
   annotation?: Annotation1;
   call_id: CallId;

@@ -1,0 +1,66 @@
+{
+  "$defs": {
+    "A2UIClientAction": {
+      "additionalProperties": true,
+      "description": "Known client-action fields with tolerated protocol extensions.",
+      "properties": {
+        "context": {
+          "additionalProperties": true,
+          "title": "Context",
+          "type": "object"
+        },
+        "name": {
+          "enum": [
+            "agent.submit",
+            "approval.respond",
+            "form.submit",
+            "run.retry",
+            "run.cancel"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "sourceComponentId": {
+          "minLength": 1,
+          "title": "Sourcecomponentid",
+          "type": "string"
+        },
+        "surfaceId": {
+          "title": "Surfaceid",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "surfaceId",
+        "sourceComponentId",
+        "timestamp",
+        "context"
+      ],
+      "title": "A2UIClientAction",
+      "type": "object"
+    }
+  },
+  "additionalProperties": true,
+  "description": "Official 0.9.1 client action envelope with extension-key tolerance.",
+  "properties": {
+    "action": {
+      "$ref": "#/$defs/A2UIClientAction"
+    },
+    "version": {
+      "const": "v0.9.1",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "action"
+  ],
+  "title": "A2UIClientActionMessage",
+  "type": "object"
+}

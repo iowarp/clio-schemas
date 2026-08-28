@@ -19,6 +19,9 @@ from pydantic import (
     field_validator,
 )
 
+from clio_schemas.a2ui_v091 import A2UIClientActionMessage, A2UIComponent
+from clio_schemas.gact_v3 import MessageBlock
+
 
 class ClioSchemaBase(BaseModel):
     """Base for new canonical wire records.
@@ -456,11 +459,14 @@ class TransformRecord(LegacyToleranceBase):
 
 # The registry the exporter iterates. Keep it alphabetical by class name.
 EXPORTED_MODELS: tuple[type[BaseModel], ...] = (
+    A2UIClientActionMessage,
+    A2UIComponent,
     ArtifactRecord,
     ArtifactVersion,
     EnvironmentRecord,
     IdentityEvidence,
     Instrument,
+    MessageBlock,
     ProvEdge,
     TransformRecord,
 )
