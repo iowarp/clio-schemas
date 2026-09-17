@@ -19,7 +19,7 @@ import pytest
 from pydantic import ValidationError
 
 from clio_schemas.a2ui.catalog_export import render_workspace_sidecar
-from clio_schemas.a2ui.sidecar import CatalogSidecar
+from clio_schemas.a2ui.sidecar import CatalogSidecar, render_narration
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_SIDECAR_PATH = (
@@ -133,3 +133,111 @@ class TestCommittedWorkspaceSidecar:
 
     def test_approval_respond_has_no_operation(self, payload: dict[str, Any]) -> None:
         assert payload["events"]["approval.respond"] == {"destination": "permission"}
+
+    def test_no_event_declares_narration(self, payload: dict[str, Any]) -> None:
+        """No declared meaning for builtin events yet — only the schema changes (0.3.2)."""
+
+        for route in payload["events"].values():
+            assert "narration" not in route
+
+
+class TestNarrationPlaceholderValidation:
+    """``narration``'s placeholders must be declared ``context_schema`` fields, when one exists."""
+
+    def test_placeholder_outside_context_schema_raises(self) -> None:
+        payload = _base_payload(
+            **{
+                "earthscope.stations.selected": {
+                    "destination": "agent",
+                    "context_schema": {
+                        "type": "object",
+                        "properties": {"stationIds": {"type": "array"}},
+                    },
+                    "narration": "User requested to stage stations {bogusField}",
+                }
+            }
+        )
+        with pytest.raises(ValidationError, match="bogusField"):
+            CatalogSidecar.model_validate(payload)
+
+    def test_placeholder_subset_of_context_schema_validates(self) -> None:
+        payload = _base_payload(
+            **{
+                "earthscope.stations.selected": {
+                    "destination": "agent",
+                    "context_schema": {
+                        "type": "object",
+                        "properties": {"stationIds": {"type": "array"}},
+                    },
+                    "narration": "User requested to stage stations {stationIds}",
+                }
+            }
+        )
+        sidecar = CatalogSidecar.model_validate(payload)
+        assert sidecar.events["earthscope.stations.selected"].narration == (
+            "User requested to stage stations {stationIds}"
+        )
+
+    def test_narration_without_context_schema_allows_any_placeholder(self) -> None:
+        payload = _base_payload(
+            **{"some.event": {"destination": "agent", "narration": "Anything goes: {whatever}"}}
+        )
+        sidecar = CatalogSidecar.model_validate(payload)
+        assert sidecar.events["some.event"].narration == "Anything goes: {whatever}"
+
+    def test_narration_defaults_to_none(self) -> None:
+        payload = _base_payload(**{"some.event": {"destination": "agent"}})
+        sidecar = CatalogSidecar.model_validate(payload)
+        assert sidecar.events["some.event"].narration is None
+
+
+class TestRenderNarration:
+    """:func:`render_narration` renders a route's template against resolved context."""
+
+    def test_returns_none_when_narration_unset(self) -> None:
+        payload = _base_payload(**{"some.event": {"destination": "agent"}})
+        sidecar = CatalogSidecar.model_validate(payload)
+        assert render_narration(sidecar.events["some.event"], {}) is None
+
+    def test_renders_list_context_as_compact_json(self) -> None:
+        payload = _base_payload(
+            **{
+                "earthscope.stations.selected": {
+                    "destination": "agent",
+                    "context_schema": {
+                        "type": "object",
+                        "properties": {"stationIds": {"type": "array"}},
+                    },
+                    "narration": "User selected stations {stationIds}",
+                }
+            }
+        )
+        sidecar = CatalogSidecar.model_validate(payload)
+        route = sidecar.events["earthscope.stations.selected"]
+        rendered = render_narration(route, {"stationIds": ["MTA1", "PKRD"]})
+        assert rendered == 'User selected stations ["MTA1","PKRD"]'
+
+    def test_missing_key_renders_literally(self) -> None:
+        payload = _base_payload(
+            **{"some.event": {"destination": "agent", "narration": "Value is {missing}"}}
+        )
+        sidecar = CatalogSidecar.model_validate(payload)
+        route = sidecar.events["some.event"]
+        assert render_narration(route, {}) == "Value is {missing}"
+
+    def test_renders_dict_context_as_compact_json(self) -> None:
+        payload = _base_payload(
+            **{"some.event": {"destination": "agent", "narration": "Context: {payload}"}}
+        )
+        sidecar = CatalogSidecar.model_validate(payload)
+        route = sidecar.events["some.event"]
+        rendered = render_narration(route, {"payload": {"a": 1, "b": 2}})
+        assert rendered == 'Context: {"a":1,"b":2}'
+
+    def test_scalar_value_renders_plainly(self) -> None:
+        payload = _base_payload(
+            **{"some.event": {"destination": "agent", "narration": "Count: {n}"}}
+        )
+        sidecar = CatalogSidecar.model_validate(payload)
+        route = sidecar.events["some.event"]
+        assert render_narration(route, {"n": 3}) == "Count: 3"
