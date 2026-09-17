@@ -14,15 +14,16 @@ This is the failing-first proof from issue #1110, hardened after review:
   rejected where an int is declared; unknown keys are forbidden; records are
   frozen).
 
-The TS-generating tests skip (never silently pass) if Node.js or the TS-gen
-``node_modules`` are absent. Install the JS side with
-``cd tools/ts-gen && npm install`` to run them.
+The TS-generating tests require Node.js and the TS-gen ``node_modules`` — they
+FAIL (never silently skip) if either is absent, so a node-less environment is
+a red build, not a quietly-shrinking test count. Install the JS side with
+``cd tools/ts-gen && npm ci`` before running this file. CI's ``roundtrip`` job
+(``.github/workflows/ci.yml``) sets up Node and runs ``npm ci`` before pytest.
 """
 
 from __future__ import annotations
 
 import re
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -39,7 +40,6 @@ from clio_schemas.models import EXPORTED_MODELS
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TS_GEN_DIR = REPO_ROOT / "tools" / "ts-gen"
 GENERATOR = TS_GEN_DIR / "schemas-to-ts.mjs"
-NODE_MODULES = TS_GEN_DIR / "node_modules"
 GOLDEN_DIR = REPO_ROOT / "tests" / "golden"
 
 
@@ -75,18 +75,8 @@ def test_hashes_manifest_lists_every_schema() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# TypeScript round-trip (needs Node)
+# TypeScript round-trip (requires Node — see module docstring: no skip)
 # --------------------------------------------------------------------------- #
-def _node_available() -> bool:
-    return shutil.which("node") is not None
-
-
-requires_node = pytest.mark.skipif(
-    not _node_available() or not NODE_MODULES.exists(),
-    reason="node / tools/ts-gen/node_modules missing (run `npm install` in tools/ts-gen)",
-)
-
-
 def _generate_ts(tmp_path: Path) -> Path:
     """Copy committed schemas + generate the TS graph into a clean temp dir.
 
@@ -114,7 +104,6 @@ def _generate_ts(tmp_path: Path) -> Path:
     return ts_dir
 
 
-@requires_node
 def test_golden_directory_set_and_bytes(tmp_path: Path) -> None:
     """Complete generated dir == complete golden dir: filenames + bytes."""
 
@@ -134,7 +123,6 @@ def test_golden_directory_set_and_bytes(tmp_path: Path) -> None:
         )
 
 
-@requires_node
 @pytest.mark.parametrize("model", EXPORTED_MODELS, ids=lambda m: m.__name__)
 def test_every_model_has_a_golden_ts_module(tmp_path: Path, model: type) -> None:
     """Each exported model has a generated (and golden) per-model .ts module."""
@@ -145,7 +133,6 @@ def test_every_model_has_a_golden_ts_module(tmp_path: Path, model: type) -> None
     assert (GOLDEN_DIR / f"{stem}.ts").exists()
 
 
-@requires_node
 def test_no_duplicate_declarations_in_barrel(tmp_path: Path) -> None:
     """Every exported type is *declared* exactly once across the module graph."""
 

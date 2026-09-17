@@ -27,8 +27,11 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from clio_schemas.a2ui.catalog_export import render_workspace_catalog
+from clio_schemas.a2ui.v0_9_1.bounded_components import COMPONENT_MODELS
+from clio_schemas.a2ui.v0_9_1.components import TextComponent, TextFieldComponent
 from clio_schemas.a2ui.validation import catalog_validators, message_validator
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -288,3 +291,152 @@ def test_clio_workspace_catalog_is_closed() -> None:
         },
     }
     assert not validator.is_valid(message)
+
+
+# --------------------------------------------------------------------------- #
+# Adversarial-review fixups: theme $defs, function-call $defs, pydantic/catalog
+# parity (blocking findings #1 and #2, and the time-series hardening in #3).
+# --------------------------------------------------------------------------- #
+def test_theme_validates_against_workspace_catalog() -> None:
+    """``createSurface.theme`` resolves ``catalog.json#/$defs/theme`` for the workspace catalog."""
+
+    validator = message_validator("server_to_client.json", catalog=WORKSPACE_CATALOG)
+    validator.validate(
+        {
+            "version": "v0.9.1",
+            "createSurface": {
+                "surfaceId": "s",
+                "catalogId": WORKSPACE_CATALOG["catalogId"],
+                "theme": {"primaryColor": "#000000"},
+            },
+        }
+    )
+
+
+def test_theme_rejects_malformed_primary_color_like_basic() -> None:
+    """An unknown/malformed theme value behaves the same against both catalogs."""
+
+    basic_validator = message_validator("server_to_client.json", catalog=BASIC_CATALOG)
+    workspace_validator = message_validator("server_to_client.json", catalog=WORKSPACE_CATALOG)
+    message = {
+        "version": "v0.9.1",
+        "createSurface": {
+            "surfaceId": "s",
+            "catalogId": "x",
+            "theme": {"primaryColor": "not-a-hex-color"},
+        },
+    }
+    basic_message = {
+        **message,
+        "createSurface": {**message["createSurface"], "catalogId": BASIC_CATALOG["catalogId"]},
+    }
+    workspace_message = {
+        **message,
+        "createSurface": {**message["createSurface"], "catalogId": WORKSPACE_CATALOG["catalogId"]},
+    }
+    assert basic_validator.is_valid(basic_message) == workspace_validator.is_valid(
+        workspace_message
+    )
+    assert not workspace_validator.is_valid(workspace_message)
+
+
+def test_checkable_function_call_validates_against_workspace_catalog() -> None:
+    """A TextField ``checks[].condition`` FunctionCall (``required``) validates."""
+
+    payload = {
+        "id": "field_1",
+        "component": "TextField",
+        "label": "Name",
+        "checks": [
+            {
+                "condition": {
+                    "call": "required",
+                    "args": {"value": {"path": "/name"}},
+                    "returnType": "boolean",
+                },
+                "message": "Required",
+            }
+        ],
+    }
+    WORKSPACE_VALIDATORS["TextField"].validate(payload)
+    TextFieldComponent.model_validate(payload)
+
+
+def test_dynamic_string_function_call_validates_against_workspace_catalog() -> None:
+    """A ``Text.text`` DynamicString FunctionCall (``formatString``) validates."""
+
+    payload = {
+        "id": "text_1",
+        "component": "Text",
+        "text": {"call": "formatString", "args": {"value": "x"}, "returnType": "string"},
+    }
+    WORKSPACE_VALIDATORS["Text"].validate(payload)
+    TextComponent.model_validate(payload)
+
+
+def test_unknown_function_call_is_rejected_by_both() -> None:
+    """An unregistered function name (``nope``) fails both the catalog and the model."""
+
+    payload = {
+        "id": "text_1",
+        "component": "Text",
+        "text": {"call": "nope", "args": {}, "returnType": "string"},
+    }
+    assert not WORKSPACE_VALIDATORS["Text"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        TextComponent.model_validate(payload)
+
+
+CLIO_TIME_SERIES_REJECT_CASES: list[Any] = [
+    pytest.param(
+        {
+            "id": "ts_1",
+            "component": "clio.time-series.v1",
+            "xKey": "t",
+            "yKeys": ["a", "a"],
+            "series": [{"t": 0, "a": 1}],
+        },
+        id="TimeSeries-duplicate-yKeys",
+    ),
+    pytest.param(
+        {
+            "id": "ts_1",
+            "component": "clio.time-series.v1",
+            "xKey": "t",
+            "yKeys": ["  "],
+            "series": [{"t": 0, "a": 1}],
+        },
+        id="TimeSeries-blank-yKey",
+    ),
+    pytest.param(
+        {
+            "id": "ts_1",
+            "component": "clio.time-series.v1",
+            "xKey": "t",
+            "yKeys": ["a"],
+            "series": [{"t": 0, "a": {"x": 1}}],
+        },
+        id="TimeSeries-non-scalar-series-value",
+    ),
+]
+
+
+@pytest.mark.parametrize("payload", [*CLIO_REJECT_CASES, *CLIO_TIME_SERIES_REJECT_CASES])
+def test_clio_reject_case_fails_pydantic_and_catalog(payload: dict[str, Any]) -> None:
+    """Every reject payload fails BOTH the pydantic model and the catalog validator."""
+
+    model_by_name = {m.model_fields["component"].default: m for m in COMPONENT_MODELS}
+    model = model_by_name[payload["component"]]
+    assert not WORKSPACE_VALIDATORS[payload["component"]].is_valid(payload)
+    with pytest.raises(ValidationError):
+        model.model_validate(payload)
+
+
+@pytest.mark.parametrize("payload", CLIO_ACCEPT_CASES)
+def test_clio_accept_case_validates_pydantic_and_catalog(payload: dict[str, Any]) -> None:
+    """Every accept payload validates against BOTH the pydantic model and the catalog validator."""
+
+    model_by_name = {m.model_fields["component"].default: m for m in COMPONENT_MODELS}
+    model = model_by_name[payload["component"]]
+    WORKSPACE_VALIDATORS[payload["component"]].validate(payload)
+    model.model_validate(payload)

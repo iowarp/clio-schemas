@@ -10,7 +10,9 @@ vendored spec, in ``tests/test_a2ui_corpus.py`` (``CLIO_ACCEPT_CASES`` /
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -24,6 +26,11 @@ from clio_schemas.a2ui.v0_9_1.bounded_components import (
     TimeSeriesComponent,
     WorkflowComponent,
 )
+from clio_schemas.a2ui.v0_9_1.capabilities import (
+    A2UIAgentCapabilities,
+    A2UIClientCapabilities,
+    InlineCatalog,
+)
 from clio_schemas.a2ui.v0_9_1.components import (
     COMPONENT_SPECS,
     ButtonComponent,
@@ -35,12 +42,28 @@ from clio_schemas.a2ui.v0_9_1.components import (
     TextComponent,
     TextFieldComponent,
 )
+from clio_schemas.a2ui.v0_9_1.data_model import A2UIClientDataModel
 from clio_schemas.a2ui.v0_9_1.messages import (
     A2UIClientAction,
     A2UIClientMessage,
     A2UIServerMessage,
 )
+from clio_schemas.a2ui.validation import message_validator
 from clio_schemas.gact_v3 import MessageBlock
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+BASIC_CATALOG_PATH = (
+    REPO_ROOT
+    / "src"
+    / "clio_schemas"
+    / "schemas"
+    / "a2ui"
+    / "v0_9_1"
+    / "catalogs"
+    / "basic"
+    / "catalog.json"
+)
+BASIC_CATALOG = json.loads(BASIC_CATALOG_PATH.read_text(encoding="utf-8"))
 
 
 @pytest.mark.parametrize(
@@ -314,3 +337,75 @@ def test_server_message_requires_exactly_one_operation() -> None:
         {"version": "v0.9.1", "deleteSurface": {"surfaceId": "s"}}
     )
     assert message.deleteSurface is not None
+
+
+# --------------------------------------------------------------------------- #
+# Adversarial-review fixups: wire-valid serialization, required surfaces,
+# RFC 3339 timestamps, tolerant capabilities, boolean-schema inline catalogs.
+# --------------------------------------------------------------------------- #
+def test_server_message_dump_emits_only_the_present_operation_key() -> None:
+    """``model_dump()`` never emits the three absent op keys as null."""
+
+    message = A2UIServerMessage.model_validate(
+        {"version": "v0.9", "updateDataModel": {"surfaceId": "s", "path": "/k"}}
+    )
+    dump = message.model_dump()
+    assert "value" not in dump["updateDataModel"]
+    assert set(dump) == {"version", "updateDataModel"}
+
+    validator = message_validator("server_to_client", catalog=BASIC_CATALOG)
+    assert validator.is_valid(dump)
+    assert "null" not in message.model_dump_json()
+
+
+def test_server_message_dump_keeps_an_explicit_null_value() -> None:
+    """An explicit ``value: null`` round-trips; it is not confused with an omitted value."""
+
+    message = A2UIServerMessage.model_validate(
+        {"version": "v0.9", "updateDataModel": {"surfaceId": "s", "path": "/k", "value": None}}
+    )
+    dump = message.model_dump()
+    assert "value" in dump["updateDataModel"]
+    assert dump["updateDataModel"]["value"] is None
+
+
+def test_client_data_model_requires_surfaces() -> None:
+    with pytest.raises(ValidationError):
+        A2UIClientDataModel.model_validate({"version": "v0.9"})
+    model = A2UIClientDataModel.model_validate({"version": "v0.9", "surfaces": {}})
+    assert model.surfaces == {}
+
+
+def test_client_action_timestamp_must_be_rfc3339_date_time() -> None:
+    """A bare date (no time component) is not a valid A2UI action timestamp."""
+
+    with pytest.raises(ValidationError):
+        A2UIClientAction.model_validate(
+            {
+                "name": "run.cancel",
+                "surfaceId": "s",
+                "sourceComponentId": "c",
+                "timestamp": "2026-01-01",
+                "context": {},
+            }
+        )
+
+
+def test_capabilities_tolerate_extra_keys_like_the_vendored_schema() -> None:
+    """client_capabilities.json / server_capabilities.json do not forbid extras."""
+
+    client = A2UIClientCapabilities.model_validate(
+        {"v0.9": {"supportedCatalogIds": ["c"], "future": "ignored-by-schema-not-us"}}
+    )
+    assert client.v0_9.supportedCatalogIds == ["c"]
+    agent = A2UIAgentCapabilities.model_validate({"v0.9": {"future": True}})
+    assert agent.v0_9.supportedCatalogIds == []
+
+
+def test_inline_catalog_accepts_boolean_component_schema() -> None:
+    """A component/theme value may be the boolean JSON Schema ``true``/``false``."""
+
+    catalog = InlineCatalog.model_validate(
+        {"catalogId": "c", "components": {"Anything": True}, "theme": {"free": False}}
+    )
+    assert catalog.components["Anything"] is True
