@@ -1,9 +1,29 @@
-"""Canonical trusted A2UI 0.9.1 catalog vocabulary."""
+"""CLIO's 30 trusted A2UI 0.9.1 catalog components — the pydantic generator.
+
+These models are the *source of truth* for the ``clio-workspace`` catalog file
+rendered by :mod:`clio_schemas.a2ui.catalog_export` (``catalog.json``, in the
+official A2UI style — see ``catalogs/basic/catalog.json`` in the vendored
+tree). ``COMPONENT_SPECS`` records, for every component built through
+:func:`_component_model`, the exact ``required``/``optional`` field-type
+declaration used to build both the pydantic model *and* the catalog's JSON
+Schema component definition — one declaration, two renderings, so they can
+never drift from each other.
+
+Field types that must resolve to an official ``common_types.json`` shape
+(dynamic bindings, component-id references, child lists, actions) are
+declared with the small marker types below (:data:`ComponentId`,
+:data:`DynamicString`, ...) so the canonicaliser in ``catalog_export.py`` can
+recognise them by identity/equality rather than by pattern-matching rendered
+JSON Schema.
+"""
 
 from __future__ import annotations
 
+import functools
+import importlib.resources
+import json
 from collections.abc import Mapping
-from datetime import datetime
+from pathlib import Path
 from typing import Annotated, Any, Literal, cast
 
 from pydantic import (
@@ -11,19 +31,46 @@ from pydantic import (
     ConfigDict,
     Field,
     JsonValue,
-    RootModel,
-    StringConstraints,
     create_model,
     field_validator,
-    model_validator,
 )
 
-A2UI_WIRE_VERSION = "v0.9.1"
-A2UI_CATALOG_ID = "https://iowarp.ai/a2ui/catalogs/clio-workspace/v1"
+# Bounds shared with bounded_components.py's clio.map.v1 / clio.time-series.v1
+# / clio.workflow.v1 (and their catalog-render mirrors in catalog_bounded.py).
 MAX_MAP_POINTS = 500
 MAX_TIME_SERIES_ROWS = 10_000
 MAX_WORKFLOW_NODES = 128
 MAX_WORKFLOW_EDGES = 256
+
+#: The 3 CLIO-authored functions (see ``catalog_export.py::_render_workspace_functions``).
+#: Kept here, not just there, so the pydantic ``call`` validator below and the
+#: rendered catalog's function names can never drift apart.
+CLIO_FUNCTION_NAMES: frozenset[str] = frozenset({"openArtifact", "selectData", "focusWorkflow"})
+
+
+@functools.lru_cache(maxsize=1)
+def _known_function_names() -> frozenset[str]:
+    """Every function name a ``FunctionCall.call`` may reference.
+
+    The vendored Basic catalog's 14 functions (``required``, ``regex``,
+    ``formatString``, ...), read verbatim at call time — never hand-typed, so
+    it can't drift from ``catalog_export.py``'s copy of the same file — plus
+    :data:`CLIO_FUNCTION_NAMES`.
+    """
+
+    basic_path = Path(
+        str(
+            importlib.resources.files("clio_schemas")
+            / "schemas"
+            / "a2ui"
+            / "v0_9_1"
+            / "catalogs"
+            / "basic"
+            / "catalog.json"
+        )
+    )
+    basic = json.loads(basic_path.read_text(encoding="utf-8"))
+    return frozenset(basic["functions"]) | CLIO_FUNCTION_NAMES
 
 
 class _ClosedModel(BaseModel):
@@ -38,37 +85,61 @@ class _DataBinding(_ClosedModel):
     path: str
 
 
-class _FunctionCall(_ClosedModel):
-    """A typed client-side function invocation."""
+class _FunctionCallBase(_ClosedModel):
+    """Shared identity check for every FunctionCall shape: ``call`` must be known.
+
+    Mirrors what the catalog enforces via ``common_types.json``'s
+    ``FunctionCall.oneOf: [{"$ref": "catalog.json#/$defs/anyFunction"}]`` — an
+    unregistered function name is invalid on the wire, not just structurally
+    malformed, so the pydantic side must reject it too.
+    """
 
     call: str
+
+    @field_validator("call")
+    @classmethod
+    def _call_is_known(cls, value: str) -> str:
+        if value not in _known_function_names():
+            raise ValueError(
+                f"unknown function call {value!r}: not declared by any builtin catalog"
+            )
+        return value
+
+
+class _FunctionCall(_FunctionCallBase):
+    """A typed client-side function invocation."""
+
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["string", "number", "boolean", "array", "object", "any", "void"] = "boolean"
 
 
-class _StringFunctionCall(_ClosedModel):
-    call: str
+class _StringFunctionCall(_FunctionCallBase):
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["string"] = "string"
 
 
-class _NumberFunctionCall(_ClosedModel):
-    call: str
+class _NumberFunctionCall(_FunctionCallBase):
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["number"] = "number"
 
 
-class _BooleanFunctionCall(_ClosedModel):
-    call: str
+class _BooleanFunctionCall(_FunctionCallBase):
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["boolean"] = "boolean"
 
 
-class _ArrayFunctionCall(_ClosedModel):
-    call: str
+class _ArrayFunctionCall(_FunctionCallBase):
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["array"] = "array"
 
+
+# Component-id reference marker: a plain string on the wire, but a field
+# declared with this type is a *reference to another component's id*, which
+# the catalog canonicaliser renders as ``common_types.json#/$defs/ComponentId``
+# instead of a bare ``{"type": "string"}``. Plain ``str`` stays plain (e.g. a
+# severity string or a URI) — only fields declared with this marker get the
+# ComponentId treatment.
+ComponentId = Annotated[str, "a2ui:ComponentId"]
 
 DynamicString = str | _DataBinding | _StringFunctionCall
 DynamicNumber = float | _DataBinding | _NumberFunctionCall
@@ -87,11 +158,18 @@ class _Accessibility(_ClosedModel):
 class _ChildTemplate(_ClosedModel):
     """Template for generating repeated child components from bound data."""
 
-    componentId: str
+    componentId: ComponentId
     path: str
 
 
 ChildList = list[str] | _ChildTemplate
+
+
+class _IconSvgPath(_ClosedModel):
+    svgPath: str
+
+
+IconValue = str | _IconSvgPath | _DataBinding
 
 
 class _ServerEvent(_ClosedModel):
@@ -119,9 +197,12 @@ class _CheckRule(_ClosedModel):
     message: str
 
 
+Checks = list[_CheckRule]
+
+
 class _TabDefinition(_ClosedModel):
     title: DynamicString
-    child: str
+    child: ComponentId
 
 
 class _ChoiceOption(_ClosedModel):
@@ -140,16 +221,19 @@ class _CardAction(_ClosedModel):
     tone: Literal["default", "destructive"] | None = None
 
 
-class _IconSvgPath(_ClosedModel):
-    svgPath: str
-
-
 class _ComponentBase(_ClosedModel):
     """Fields shared by every trusted catalog component."""
 
     id: str
     accessibility: _Accessibility | None = None
     weight: float | None = None
+
+
+# component_name -> (required, optional) field-type declarations, populated
+# as a side effect of every :func:`_component_model` call. This is the single
+# declaration the catalog canonicaliser (``catalog_export.py``) renders from —
+# the same data that builds the pydantic model below it.
+COMPONENT_SPECS: dict[str, tuple[Mapping[str, Any], Mapping[str, Any]]] = {}
 
 
 def _component_model(
@@ -161,6 +245,7 @@ def _component_model(
 ) -> type[BaseModel]:
     """Create one closed component model from the canonical property declaration."""
 
+    COMPONENT_SPECS[component_name] = (dict(required or {}), dict(optional or {}))
     fields: dict[str, tuple[Any, Any]] = {
         "component": (Literal[component_name], component_name),
     }
@@ -181,7 +266,7 @@ TextComponent = _component_model(
 IconComponent = _component_model(
     "IconComponent",
     "Icon",
-    required={"name": str | _IconSvgPath | _DataBinding},
+    required={"name": IconValue},
 )
 ImageComponent = _component_model(
     "ImageComponent",
@@ -220,7 +305,7 @@ ColumnComponent = _component_model(
 GridComponent = _component_model(
     "GridComponent",
     "Grid",
-    required={"children": list[str]},
+    required={"children": list[ComponentId]},
     optional={"columns": int, "gap": float},
 )
 ListComponent = _component_model(
@@ -235,7 +320,7 @@ ListComponent = _component_model(
 FrameComponent = _component_model(
     "FrameComponent",
     "Frame",
-    required={"child": str},
+    required={"child": ComponentId},
     optional={"title": DynamicString, "description": DynamicString},
 )
 TabsComponent = _component_model(
@@ -244,7 +329,7 @@ TabsComponent = _component_model(
     required={"tabs": Annotated[list[_TabDefinition], Field(min_length=1)]},
 )
 ModalComponent = _component_model(
-    "ModalComponent", "Modal", required={"trigger": str, "content": str}
+    "ModalComponent", "Modal", required={"trigger": ComponentId, "content": ComponentId}
 )
 DividerComponent = _component_model(
     "DividerComponent", "Divider", optional={"axis": Literal["horizontal", "vertical"]}
@@ -252,17 +337,17 @@ DividerComponent = _component_model(
 ButtonComponent = _component_model(
     "ButtonComponent",
     "Button",
-    required={"child": str, "action": Action},
+    required={"child": ComponentId, "action": Action},
     optional={
         "variant": Literal["default", "primary", "borderless"],
-        "checks": list[_CheckRule],
+        "checks": Checks,
     },
 )
 CheckBoxComponent = _component_model(
     "CheckBoxComponent",
     "CheckBox",
     required={"label": DynamicString, "value": DynamicBoolean},
-    optional={"checks": list[_CheckRule]},
+    optional={"checks": Checks},
 )
 TextFieldComponent = _component_model(
     "TextFieldComponent",
@@ -272,7 +357,7 @@ TextFieldComponent = _component_model(
         "value": DynamicString,
         "variant": Literal["longText", "number", "shortText", "obscured"],
         "validationRegexp": str,
-        "checks": list[_CheckRule],
+        "checks": Checks,
     },
 )
 ChoicePickerComponent = _component_model(
@@ -284,14 +369,14 @@ ChoicePickerComponent = _component_model(
         "variant": Literal["multipleSelection", "mutuallyExclusive"],
         "displayStyle": Literal["checkbox", "chips"],
         "filterable": bool,
-        "checks": list[_CheckRule],
+        "checks": Checks,
     },
 )
 SliderComponent = _component_model(
     "SliderComponent",
     "Slider",
     required={"max": float, "value": DynamicNumber},
-    optional={"label": DynamicString, "min": float, "checks": list[_CheckRule]},
+    optional={"label": DynamicString, "min": float, "checks": Checks},
 )
 StatusComponent = _component_model(
     "StatusComponent",
@@ -376,194 +461,7 @@ ApprovalComponent = _component_model(
     },
 )
 
-
-class MapPoint(_ClosedModel):
-    """One bounded point in the interactive map component."""
-
-    id: Annotated[str, StringConstraints(min_length=1, max_length=128)]
-    label: Annotated[str, StringConstraints(min_length=1, max_length=240)]
-    latitude: float = Field(ge=-90, le=90, allow_inf_nan=False)
-    longitude: float = Field(ge=-180, le=180, allow_inf_nan=False)
-    detail: str | None = Field(default=None, max_length=2_000)
-    category: str | None = Field(default=None, max_length=120)
-
-
-class MapComponent(_ComponentBase):
-    """Interactive bounded geospatial component."""
-
-    component: Literal["clio.map.v1"] = "clio.map.v1"
-    title: DynamicString | None = None
-    points: list[MapPoint] = Field(min_length=1, max_length=MAX_MAP_POINTS)
-    selected: str | None = Field(default=None, max_length=128)
-    action: Action | None = None
-    actionLabel: DynamicString | None = None
-
-
-class TimeSeriesComponent(_ComponentBase):
-    """Inline or artifact-backed interactive time-series component."""
-
-    component: Literal["clio.time-series.v1"] = "clio.time-series.v1"
-    series: list[dict[str, str | float | int | None]] | None = Field(
-        default=None,
-        min_length=1,
-        max_length=MAX_TIME_SERIES_ROWS,
-    )
-    dataUri: str | None = Field(
-        default=None,
-        pattern=r"^artifact://artifact_[A-Za-z0-9_-]+$",
-    )
-    xKey: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
-    yKeys: list[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]] = Field(
-        min_length=1,
-        max_length=5,
-    )
-    title: DynamicString | None = None
-
-    @model_validator(mode="after")
-    def _validate_data_source_and_columns(self) -> TimeSeriesComponent:
-        if (self.series is None) == (self.dataUri is None):
-            raise ValueError("exactly one of series or dataUri is required")
-        if len(set(self.yKeys)) != len(self.yKeys):
-            raise ValueError("yKeys must contain distinct column names")
-        return self
-
-
-class WorkflowNode(_ClosedModel):
-    """One node in a bounded workflow graph."""
-
-    id: str
-    label: str
-    state: str | None = None
-    detail: str | None = None
-
-
-class WorkflowEdge(_ClosedModel):
-    """One directed relationship in a workflow graph."""
-
-    source: str
-    target: str
-    label: str | None = None
-
-
-class WorkflowComponent(_ComponentBase):
-    """Bounded interactive workflow topology."""
-
-    component: Literal["clio.workflow.v1"] = "clio.workflow.v1"
-    nodes: list[WorkflowNode] = Field(min_length=1, max_length=MAX_WORKFLOW_NODES)
-    edges: list[WorkflowEdge] = Field(max_length=MAX_WORKFLOW_EDGES)
-    selected: str | None = None
-    action: Action | None = None
-
-
-COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
-    TextComponent,
-    IconComponent,
-    ImageComponent,
-    RowComponent,
-    ColumnComponent,
-    GridComponent,
-    ListComponent,
-    FrameComponent,
-    TabsComponent,
-    ModalComponent,
-    DividerComponent,
-    ButtonComponent,
-    CheckBoxComponent,
-    TextFieldComponent,
-    ChoicePickerComponent,
-    SliderComponent,
-    StatusComponent,
-    MetricComponent,
-    ProgressComponent,
-    CalloutComponent,
-    DataTableComponent,
-    TimeSeriesComponent,
-    MermaidComponent,
-    MapComponent,
-    WorkflowComponent,
-    ArtifactComponent,
-    CodeComponent,
-    DiffComponent,
-    ActionCardComponent,
-    ApprovalComponent,
-)
-
-A2UIComponentValue = Annotated[
-    TextComponent
-    | IconComponent
-    | ImageComponent
-    | RowComponent
-    | ColumnComponent
-    | GridComponent
-    | ListComponent
-    | FrameComponent
-    | TabsComponent
-    | ModalComponent
-    | DividerComponent
-    | ButtonComponent
-    | CheckBoxComponent
-    | TextFieldComponent
-    | ChoicePickerComponent
-    | SliderComponent
-    | StatusComponent
-    | MetricComponent
-    | ProgressComponent
-    | CalloutComponent
-    | DataTableComponent
-    | TimeSeriesComponent
-    | MermaidComponent
-    | MapComponent
-    | WorkflowComponent
-    | ArtifactComponent
-    | CodeComponent
-    | DiffComponent
-    | ActionCardComponent
-    | ApprovalComponent,
-    Field(discriminator="component"),
-]
-
-
-class A2UIComponent(RootModel[A2UIComponentValue]):
-    """Closed union of every trusted A2UI 0.9.1 catalog component."""
-
-
-class A2UIClientAction(BaseModel):
-    """Known client-action fields with tolerated protocol extensions."""
-
-    model_config = ConfigDict(extra="allow", strict=True, frozen=True)
-
-    name: Literal[
-        "agent.submit",
-        "approval.respond",
-        "form.submit",
-        "run.retry",
-        "run.cancel",
-    ]
-    surfaceId: str
-    sourceComponentId: str = Field(min_length=1)
-    timestamp: str
-    context: dict[str, Any]
-
-    @field_validator("timestamp")
-    @classmethod
-    def _validate_timestamp(cls, value: str) -> str:
-        try:
-            datetime.fromisoformat(value.replace("Z", "+00:00"))
-        except ValueError as exc:
-            raise ValueError("timestamp must be ISO 8601") from exc
-        return value
-
-
-class A2UIClientActionMessage(BaseModel):
-    """Official 0.9.1 client action envelope with extension-key tolerance."""
-
-    model_config = ConfigDict(extra="allow", strict=True, frozen=True)
-
-    version: Literal["v0.9.1"]
-    action: A2UIClientAction
-
-
-def trusted_component_names() -> tuple[str, ...]:
-    """Return the canonical trusted component names in catalog order."""
-
-    return tuple(model.model_fields["component"].default for model in COMPONENT_MODELS)
+# The three bounded/cross-field-validated components (clio.map.v1,
+# clio.time-series.v1, clio.workflow.v1) are not built through
+# `_component_model` — see bounded_components.py — but COMPONENT_MODELS
+# there is the single list consumers should import.

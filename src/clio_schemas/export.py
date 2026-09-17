@@ -40,6 +40,7 @@ from pathlib import Path
 from pydantic import BaseModel
 from pydantic.json_schema import models_json_schema
 
+from clio_schemas.a2ui.catalog_export import render_a2ui_catalog_bundle
 from clio_schemas.constants import (
     AGGREGATE_FILENAME,
     HASH_ALGORITHM,
@@ -47,6 +48,13 @@ from clio_schemas.constants import (
     LOCKED_PYDANTIC_VERSION,
 )
 from clio_schemas.models import EXPORTED_MODELS
+
+#: Directory (relative to the package schema root) holding the CLIO builtin
+#: A2UI catalog tree — JSON *and* Markdown files, unlike the flat per-model
+#: schemas. Kept distinct from the vendored ``a2ui/v0_9_1/**`` tree, which is
+#: tracked by its own ``SOURCE.json`` manifest (``scripts/vendor_a2ui_spec.py``),
+#: never by ``HASHES.json``.
+_A2UI_CATALOGS_DIRNAME = "a2ui/catalogs"
 
 __all__ = [
     "AGGREGATE_FILENAME",
@@ -155,9 +163,17 @@ def render_hashes(rendered: dict[str, str]) -> str:
 def render_bundle(
     models: tuple[type[BaseModel], ...] = EXPORTED_MODELS,
 ) -> dict[str, str]:
-    """Render the complete committed set: schemas + HASHES.json."""
+    """Render the complete committed set: model schemas + the a2ui catalog tree + HASHES.json.
+
+    The a2ui catalog tree (``a2ui/catalogs/**`` — CLIO's builtin catalog
+    files, sidecars, and instructions) is a second kind of committed
+    artifact alongside the flat per-model schemas: both are rendered
+    deterministically, both are covered by the same ``HASHES.json``, keyed
+    by their path relative to the schema root.
+    """
 
     rendered = render_all(models)
+    rendered.update(render_a2ui_catalog_bundle())
     bundle = dict(rendered)
     bundle[HASHES_FILENAME] = render_hashes(rendered)
     return bundle
@@ -172,8 +188,32 @@ def package_schema_dir() -> Path:
     return Path(str(importlib.resources.files("clio_schemas") / "schemas"))
 
 
+def _iter_tracked_files(root: Path) -> set[str]:
+    """Every relative path this export pipeline renders/verifies under ``root``.
+
+    Flat ``*.json`` directly under ``root`` (the per-model schemas +
+    ``HASHES.json``), plus every ``*.json``/``*.md`` under
+    ``a2ui/catalogs/`` (CLIO's builtin catalog tree). Deliberately excludes
+    the vendored ``a2ui/v0_9_1/**`` tree and ``a2ui/LICENSE``/``NOTICE`` —
+    those are tracked by their own ``SOURCE.json`` manifest
+    (``scripts/vendor_a2ui_spec.py``), never by this one.
+    """
+
+    if not root.is_dir():
+        return set()
+    names = {path.name for path in root.glob("*.json")}
+    catalogs_dir = root / _A2UI_CATALOGS_DIRNAME
+    if catalogs_dir.is_dir():
+        names.update(
+            path.relative_to(root).as_posix()
+            for path in catalogs_dir.rglob("*")
+            if path.is_file() and path.suffix in (".json", ".md")
+        )
+    return names
+
+
 def read_committed() -> dict[str, str]:
-    """Read every committed ``.json`` schema resource as ``{filename: content}``."""
+    """Read every committed resource this pipeline tracks (see :func:`_iter_tracked_files`)."""
 
     schema_dir = package_schema_dir()
     if not schema_dir.is_dir():
@@ -182,29 +222,34 @@ def read_committed() -> dict[str, str]:
             "`python -m clio_schemas.export --regenerate`"
         )
     return {
-        path.name: path.read_text(encoding="utf-8") for path in sorted(schema_dir.glob("*.json"))
+        name: (schema_dir / name).read_bytes().decode("utf-8")
+        for name in sorted(_iter_tracked_files(schema_dir))
     }
 
 
 def _write_dir(out_dir: Path, files: dict[str, str]) -> list[Path]:
+    # newline="" disables platform newline translation (e.g. \n -> \r\n on
+    # Windows) so every committed file is byte-identical LF regardless of
+    # the platform that rendered it.
     out_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
     for name, content in sorted(files.items()):
         path = out_dir / name
-        path.write_text(content, encoding="utf-8")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8", newline="")
         written.append(path)
     return written
 
 
 def _diff_dirs(expected: dict[str, str], actual_dir: Path) -> list[str]:
-    """Compare an on-disk directory of ``.json`` files against ``expected``.
+    """Compare an on-disk directory of tracked files against ``expected``.
 
     Reports missing, unexpected (extra/untracked), and stale (content-mismatch)
     files — exact file-set + byte equality.
     """
 
     problems: list[str] = []
-    actual_names = {p.name for p in actual_dir.glob("*.json")} if actual_dir.is_dir() else set()
+    actual_names = _iter_tracked_files(actual_dir)
     expected_names = set(expected)
 
     for name in sorted(expected_names - actual_names):
@@ -212,7 +257,7 @@ def _diff_dirs(expected: dict[str, str], actual_dir: Path) -> list[str]:
     for name in sorted(actual_names - expected_names):
         problems.append(f"unexpected: {name} (not a canonical schema file)")
     for name in sorted(expected_names & actual_names):
-        if (actual_dir / name).read_text(encoding="utf-8") != expected[name]:
+        if (actual_dir / name).read_bytes().decode("utf-8") != expected[name]:
             problems.append(f"stale: {name} (does not match committed bytes)")
     return problems
 
@@ -260,12 +305,11 @@ def do_regenerate() -> int:
     _require_locked_pydantic()
     bundle = render_bundle()
     schema_dir = package_schema_dir()
-    # Remove orphaned committed files no longer produced by the models.
-    if schema_dir.is_dir():
-        for path in schema_dir.glob("*.json"):
-            if path.name not in bundle:
-                path.unlink()
-                print(f"removed orphan {path}")
+    # Remove orphaned committed files no longer produced by the models/catalogs.
+    for name in sorted(_iter_tracked_files(schema_dir) - set(bundle)):
+        path = schema_dir / name
+        path.unlink()
+        print(f"removed orphan {path}")
     for path in _write_dir(schema_dir, bundle):
         print(f"wrote {path}")
     return 0

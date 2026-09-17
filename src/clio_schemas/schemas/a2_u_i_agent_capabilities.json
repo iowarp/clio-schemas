@@ -1,0 +1,35 @@
+{
+  "$defs": {
+    "_AgentCapabilitiesV09": {
+      "additionalProperties": true,
+      "properties": {
+        "acceptsInlineCatalogs": {
+          "default": false,
+          "title": "Acceptsinlinecatalogs",
+          "type": "boolean"
+        },
+        "supportedCatalogIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supportedcatalogids",
+          "type": "array"
+        }
+      },
+      "title": "_AgentCapabilitiesV09",
+      "type": "object"
+    }
+  },
+  "additionalProperties": true,
+  "description": "The server/agent capabilities object, advertised e.g. in an Agent Card.",
+  "properties": {
+    "v0.9": {
+      "$ref": "#/$defs/_AgentCapabilitiesV09"
+    }
+  },
+  "required": [
+    "v0.9"
+  ],
+  "title": "A2UIAgentCapabilities",
+  "type": "object"
+}

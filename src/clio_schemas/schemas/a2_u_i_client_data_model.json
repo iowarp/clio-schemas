@@ -1,0 +1,33 @@
+{
+  "$defs": {
+    "JsonValue": {}
+  },
+  "additionalProperties": false,
+  "description": "The ``a2uiClientDataModel`` A2A metadata object a client may attach.\n\n``surfaces`` is required (``required: [\"version\", \"surfaces\"]`` in the\nvendored ``client_data_model.json``) — an empty ``{}`` is a valid value,\nbut the key must be present.",
+  "properties": {
+    "surfaces": {
+      "additionalProperties": {
+        "additionalProperties": {
+          "$ref": "#/$defs/JsonValue"
+        },
+        "type": "object"
+      },
+      "title": "Surfaces",
+      "type": "object"
+    },
+    "version": {
+      "enum": [
+        "v0.9",
+        "v0.9.1"
+      ],
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "surfaces"
+  ],
+  "title": "A2UIClientDataModel",
+  "type": "object"
+}

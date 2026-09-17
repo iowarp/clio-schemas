@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "_EventRoute": {
+      "additionalProperties": false,
+      "description": "Where one client action name routes, beyond the default agent lane.",
+      "properties": {
+        "context_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Schema"
+        },
+        "destination": {
+          "default": "agent",
+          "enum": [
+            "agent",
+            "permission",
+            "run"
+          ],
+          "title": "Destination",
+          "type": "string"
+        }
+      },
+      "title": "_EventRoute",
+      "type": "object"
+    },
+    "_Implementation": {
+      "additionalProperties": false,
+      "description": "Which renderer kernel implements one catalog component.",
+      "properties": {
+        "kernel": {
+          "title": "Kernel",
+          "type": "string"
+        },
+        "presets": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Presets"
+        }
+      },
+      "required": [
+        "kernel"
+      ],
+      "title": "_Implementation",
+      "type": "object"
+    },
+    "_Trust": {
+      "additionalProperties": false,
+      "description": "Where a catalog came from, for permission/provenance gating.",
+      "properties": {
+        "source": {
+          "enum": [
+            "builtin",
+            "pack"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "title": "_Trust",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "CLIO packaging metadata for one catalog. Never sent on the A2UI wire.",
+  "properties": {
+    "catalogId": {
+      "title": "Catalogid",
+      "type": "string"
+    },
+    "events": {
+      "additionalProperties": {
+        "$ref": "#/$defs/_EventRoute"
+      },
+      "title": "Events",
+      "type": "object"
+    },
+    "implements": {
+      "additionalProperties": {
+        "$ref": "#/$defs/_Implementation"
+      },
+      "title": "Implements",
+      "type": "object"
+    },
+    "instructions": {
+      "default": "instructions.md",
+      "title": "Instructions",
+      "type": "string"
+    },
+    "protocolVersion": {
+      "const": "0.9.1",
+      "title": "Protocolversion",
+      "type": "string"
+    },
+    "trust": {
+      "$ref": "#/$defs/_Trust"
+    }
+  },
+  "required": [
+    "catalogId",
+    "protocolVersion",
+    "trust"
+  ],
+  "title": "CatalogSidecar",
+  "type": "object"
+}

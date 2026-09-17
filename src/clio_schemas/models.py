@@ -19,7 +19,11 @@ from pydantic import (
     field_validator,
 )
 
-from clio_schemas.a2ui_v091 import A2UIClientActionMessage, A2UIComponent
+from clio_schemas.a2ui.sidecar import CatalogSidecar
+from clio_schemas.a2ui.v0_9_1.capabilities import A2UIAgentCapabilities, A2UIClientCapabilities
+from clio_schemas.a2ui.v0_9_1.catalog_file import CatalogFile
+from clio_schemas.a2ui.v0_9_1.data_model import A2UIClientDataModel
+from clio_schemas.a2ui.v0_9_1.messages import A2UIClientMessage, A2UIServerMessage
 from clio_schemas.gact_v3 import MessageBlock
 
 
@@ -459,10 +463,15 @@ class TransformRecord(LegacyToleranceBase):
 
 # The registry the exporter iterates. Keep it alphabetical by class name.
 EXPORTED_MODELS: tuple[type[BaseModel], ...] = (
-    A2UIClientActionMessage,
-    A2UIComponent,
+    A2UIAgentCapabilities,
+    A2UIClientCapabilities,
+    A2UIClientDataModel,
+    A2UIClientMessage,
+    A2UIServerMessage,
     ArtifactRecord,
     ArtifactVersion,
+    CatalogFile,
+    CatalogSidecar,
     EnvironmentRecord,
     IdentityEvidence,
     Instrument,

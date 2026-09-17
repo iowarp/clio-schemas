@@ -3,7 +3,8 @@
 **The single source of truth for the record shapes shared across the CLIO
 system.** `clio-agent`, `clio-relay`, and `gact-tui` all speak the same wire
 records — artifact versions/chains, transform provenance records, the closed GACT 0.3
-message-block union, and the trusted A2UI 0.9.1 component/action catalog. Historically
+message-block union, and the official A2UI 0.9.1 protocol shapes (envelopes,
+capabilities, catalog files). Historically
 each service hand-wrote its own copy of these types and
 they drifted. This package makes the shapes canonical: they are defined once as
 [pydantic](https://docs.pydantic.dev/) v2 models here and exported to JSON
@@ -11,9 +12,15 @@ Schema. Python consumers import the models; TypeScript consumers **generate**
 types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
-> **Status: canonical records and live UI vocabularies (version 0.2.3).**
+> **Status: canonical records, live UI vocabularies, and A2UI 0.9.1 catalog
+> files (version 0.3.0).**
 > `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 13 GACT 0.3
-> message blocks, and the A2UI 0.9.1 catalog/action envelopes are canonical.
+> message blocks, the official A2UI 0.9.1 envelope/capability/catalog-file models, and
+> the two builtin catalog files (`clio-workspace`'s 30 CLIO components, the vendored
+> `basic` catalog) are canonical. There is no closed component/action Python union
+> anymore — a catalog is a JSON Schema document, validated with
+> `clio_schemas.a2ui.validation` (`jsonschema` + `referencing`), not a pydantic
+> discriminated union.
 
 ---
 
@@ -43,12 +50,24 @@ clio-schemas/
 │   ├── models.py                      # canonical models + ClioSchemaBase + registry
 │   ├── export.py                      # copy / check / regenerate / verify
 │   ├── py.typed                       # ships type information
+│   ├── a2ui/                          # A2UI 0.9.1: official shapes + catalog rendering
+│   │   ├── v0_9_1/                    #   messages, capabilities, data model, catalog file,
+│   │   │                              #   the 30 CLIO component models (components.py /
+│   │   │                              #   bounded_components.py)
+│   │   ├── sidecar.py                 #   CLIO catalog packaging metadata (never on the wire)
+│   │   ├── validation.py              #   jsonschema + referencing validators
+│   │   ├── catalog_render.py          #   canonicaliser: pydantic spec -> official JSON Schema
+│   │   ├── catalog_bounded.py         #   hand-authored map/time-series/workflow definitions
+│   │   └── catalog_export.py          #   assembles + renders a2ui/catalogs/**
 │   └── schemas/                       # COMMITTED immutable artifacts (in the wheel)
 │       ├── artifact_version.json      #   per-model, self-contained
 │       ├── artifact_record.json       #   per-model, self-contained
 │       ├── transform_record.json      #   plus provenance/value model schemas
 │       ├── index.json                 #   aggregate: shared $defs emitted once
-│       └── HASHES.json                #   canonical sha256 manifest
+│       ├── HASHES.json                #   canonical sha256 manifest (covers a2ui/catalogs/** too)
+│       └── a2ui/
+│           ├── v0_9_1/                #   VENDORED spec + basic catalog (SOURCE.json-tracked)
+│           └── catalogs/              #   RENDERED: clio-workspace/v1 + basic sidecars
 ├── tools/ts-gen/
 │   ├── schemas-to-ts.mjs              # JSON Schema dir -> TS module graph (deterministic)
 │   ├── tsconfig.check.json            # isolated strict typecheck of generated TS

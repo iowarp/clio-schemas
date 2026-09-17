@@ -1,0 +1,147 @@
+{
+  "$defs": {
+    "FunctionDefinition": {
+      "additionalProperties": false,
+      "description": "Interface metadata for one function in an *inline* catalog.\n\nMatches ``client_capabilities.json#/$defs/FunctionDefinition`` verbatim.\nNot used by :class:`CatalogFile` — see the module docstring.",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "returnType": {
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "array",
+            "object",
+            "any",
+            "void"
+          ],
+          "title": "Returntype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "parameters",
+        "returnType"
+      ],
+      "title": "FunctionDefinition",
+      "type": "object"
+    },
+    "InlineCatalog": {
+      "additionalProperties": false,
+      "description": "One inline catalog a client bundles into its declared capabilities.\n\nMatches ``client_capabilities.json#/$defs/Catalog``. Only sent when the\nserver declares ``acceptsInlineCatalogs: true``.",
+      "properties": {
+        "catalogId": {
+          "title": "Catalogid",
+          "type": "string"
+        },
+        "components": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Components",
+          "type": "object"
+        },
+        "functions": {
+          "items": {
+            "$ref": "#/$defs/FunctionDefinition"
+          },
+          "title": "Functions",
+          "type": "array"
+        },
+        "theme": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Theme",
+          "type": "object"
+        }
+      },
+      "required": [
+        "catalogId"
+      ],
+      "title": "InlineCatalog",
+      "type": "object"
+    },
+    "_ClientCapabilitiesV09": {
+      "additionalProperties": true,
+      "properties": {
+        "inlineCatalogs": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/InlineCatalog"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inlinecatalogs"
+        },
+        "supportedCatalogIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supportedcatalogids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "supportedCatalogIds"
+      ],
+      "title": "_ClientCapabilitiesV09",
+      "type": "object"
+    }
+  },
+  "additionalProperties": true,
+  "description": "The ``a2uiClientCapabilities`` A2A metadata object a client sends.",
+  "properties": {
+    "v0.9": {
+      "$ref": "#/$defs/_ClientCapabilitiesV09"
+    }
+  },
+  "required": [
+    "v0.9"
+  ],
+  "title": "A2UIClientCapabilities",
+  "type": "object"
+}

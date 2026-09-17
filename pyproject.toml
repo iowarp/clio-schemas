@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "clio-schemas"
-version = "0.2.3"
+version = "0.3.0"
 description = "Canonical shared record schemas (pydantic v2) for clio-agent, clio-relay, and gact-tui."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -18,6 +18,8 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.7,<3",
+    "jsonschema[format]>=4.23",
+    "referencing>=0.35",
 ]
 
 [project.urls]

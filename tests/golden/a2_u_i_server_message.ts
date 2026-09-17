@@ -6,6 +6,10 @@
  */
 
 export type {
-  A2UIClientAction,
-  A2UIClientActionMessage
+  A2UIServerMessage,
+  CreateSurfacePayload,
+  DeleteSurfacePayload,
+  JsonValue,
+  UpdateComponentsPayload,
+  UpdateDataModelPayload
 } from "./_models";
