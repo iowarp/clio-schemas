@@ -90,18 +90,36 @@ def _render_workspace_functions() -> dict[str, Any]:
 
 
 def render_workspace_catalog() -> dict[str, Any]:
-    """Render the ``clio-workspace`` catalog file: all 30 CLIO components."""
+    """Render the ``clio-workspace`` catalog file: all 30 CLIO components.
+
+    ``$defs.theme`` and the 14 Basic ``functions`` (``required``, ``regex``,
+    ``formatString``, ...) are copied VERBATIM from the vendored Basic
+    catalog at render time, never hand-typed: ``server_to_client.json``'s
+    ``createSurface.theme`` and ``common_types.json``'s ``FunctionCall``
+    both ``$ref`` ``catalog.json#/$defs/theme`` /
+    ``catalog.json#/$defs/anyFunction`` for WHICHEVER catalog is aliased —
+    without these, a themed ``createSurface`` can't resolve ``$defs/theme``
+    against this catalog, and every ``Checkable``/dynamic-value function call
+    (``checks[].condition``, ``formatString`` inside a ``DynamicString``,
+    ...) is unsatisfiable even though the pydantic generator still accepts
+    it. The 3 CLIO functions (``openArtifact``/``selectData``/
+    ``focusWorkflow``) are added alongside them, in the same call-schema
+    style.
+    """
 
     components, defs = render_factory_components()
     hand_components, hand_defs = hand_authored_components()
     components.update(hand_components)
     defs.update(hand_defs)
 
+    basic_catalog = _load_basic_catalog()
+    defs["theme"] = basic_catalog["$defs"]["theme"]
+
     defs["anyComponent"] = {
         "oneOf": [{"$ref": f"#/components/{name}"} for name in sorted(components)],
         "discriminator": {"propertyName": "component"},
     }
-    functions = _render_workspace_functions()
+    functions = {**basic_catalog["functions"], **_render_workspace_functions()}
     defs["anyFunction"] = {"oneOf": [{"$ref": f"#/functions/{name}"} for name in sorted(functions)]}
 
     catalog: dict[str, Any] = {

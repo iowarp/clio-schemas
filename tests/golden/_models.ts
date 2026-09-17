@@ -337,20 +337,24 @@ export interface ClioSchemaRegistry {
  */
 export interface A2UIAgentCapabilities {
   "v0.9": _AgentCapabilitiesV09;
+  [k: string]: unknown | undefined;
 }
 export interface _AgentCapabilitiesV09 {
   acceptsInlineCatalogs?: Acceptsinlinecatalogs;
   supportedCatalogIds?: Supportedcatalogids;
+  [k: string]: unknown | undefined;
 }
 /**
  * The ``a2uiClientCapabilities`` A2A metadata object a client sends.
  */
 export interface A2UIClientCapabilities {
   "v0.9": _ClientCapabilitiesV09;
+  [k: string]: unknown | undefined;
 }
 export interface _ClientCapabilitiesV09 {
   inlineCatalogs?: Inlinecatalogs;
   supportedCatalogIds: Supportedcatalogids1;
+  [k: string]: unknown | undefined;
 }
 /**
  * One inline catalog a client bundles into its declared capabilities.
@@ -366,9 +370,12 @@ export interface InlineCatalog {
 }
 export interface Components {
   [k: string]:
-    | {
-        [k: string]: unknown | undefined;
-      }
+    | (
+        | {
+            [k: string]: unknown | undefined;
+          }
+        | boolean
+      )
     | undefined;
 }
 /**
@@ -388,16 +395,23 @@ export interface Parameters {
 }
 export interface Theme {
   [k: string]:
-    | {
-        [k: string]: unknown | undefined;
-      }
+    | (
+        | {
+            [k: string]: unknown | undefined;
+          }
+        | boolean
+      )
     | undefined;
 }
 /**
  * The ``a2uiClientDataModel`` A2A metadata object a client may attach.
+ *
+ * ``surfaces`` is required (``required: ["version", "surfaces"]`` in the
+ * vendored ``client_data_model.json``) — an empty ``{}`` is a valid value,
+ * but the key must be present.
  */
 export interface A2UIClientDataModel {
-  surfaces?: Surfaces;
+  surfaces: Surfaces;
   version: Version;
 }
 export interface Surfaces {

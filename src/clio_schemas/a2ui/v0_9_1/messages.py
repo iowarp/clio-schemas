@@ -13,13 +13,31 @@ by a closed pydantic union.
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    JsonValue,
+    SerializerFunctionWrapHandler,
+    model_serializer,
+    model_validator,
+)
 
 A2UI_PROTOCOL_VERSIONS = ("v0.9", "v0.9.1")
 _ProtocolVersion = Literal["v0.9", "v0.9.1"]
+
+#: RFC 3339 ``date-time`` (the vendored ``client_to_server.json``'s
+#: ``action.timestamp`` declares ``"format": "date-time"``, not just any ISO
+#: 8601 string — a bare date like ``"2026-01-01"`` is valid ISO 8601 but not
+#: a valid RFC 3339 date-time, so ``datetime.fromisoformat`` alone is too
+#: lenient).
+_RFC3339_DATE_TIME = re.compile(
+    r"^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$"
+)
 
 
 class _ServerOpBase(BaseModel):
@@ -71,6 +89,20 @@ class UpdateDataModelPayload(_ServerOpBase):
 
         return "value" in self.model_fields_set
 
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        """Drop ``value`` from the dump when it was never set — wire-valid delete semantics.
+
+        Without this, ``model_dump()``/``model_dump_json()`` would emit
+        ``"value": null`` for an omitted value, which the wire schema reads
+        as "replace with null", not "delete the key at path".
+        """
+
+        data = handler(self)
+        if not self.value_provided:
+            data.pop("value", None)
+        return data
+
 
 class DeleteSurfacePayload(_ServerOpBase):
     """``deleteSurface``: remove a previously created surface."""
@@ -89,6 +121,8 @@ class A2UIServerMessage(BaseModel):
     updateDataModel: UpdateDataModelPayload | None = None
     deleteSurface: DeleteSurfacePayload | None = None
 
+    _OP_FIELDS = ("createSurface", "updateComponents", "updateDataModel", "deleteSurface")
+
     @model_validator(mode="after")
     def _exactly_one_operation(self) -> A2UIServerMessage:
         ops = (self.createSurface, self.updateComponents, self.updateDataModel, self.deleteSurface)
@@ -98,6 +132,22 @@ class A2UIServerMessage(BaseModel):
                 "deleteSurface is required"
             )
         return self
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        """Emit only ``version`` and the one present operation key.
+
+        Without this, ``model_dump()``/``model_dump_json()`` would emit the
+        three absent operations as ``null``, which is not a valid
+        ``server_to_client.json`` message (it declares ``additionalProperties:
+        false`` with exactly one operation key required alongside ``version``).
+        """
+
+        data = handler(self)
+        for key in self._OP_FIELDS:
+            if data.get(key) is None:
+                data.pop(key, None)
+        return data
 
 
 class A2UIClientAction(BaseModel):
@@ -117,10 +167,18 @@ class A2UIClientAction(BaseModel):
 
     @model_validator(mode="after")
     def _validate_timestamp(self) -> A2UIClientAction:
+        if not _RFC3339_DATE_TIME.match(self.timestamp):
+            raise ValueError(
+                "timestamp must be an RFC 3339 date-time (e.g. 2026-01-01T00:00:00Z), "
+                "not a bare date"
+            )
+        normalized = self.timestamp
+        if normalized.endswith(("Z", "z")):
+            normalized = normalized[:-1] + "+00:00"
         try:
-            datetime.fromisoformat(self.timestamp.replace("Z", "+00:00"))
+            datetime.fromisoformat(normalized)
         except ValueError as exc:
-            raise ValueError("timestamp must be ISO 8601") from exc
+            raise ValueError("timestamp must be a valid RFC 3339 date-time") from exc
         return self
 
 

@@ -19,7 +19,11 @@ JSON Schema.
 
 from __future__ import annotations
 
+import functools
+import importlib.resources
+import json
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Annotated, Any, Literal, cast
 
 from pydantic import (
@@ -28,6 +32,7 @@ from pydantic import (
     Field,
     JsonValue,
     create_model,
+    field_validator,
 )
 
 # Bounds shared with bounded_components.py's clio.map.v1 / clio.time-series.v1
@@ -36,6 +41,36 @@ MAX_MAP_POINTS = 500
 MAX_TIME_SERIES_ROWS = 10_000
 MAX_WORKFLOW_NODES = 128
 MAX_WORKFLOW_EDGES = 256
+
+#: The 3 CLIO-authored functions (see ``catalog_export.py::_render_workspace_functions``).
+#: Kept here, not just there, so the pydantic ``call`` validator below and the
+#: rendered catalog's function names can never drift apart.
+CLIO_FUNCTION_NAMES: frozenset[str] = frozenset({"openArtifact", "selectData", "focusWorkflow"})
+
+
+@functools.lru_cache(maxsize=1)
+def _known_function_names() -> frozenset[str]:
+    """Every function name a ``FunctionCall.call`` may reference.
+
+    The vendored Basic catalog's 14 functions (``required``, ``regex``,
+    ``formatString``, ...), read verbatim at call time — never hand-typed, so
+    it can't drift from ``catalog_export.py``'s copy of the same file — plus
+    :data:`CLIO_FUNCTION_NAMES`.
+    """
+
+    basic_path = Path(
+        str(
+            importlib.resources.files("clio_schemas")
+            / "schemas"
+            / "a2ui"
+            / "v0_9_1"
+            / "catalogs"
+            / "basic"
+            / "catalog.json"
+        )
+    )
+    basic = json.loads(basic_path.read_text(encoding="utf-8"))
+    return frozenset(basic["functions"]) | CLIO_FUNCTION_NAMES
 
 
 class _ClosedModel(BaseModel):
@@ -50,34 +85,50 @@ class _DataBinding(_ClosedModel):
     path: str
 
 
-class _FunctionCall(_ClosedModel):
-    """A typed client-side function invocation."""
+class _FunctionCallBase(_ClosedModel):
+    """Shared identity check for every FunctionCall shape: ``call`` must be known.
+
+    Mirrors what the catalog enforces via ``common_types.json``'s
+    ``FunctionCall.oneOf: [{"$ref": "catalog.json#/$defs/anyFunction"}]`` — an
+    unregistered function name is invalid on the wire, not just structurally
+    malformed, so the pydantic side must reject it too.
+    """
 
     call: str
+
+    @field_validator("call")
+    @classmethod
+    def _call_is_known(cls, value: str) -> str:
+        if value not in _known_function_names():
+            raise ValueError(
+                f"unknown function call {value!r}: not declared by any builtin catalog"
+            )
+        return value
+
+
+class _FunctionCall(_FunctionCallBase):
+    """A typed client-side function invocation."""
+
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["string", "number", "boolean", "array", "object", "any", "void"] = "boolean"
 
 
-class _StringFunctionCall(_ClosedModel):
-    call: str
+class _StringFunctionCall(_FunctionCallBase):
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["string"] = "string"
 
 
-class _NumberFunctionCall(_ClosedModel):
-    call: str
+class _NumberFunctionCall(_FunctionCallBase):
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["number"] = "number"
 
 
-class _BooleanFunctionCall(_ClosedModel):
-    call: str
+class _BooleanFunctionCall(_FunctionCallBase):
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["boolean"] = "boolean"
 
 
-class _ArrayFunctionCall(_ClosedModel):
-    call: str
+class _ArrayFunctionCall(_FunctionCallBase):
     args: dict[str, JsonValue] = Field(default_factory=dict)
     returnType: Literal["array"] = "array"
 

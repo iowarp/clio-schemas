@@ -273,15 +273,77 @@
     "anyFunction": {
       "oneOf": [
         {
+          "$ref": "#/functions/and"
+        },
+        {
+          "$ref": "#/functions/email"
+        },
+        {
           "$ref": "#/functions/focusWorkflow"
+        },
+        {
+          "$ref": "#/functions/formatCurrency"
+        },
+        {
+          "$ref": "#/functions/formatDate"
+        },
+        {
+          "$ref": "#/functions/formatNumber"
+        },
+        {
+          "$ref": "#/functions/formatString"
+        },
+        {
+          "$ref": "#/functions/length"
+        },
+        {
+          "$ref": "#/functions/not"
+        },
+        {
+          "$ref": "#/functions/numeric"
         },
         {
           "$ref": "#/functions/openArtifact"
         },
         {
+          "$ref": "#/functions/openUrl"
+        },
+        {
+          "$ref": "#/functions/or"
+        },
+        {
+          "$ref": "#/functions/pluralize"
+        },
+        {
+          "$ref": "#/functions/regex"
+        },
+        {
+          "$ref": "#/functions/required"
+        },
+        {
           "$ref": "#/functions/selectData"
         }
       ]
+    },
+    "theme": {
+      "additionalProperties": true,
+      "properties": {
+        "agentDisplayName": {
+          "description": "Text to be displayed next to the surface to identify the agent or tool that created it.",
+          "type": "string"
+        },
+        "iconUrl": {
+          "description": "A URL for an image that identifies the agent or tool associated with the surface.",
+          "format": "uri",
+          "type": "string"
+        },
+        "primaryColor": {
+          "description": "The primary brand color used for highlights (e.g., primary buttons, active borders). Renderers may generate variants of this color for different contexts. Format: Hexadecimal code (e.g., '#00BFFF').",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        }
+      },
+      "type": "object"
     }
   },
   "$id": "https://iowarp.ai/a2ui/catalogs/clio-workspace/v1",
@@ -1431,6 +1493,13 @@
             },
             "series": {
               "items": {
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "null"
+                  ]
+                },
                 "type": "object"
               },
               "maxItems": 10000,
@@ -1442,16 +1511,19 @@
             },
             "xKey": {
               "minLength": 1,
+              "pattern": "\\S",
               "type": "string"
             },
             "yKeys": {
               "items": {
                 "minLength": 1,
+                "pattern": "\\S",
                 "type": "string"
               },
               "maxItems": 5,
               "minItems": 1,
-              "type": "array"
+              "type": "array",
+              "uniqueItems": true
             }
           },
           "required": [
@@ -1541,6 +1613,69 @@
   },
   "description": "The 30 CLIO scientific-agent A2UI 0.9.1 components, in official catalog-file style.",
   "functions": {
+    "and": {
+      "description": "Performs a logical AND operation on a list of boolean values.",
+      "properties": {
+        "args": {
+          "properties": {
+            "values": {
+              "description": "The list of boolean values to evaluate.",
+              "items": {
+                "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicBoolean"
+              },
+              "minItems": 2,
+              "type": "array"
+            }
+          },
+          "required": [
+            "values"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "and"
+        },
+        "returnType": {
+          "const": "boolean"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "email": {
+      "description": "Checks that the value is a valid email address.",
+      "properties": {
+        "args": {
+          "properties": {
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "email"
+        },
+        "returnType": {
+          "const": "boolean"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
     "focusWorkflow": {
       "description": "Focuses one node of a clio.workflow.v1 component.",
       "properties": {
@@ -1571,6 +1706,281 @@
       "type": "object",
       "unevaluatedProperties": false
     },
+    "formatCurrency": {
+      "description": "Formats a number as a currency string.",
+      "properties": {
+        "args": {
+          "properties": {
+            "currency": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "The ISO 4217 currency code (e.g., 'USD', 'EUR')."
+            },
+            "decimals": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicNumber",
+              "description": "Optional. The number of decimal places to show. Defaults to 0 or 2 depending on locale."
+            },
+            "grouping": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicBoolean",
+              "description": "Optional. If true, uses locale-specific grouping separators (e.g. '1,000'). If false, returns raw digits (e.g. '1000'). Defaults to true."
+            },
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicNumber",
+              "description": "The monetary amount."
+            }
+          },
+          "required": [
+            "currency",
+            "value"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "formatCurrency"
+        },
+        "returnType": {
+          "const": "string"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "formatDate": {
+      "description": "Formats a timestamp into a string using a pattern.",
+      "properties": {
+        "args": {
+          "properties": {
+            "format": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "A Unicode TR35 date pattern string.\n\nToken Reference:\n- Year: 'yy' (26), 'yyyy' (2026)\n- Month: 'M' (1), 'MM' (01), 'MMM' (Jan), 'MMMM' (January)\n- Day: 'd' (1), 'dd' (01), 'E' (Tue), 'EEEE' (Tuesday)\n- Hour (12h): 'h' (1-12), 'hh' (01-12) - requires 'a' for AM/PM\n- Hour (24h): 'H' (0-23), 'HH' (00-23) - Military Time\n- Minute: 'mm' (00-59)\n- Second: 'ss' (00-59)\n- Period: 'a' (AM/PM)\n\nExamples:\n- 'MMM dd, yyyy' -> 'Jan 16, 2026'\n- 'HH:mm' -> '14:30' (Military)\n- 'h:mm a' -> '2:30 PM'\n- 'EEEE, d MMMM' -> 'Friday, 16 January'"
+            },
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicValue",
+              "description": "The date to format."
+            }
+          },
+          "required": [
+            "format",
+            "value"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "formatDate"
+        },
+        "returnType": {
+          "const": "string"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "formatNumber": {
+      "description": "Formats a number with the specified grouping and decimal precision.",
+      "properties": {
+        "args": {
+          "properties": {
+            "decimals": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicNumber",
+              "description": "Optional. The number of decimal places to show. Defaults to 0 or 2 depending on locale."
+            },
+            "grouping": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicBoolean",
+              "description": "Optional. If true, uses locale-specific grouping separators (e.g. '1,000'). If false, returns raw digits (e.g. '1000'). Defaults to true."
+            },
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicNumber",
+              "description": "The number to format."
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "formatNumber"
+        },
+        "returnType": {
+          "const": "string"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "formatString": {
+      "description": "Performs string interpolation of data model values and other functions in the catalog functions list and returns the resulting string. The value string can contain interpolated expressions in the `${expression}` format. Supported expression types include: JSON Pointer paths to the data model (e.g., `${/absolute/path}` or `${relative/path}`), and client-side function calls (e.g., `${now()}`). Function arguments must be named (e.g., `${formatDate(value:${/currentDate}, format:'MM-dd')}`). To include a literal `${` sequence, escape it as `\\${`.",
+      "properties": {
+        "args": {
+          "properties": {
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "formatString"
+        },
+        "returnType": {
+          "const": "string"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "length": {
+      "description": "Checks string length constraints.",
+      "properties": {
+        "args": {
+          "anyOf": [
+            {
+              "required": [
+                "min"
+              ]
+            },
+            {
+              "required": [
+                "max"
+              ]
+            }
+          ],
+          "properties": {
+            "max": {
+              "description": "The maximum allowed length.",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "min": {
+              "description": "The minimum allowed length.",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "length"
+        },
+        "returnType": {
+          "const": "boolean"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "not": {
+      "description": "Performs a logical NOT operation on a boolean value.",
+      "properties": {
+        "args": {
+          "properties": {
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicBoolean",
+              "description": "The boolean value to negate."
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "not"
+        },
+        "returnType": {
+          "const": "boolean"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "numeric": {
+      "description": "Checks numeric range constraints.",
+      "properties": {
+        "args": {
+          "anyOf": [
+            {
+              "required": [
+                "min"
+              ]
+            },
+            {
+              "required": [
+                "max"
+              ]
+            }
+          ],
+          "properties": {
+            "max": {
+              "description": "The maximum allowed value.",
+              "type": "number"
+            },
+            "min": {
+              "description": "The minimum allowed value.",
+              "type": "number"
+            },
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicNumber"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "numeric"
+        },
+        "returnType": {
+          "const": "boolean"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
     "openArtifact": {
       "description": "Opens a registered artifact in the workspace artifact viewer.",
       "properties": {
@@ -1592,6 +2002,189 @@
         },
         "returnType": {
           "const": "void"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "openUrl": {
+      "description": "Opens the specified URL in a browser or handler. This function has no return value.",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "description": "The URL to open.",
+              "format": "uri",
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "type": "object"
+        },
+        "call": {
+          "const": "openUrl"
+        },
+        "returnType": {
+          "const": "void"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "or": {
+      "description": "Performs a logical OR operation on a list of boolean values.",
+      "properties": {
+        "args": {
+          "properties": {
+            "values": {
+              "description": "The list of boolean values to evaluate.",
+              "items": {
+                "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicBoolean"
+              },
+              "minItems": 2,
+              "type": "array"
+            }
+          },
+          "required": [
+            "values"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "or"
+        },
+        "returnType": {
+          "const": "boolean"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "pluralize": {
+      "description": "Returns a localized string based on the Common Locale Data Repository (CLDR) plural category of the count (zero, one, two, few, many, other). Requires an 'other' fallback. For English, just use 'one' and 'other'.",
+      "properties": {
+        "args": {
+          "properties": {
+            "few": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "String for the 'few' category (e.g., small groups in Slavic languages)."
+            },
+            "many": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "String for the 'many' category (e.g., large groups in various languages)."
+            },
+            "one": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "String for the 'one' category (e.g., 1 item)."
+            },
+            "other": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "The default/fallback string (used for general plural cases)."
+            },
+            "two": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "String for the 'two' category (used in Arabic, Welsh, etc.)."
+            },
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicNumber",
+              "description": "The numeric value used to determine the plural category."
+            },
+            "zero": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "String for the 'zero' category (e.g., 0 items)."
+            }
+          },
+          "required": [
+            "value",
+            "other"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "pluralize"
+        },
+        "returnType": {
+          "const": "string"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "regex": {
+      "description": "Checks that the value matches a regular expression string.",
+      "properties": {
+        "args": {
+          "properties": {
+            "pattern": {
+              "description": "The regex pattern to match against.",
+              "type": "string"
+            },
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"
+            }
+          },
+          "required": [
+            "value",
+            "pattern"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "regex"
+        },
+        "returnType": {
+          "const": "boolean"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "required": {
+      "description": "Checks that the value is not null, undefined, or empty.",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "description": "The value to check."
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "type": "object"
+        },
+        "call": {
+          "const": "required"
+        },
+        "returnType": {
+          "const": "boolean"
         }
       },
       "required": [

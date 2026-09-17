@@ -1,7 +1,7 @@
 {
   "$defs": {
     "A2UIAgentCapabilities": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "The server/agent capabilities object, advertised e.g. in an Agent Card.",
       "properties": {
         "v0.9": {
@@ -52,7 +52,7 @@
       "type": "object"
     },
     "A2UIClientCapabilities": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "The ``a2uiClientCapabilities`` A2A metadata object a client sends.",
       "properties": {
         "v0.9": {
@@ -67,7 +67,7 @@
     },
     "A2UIClientDataModel": {
       "additionalProperties": false,
-      "description": "The ``a2uiClientDataModel`` A2A metadata object a client may attach.",
+      "description": "The ``a2uiClientDataModel`` A2A metadata object a client may attach.\n\n``surfaces`` is required (``required: [\"version\", \"surfaces\"]`` in the\nvendored ``client_data_model.json``) — an empty ``{}`` is a valid value,\nbut the key must be present.",
       "properties": {
         "surfaces": {
           "additionalProperties": {
@@ -89,7 +89,8 @@
         }
       },
       "required": [
-        "version"
+        "version",
+        "surfaces"
       ],
       "title": "A2UIClientDataModel",
       "type": "object"
@@ -1422,8 +1423,15 @@
         },
         "components": {
           "additionalProperties": {
-            "additionalProperties": true,
-            "type": "object"
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
           },
           "title": "Components",
           "type": "object"
@@ -1437,8 +1445,15 @@
         },
         "theme": {
           "additionalProperties": {
-            "additionalProperties": true,
-            "type": "object"
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
           },
           "title": "Theme",
           "type": "object"
@@ -2481,7 +2496,7 @@
       "type": "object"
     },
     "_AgentCapabilitiesV09": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "acceptsInlineCatalogs": {
           "default": false,
@@ -2500,7 +2515,7 @@
       "type": "object"
     },
     "_ClientCapabilitiesV09": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "inlineCatalogs": {
           "anyOf": [

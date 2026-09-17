@@ -1,7 +1,7 @@
 {
   "$defs": {
     "_AgentCapabilitiesV09": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "acceptsInlineCatalogs": {
           "default": false,
@@ -20,7 +20,7 @@
       "type": "object"
     }
   },
-  "additionalProperties": false,
+  "additionalProperties": true,
   "description": "The server/agent capabilities object, advertised e.g. in an Agent Card.",
   "properties": {
     "v0.9": {

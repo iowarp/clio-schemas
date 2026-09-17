@@ -57,8 +57,15 @@
         },
         "components": {
           "additionalProperties": {
-            "additionalProperties": true,
-            "type": "object"
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
           },
           "title": "Components",
           "type": "object"
@@ -72,8 +79,15 @@
         },
         "theme": {
           "additionalProperties": {
-            "additionalProperties": true,
-            "type": "object"
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
           },
           "title": "Theme",
           "type": "object"
@@ -86,7 +100,7 @@
       "type": "object"
     },
     "_ClientCapabilitiesV09": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "inlineCatalogs": {
           "anyOf": [
@@ -118,7 +132,7 @@
       "type": "object"
     }
   },
-  "additionalProperties": false,
+  "additionalProperties": true,
   "description": "The ``a2uiClientCapabilities`` A2A metadata object a client sends.",
   "properties": {
     "v0.9": {

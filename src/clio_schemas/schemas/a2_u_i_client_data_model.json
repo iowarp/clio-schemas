@@ -3,7 +3,7 @@
     "JsonValue": {}
   },
   "additionalProperties": false,
-  "description": "The ``a2uiClientDataModel`` A2A metadata object a client may attach.",
+  "description": "The ``a2uiClientDataModel`` A2A metadata object a client may attach.\n\n``surfaces`` is required (``required: [\"version\", \"surfaces\"]`` in the\nvendored ``client_data_model.json``) — an empty ``{}`` is a valid value,\nbut the key must be present.",
   "properties": {
     "surfaces": {
       "additionalProperties": {
@@ -25,7 +25,8 @@
     }
   },
   "required": [
-    "version"
+    "version",
+    "surfaces"
   ],
   "title": "A2UIClientDataModel",
   "type": "object"
