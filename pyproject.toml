@@ -41,6 +41,7 @@ packages = ["src/clio_schemas"]
 # pydantic). *.json/py.typed are not Python modules, so force-include them.
 artifacts = [
     "src/clio_schemas/schemas/*.json",
+    "src/clio_schemas/schemas/a2ui/**",
     "src/clio_schemas/py.typed",
 ]
 
@@ -58,6 +59,10 @@ include = [
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+# Vendored upstream artifacts (see scripts/vendor_a2ui_spec.py) must stay
+# byte-identical to google/A2UI at the pinned commit — sha256-checked by
+# SOURCE.json / tests/test_a2ui_vendored_integrity.py. Never lint/format them.
+extend-exclude = ["tests/a2ui_corpus"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
