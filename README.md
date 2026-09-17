@@ -13,7 +13,7 @@ types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
 > **Status: canonical records, live UI vocabularies, and A2UI 0.9.1 catalog
-> files (version 0.3.0).**
+> files (version 0.3.1).**
 > `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 13 GACT 0.3
 > message blocks, the official A2UI 0.9.1 envelope/capability/catalog-file models, and
 > the two builtin catalog files (`clio-workspace`'s 30 CLIO components, the vendored

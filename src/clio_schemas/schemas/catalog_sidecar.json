@@ -26,6 +26,22 @@
           ],
           "title": "Destination",
           "type": "string"
+        },
+        "operation": {
+          "anyOf": [
+            {
+              "enum": [
+                "cancel",
+                "retry"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation"
         }
       },
       "title": "_EventRoute",

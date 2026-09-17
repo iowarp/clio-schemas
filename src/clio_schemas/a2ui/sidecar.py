@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class _Trust(BaseModel):
@@ -41,6 +41,7 @@ class _EventRoute(BaseModel):
 
     destination: Literal["agent", "permission", "run"] = "agent"
     context_schema: dict[str, object] | None = None
+    operation: Literal["cancel", "retry"] | None = None
 
 
 class CatalogSidecar(BaseModel):
@@ -54,3 +55,26 @@ class CatalogSidecar(BaseModel):
     implements: dict[str, _Implementation] = Field(default_factory=dict)
     events: dict[str, _EventRoute] = Field(default_factory=dict)
     instructions: str = "instructions.md"
+
+    @model_validator(mode="after")
+    def _check_run_operation(self) -> CatalogSidecar:
+        """``operation`` is required for ``run``-destination events, forbidden otherwise.
+
+        The constraint spans two sibling fields of ``_EventRoute``
+        (``destination`` and ``operation``), so it can only be checked here,
+        where each event's name is still available for the error message —
+        ``_EventRoute`` itself never sees its own dict key.
+        """
+
+        for name, route in self.events.items():
+            if route.destination == "run" and route.operation is None:
+                raise ValueError(
+                    f"event {name!r} routes to 'run' and must declare an "
+                    "'operation' ('cancel' or 'retry')"
+                )
+            if route.destination != "run" and route.operation is not None:
+                raise ValueError(
+                    f"event {name!r} routes to {route.destination!r}, not 'run' — "
+                    "'operation' must be omitted"
+                )
+        return self

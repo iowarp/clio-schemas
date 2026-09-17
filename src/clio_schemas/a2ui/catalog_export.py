@@ -164,8 +164,8 @@ def render_workspace_sidecar() -> dict[str, Any]:
         "implements": {name: {"kernel": name} for name in catalog["components"]},
         "events": {
             "approval.respond": {"destination": "permission"},
-            "run.cancel": {"destination": "run"},
-            "run.retry": {"destination": "run"},
+            "run.cancel": {"destination": "run", "operation": "cancel"},
+            "run.retry": {"destination": "run", "operation": "retry"},
         },
         "instructions": "instructions.md",
     }
