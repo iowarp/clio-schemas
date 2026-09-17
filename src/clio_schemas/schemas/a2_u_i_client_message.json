@@ -1,0 +1,140 @@
+{
+  "$defs": {
+    "A2UIClientAction": {
+      "additionalProperties": true,
+      "description": "A client-reported user action. ``name`` is any non-empty string.\n\nThe vendored ``client_to_server.json`` does not forbid extra keys on the\naction object, so protocol extensions are tolerated (``extra=\"allow\"``).",
+      "properties": {
+        "context": {
+          "additionalProperties": true,
+          "title": "Context",
+          "type": "object"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "sourceComponentId": {
+          "title": "Sourcecomponentid",
+          "type": "string"
+        },
+        "surfaceId": {
+          "title": "Surfaceid",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "surfaceId",
+        "sourceComponentId",
+        "timestamp",
+        "context"
+      ],
+      "title": "A2UIClientAction",
+      "type": "object"
+    },
+    "A2UIGenericError": {
+      "additionalProperties": true,
+      "description": "Any other client-reported error. Tolerates protocol extensions.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "surfaceId": {
+          "title": "Surfaceid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "surfaceId",
+        "message"
+      ],
+      "title": "A2UIGenericError",
+      "type": "object"
+    },
+    "A2UIValidationError": {
+      "additionalProperties": false,
+      "description": "The client's ``VALIDATION_FAILED`` error report. Strict, closed shape.",
+      "properties": {
+        "code": {
+          "const": "VALIDATION_FAILED",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "surfaceId": {
+          "title": "Surfaceid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "surfaceId",
+        "path",
+        "message"
+      ],
+      "title": "A2UIValidationError",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The client->server envelope: ``version`` plus exactly one of ``action``/``error``.",
+  "properties": {
+    "action": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A2UIClientAction"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A2UIValidationError"
+        },
+        {
+          "$ref": "#/$defs/A2UIGenericError"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error"
+    },
+    "version": {
+      "enum": [
+        "v0.9",
+        "v0.9.1"
+      ],
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version"
+  ],
+  "title": "A2UIClientMessage",
+  "type": "object"
+}

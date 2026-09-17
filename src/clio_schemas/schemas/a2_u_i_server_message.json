@@ -1,0 +1,186 @@
+{
+  "$defs": {
+    "CreateSurfacePayload": {
+      "additionalProperties": false,
+      "description": "``createSurface``: begin rendering a new surface against one catalog.",
+      "properties": {
+        "catalogId": {
+          "title": "Catalogid",
+          "type": "string"
+        },
+        "sendDataModel": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Senddatamodel"
+        },
+        "surfaceId": {
+          "title": "Surfaceid",
+          "type": "string"
+        },
+        "theme": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theme"
+        }
+      },
+      "required": [
+        "surfaceId",
+        "catalogId"
+      ],
+      "title": "CreateSurfacePayload",
+      "type": "object"
+    },
+    "DeleteSurfacePayload": {
+      "additionalProperties": false,
+      "description": "``deleteSurface``: remove a previously created surface.",
+      "properties": {
+        "surfaceId": {
+          "title": "Surfaceid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "surfaceId"
+      ],
+      "title": "DeleteSurfacePayload",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "UpdateComponentsPayload": {
+      "additionalProperties": false,
+      "description": "``updateComponents``: replace a surface's component tree.\n\nComponent shape is validated separately, against the surface's catalog\n(:func:`clio_schemas.a2ui.validation.catalog_validators`) — not here.",
+      "properties": {
+        "components": {
+          "items": {
+            "additionalProperties": {
+              "$ref": "#/$defs/JsonValue"
+            },
+            "type": "object"
+          },
+          "minItems": 1,
+          "title": "Components",
+          "type": "array"
+        },
+        "surfaceId": {
+          "title": "Surfaceid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "surfaceId",
+        "components"
+      ],
+      "title": "UpdateComponentsPayload",
+      "type": "object"
+    },
+    "UpdateDataModelPayload": {
+      "additionalProperties": false,
+      "description": "``updateDataModel``: set or delete one path in a surface's data model.\n\nPer the vendored schema, an *omitted* ``value`` deletes the key at\n``path``; a present ``value`` (including an explicit ``null``) replaces\nit. :attr:`value_provided` distinguishes the two cases.",
+      "properties": {
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        },
+        "surfaceId": {
+          "title": "Surfaceid",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "surfaceId"
+      ],
+      "title": "UpdateDataModelPayload",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The server->client envelope: ``version`` plus exactly one operation.",
+  "properties": {
+    "createSurface": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CreateSurfacePayload"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "deleteSurface": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DeleteSurfacePayload"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "updateComponents": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/UpdateComponentsPayload"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "updateDataModel": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/UpdateDataModelPayload"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "version": {
+      "enum": [
+        "v0.9",
+        "v0.9.1"
+      ],
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version"
+  ],
+  "title": "A2UIServerMessage",
+  "type": "object"
+}

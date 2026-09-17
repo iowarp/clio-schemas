@@ -2,10 +2,17 @@
 
 from __future__ import annotations
 
-from clio_schemas.a2ui_v091 import (
-    A2UIClientActionMessage,
-    A2UIComponent,
-    trusted_component_names,
+from clio_schemas.a2ui.sidecar import CatalogSidecar
+from clio_schemas.a2ui.v0_9_1.bounded_components import COMPONENT_MODELS
+from clio_schemas.a2ui.v0_9_1.capabilities import A2UIAgentCapabilities, A2UIClientCapabilities
+from clio_schemas.a2ui.v0_9_1.catalog_file import CatalogFile, FunctionDefinition
+from clio_schemas.a2ui.v0_9_1.data_model import A2UIClientDataModel
+from clio_schemas.a2ui.v0_9_1.messages import (
+    A2UIClientAction,
+    A2UIClientMessage,
+    A2UIGenericError,
+    A2UIServerMessage,
+    A2UIValidationError,
 )
 from clio_schemas.constants import LOCKED_PYDANTIC_VERSION
 from clio_schemas.gact_v3 import MessageBlock
@@ -36,15 +43,24 @@ from clio_schemas.models import (
 )
 
 __all__ = [
-    "A2UIClientActionMessage",
-    "A2UIComponent",
+    "COMPONENT_MODELS",
     "EXPORTED_MODELS",
     "LOCKED_PYDANTIC_VERSION",
     "RESERVED_KINDS",
+    "A2UIAgentCapabilities",
+    "A2UIClientAction",
+    "A2UIClientCapabilities",
+    "A2UIClientDataModel",
+    "A2UIClientMessage",
+    "A2UIGenericError",
+    "A2UIServerMessage",
+    "A2UIValidationError",
     "AgentRole",
     "ArtifactKind",
     "ArtifactRecord",
     "ArtifactVersion",
+    "CatalogFile",
+    "CatalogSidecar",
     "ClioSchemaBase",
     "Custody",
     "EdgeEvidence",
@@ -52,6 +68,7 @@ __all__ = [
     "EnvironmentRecord",
     "EnvironmentTier",
     "EvidenceClass",
+    "FunctionDefinition",
     "IdentityEvidence",
     "Instrument",
     "LegacyToleranceBase",
@@ -64,8 +81,7 @@ __all__ = [
     "TransformStatus",
     "__version__",
     "new_artifact_id",
-    "trusted_component_names",
 ]
 
 # Exact-pin lockstep versioning (see README "Versioning policy").
-__version__ = "0.2.3"
+__version__ = "0.3.0"

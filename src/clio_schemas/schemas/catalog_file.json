@@ -1,0 +1,60 @@
+{
+  "additionalProperties": false,
+  "description": "One official-shape A2UI catalog document (a ``catalog.json`` file).",
+  "properties": {
+    "$defs": {
+      "additionalProperties": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "$Defs",
+      "type": "object"
+    },
+    "$id": {
+      "title": "$Id",
+      "type": "string"
+    },
+    "$schema": {
+      "title": "$Schema",
+      "type": "string"
+    },
+    "catalogId": {
+      "title": "Catalogid",
+      "type": "string"
+    },
+    "components": {
+      "additionalProperties": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Components",
+      "type": "object"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "functions": {
+      "additionalProperties": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Functions",
+      "type": "object"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "$schema",
+    "$id",
+    "title",
+    "description",
+    "catalogId",
+    "components"
+  ],
+  "title": "CatalogFile",
+  "type": "object"
+}
