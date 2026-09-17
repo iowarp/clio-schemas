@@ -27,6 +27,18 @@
           "title": "Destination",
           "type": "string"
         },
+        "narration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Narration"
+        },
         "operation": {
           "anyOf": [
             {
