@@ -5,10 +5,12 @@
       "destination": "permission"
     },
     "run.cancel": {
-      "destination": "run"
+      "destination": "run",
+      "operation": "cancel"
     },
     "run.retry": {
-      "destination": "run"
+      "destination": "run",
+      "operation": "retry"
     }
   },
   "implements": {
