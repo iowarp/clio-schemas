@@ -88,12 +88,20 @@ requires_node = pytest.mark.skipif(
 
 
 def _generate_ts(tmp_path: Path) -> Path:
-    """Copy committed schemas + generate the TS graph into a clean temp dir."""
+    """Copy committed schemas + generate the TS graph into a clean temp dir.
+
+    ts-gen only cares about the flat per-model schemas (+ the aggregate +
+    HASHES.json) — the ``a2ui/catalogs/**`` tree from ``read_committed()``
+    is a JSON Schema *catalog* tree, not a pydantic-model export, and is
+    intentionally excluded here (its path keys contain ``/``).
+    """
 
     schema_dir = tmp_path / "schemas"
     ts_dir = tmp_path / "generated-ts"
     schema_dir.mkdir()
     for name, content in read_committed().items():
+        if "/" in name:
+            continue
         (schema_dir / name).write_text(content, encoding="utf-8")
 
     result = subprocess.run(
@@ -158,7 +166,17 @@ def test_no_duplicate_declarations_in_barrel(tmp_path: Path) -> None:
 # Exported-schema conformance
 # --------------------------------------------------------------------------- #
 def test_every_exported_model_forbids_schema_extras_only_when_configured() -> None:
-    """The emitted additionalProperties value follows each model's runtime contract."""
+    """The emitted additionalProperties value follows each model's runtime contract.
+
+    A model configured ``extra="forbid"`` (the new closed A2UI envelope/
+    capability/catalog models) must render ``additionalProperties: false``;
+    every other exported model (the legacy-tolerant P2.1 records, and the
+    RootModel-wrapped discriminated unions) must not.
+    """
 
     for model in EXPORTED_MODELS:
-        assert model.model_json_schema().get("additionalProperties") is not False
+        additional = model.model_json_schema().get("additionalProperties")
+        if model.model_config.get("extra") == "forbid":
+            assert additional is False, f"{model.__name__} is extra='forbid' but schema is open"
+        else:
+            assert additional is not False, f"{model.__name__} tolerates extras but schema closes"
