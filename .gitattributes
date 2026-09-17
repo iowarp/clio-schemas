@@ -1,0 +1,3 @@
+# Vendored upstream A2UI artifacts must stay byte-identical (sha256-checked); never newline-convert them.
+src/clio_schemas/schemas/a2ui/** -text
+tests/a2ui_corpus/** -text

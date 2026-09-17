@@ -1,0 +1,55 @@
+{
+  "commit": "0086493c40b119a4143fe15197006678467cad60",
+  "files": {
+    "catalogs/basic/catalog.json": {
+      "sha256": "8cc94d0a482e67048f9fc989964ca5da56fe42f531d919315a508989fb22e13e",
+      "upstream_path": "specification/v0_9_1/catalogs/basic/catalog.json"
+    },
+    "catalogs/basic/rules.txt": {
+      "sha256": "ccd5b8158b7d459c26bb92dbe63fcb5d01a78311d39200951c5b062499b854df",
+      "upstream_path": "specification/v0_9_1/catalogs/basic/rules.txt"
+    },
+    "client_capabilities.json": {
+      "sha256": "917ff302b883c8c50475f0fafa836c17620078e7e2089392b322dc5df01de78f",
+      "upstream_path": "specification/v0_9_1/json/client_capabilities.json"
+    },
+    "client_data_model.json": {
+      "sha256": "6aefe455be9287caaf2f964ae480e8cf87706718106130908b41df19d5e982be",
+      "upstream_path": "specification/v0_9_1/json/client_data_model.json"
+    },
+    "client_to_server.json": {
+      "sha256": "f049f8a554296a603cd3c1cef37dd6811006dc90e3ff52ce845d1674cd00a6b7",
+      "upstream_path": "specification/v0_9_1/json/client_to_server.json"
+    },
+    "client_to_server_list.json": {
+      "sha256": "08d9555b79e0c23cd87ce56cd249483d2041a78c72ee605b436a4192451168c7",
+      "upstream_path": "specification/v0_9_1/json/client_to_server_list.json"
+    },
+    "client_to_server_list_wrapper.json": {
+      "sha256": "aac8653c446638a14af8e8845967813051b89e57a2e668fc1186aeb5b20d0bed",
+      "upstream_path": "specification/v0_9_1/json/client_to_server_list_wrapper.json"
+    },
+    "common_types.json": {
+      "sha256": "ac79788e95e5bdf0a39808953593a53c1bc9fcdcdb55480f4610613c6591e94c",
+      "upstream_path": "specification/v0_9_1/json/common_types.json"
+    },
+    "server_capabilities.json": {
+      "sha256": "bdaf275dd2abf279e62637ead1b840744e031d94735ec4f63d0c7c2fe5347dd4",
+      "upstream_path": "specification/v0_9_1/json/server_capabilities.json"
+    },
+    "server_to_client.json": {
+      "sha256": "ed1ee11b4f1e94dd08ebe0d57bedb436cb452cc546d26cae407858ae477af288",
+      "upstream_path": "specification/v0_9_1/json/server_to_client.json"
+    },
+    "server_to_client_list.json": {
+      "sha256": "114ee3dff68c2a838f3d6ba426bd9f0d75d85251bf986ec4a601b64e7a05376a",
+      "upstream_path": "specification/v0_9_1/json/server_to_client_list.json"
+    },
+    "server_to_client_list_wrapper.json": {
+      "sha256": "b33ff49453dd8d2b91a5a842db2bbf9b4ab3995e6b1c34b3dc7e9ebca331aa70",
+      "upstream_path": "specification/v0_9_1/json/server_to_client_list_wrapper.json"
+    }
+  },
+  "repository": "google/A2UI",
+  "retrieved_at": "2026-09-17T00:51:47Z"
+}

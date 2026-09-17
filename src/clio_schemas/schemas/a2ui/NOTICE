@@ -1,0 +1,13 @@
+A2UI specification vendor notice
+=================================
+
+The files under this directory are vendored verbatim from the
+upstream google/A2UI repository (https://github.com/google/A2UI)
+at commit 0086493c40b119a4143fe15197006678467cad60, unmodified, under the terms of the
+Apache License, Version 2.0 (see LICENSE in this directory).
+
+Provenance (repository, commit, retrieval timestamp, and a sha256
+per file) is recorded in each vendored subtree's SOURCE.json, e.g.
+v0_9_1/SOURCE.json. Regenerate this tree with
+scripts/vendor_a2ui_spec.py; verify it offline with
+scripts/vendor_a2ui_spec.py --verify.
