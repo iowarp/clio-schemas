@@ -87,6 +87,28 @@ plan's progress:
 `{"id": "wf1", "component": "clio.workflow.v1", "nodes": [{"id": "fetch", "label": "Fetch"}, \
 {"id": "process", "label": "Process"}], "edges": [{"source": "fetch", "target": "process"}]}`.
 
+**Slider** — `clio.slider.v1` is a numeric control for a physical
+parameter: it keeps a `step` (for example `0.01`), shows `unit`, and has a
+number box so an exact value can be typed. The Basic `Slider` moves in whole
+numbers only; use this one for thresholds, scale factors, or any fraction:
+`{"id": "iso", "component": "clio.slider.v1", "label": "Density threshold", "min": 0, \
+"max": 1, "step": 0.01, "value": {"path": "/iso"}}`.
+
+**MeshViewport** — an orbitable 3D view of one registered mesh (`.glb`,
+results stored as node or cell fields). The mesh always comes from an
+artifact, never inline. `field` names the field to color by and `showField`
+toggles it; `frame` picks the frame of a field that changes over time
+(increments, design cycles); `thresholdField` with `thresholdMin`/
+`thresholdMax` shows only the cells whose value is in range, like a
+Threshold filter. Bind the dynamic ones to the data model and drive them
+from a `Slider`, `CheckBox`, or `ChoicePicker`. Bind `camera` to a path and
+the view keeps the current camera there (and follows it when it changes),
+so a `Button` can send the scientist's chosen angle to the agent. Viewports
+that share a `syncGroup` move one camera and one color range together:
+`{"id": "vp1", "component": "clio.mesh-viewport.v1", "title": "Design", "meshUri": \
+"artifact://artifact_abc123", "field": "DENSITY", "frame": {"path": "/cycle"}, \
+"thresholdField": "DENSITY", "thresholdMin": {"path": "/iso"}, "thresholdMax": 1}`.
+
 **Artifact** — reference a registered artifact by its returned URI (an
 `artifact://` id if that is all registration returned), never a bare
 filesystem path:

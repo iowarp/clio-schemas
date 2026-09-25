@@ -205,6 +205,46 @@ CLIO_ACCEPT_CASES: list[Any] = [
         },
         id="Button-event-action",
     ),
+    pytest.param(
+        {
+            "id": "vp_1",
+            "component": "clio.mesh-viewport.v1",
+            "title": "Baseline",
+            "meshUri": "artifact://artifact_abc123",
+            "field": "S_MISES",
+            "showField": {"path": "/showStress"},
+            "syncGroup": "compare",
+            "upAxis": "y",
+        },
+        id="MeshViewport-bound-field-toggle",
+    ),
+    pytest.param(
+        {
+            "id": "vp_2",
+            "component": "clio.mesh-viewport.v1",
+            "meshUri": "artifact://artifact_design",
+            "field": "DENSITY",
+            "frame": {"path": "/cycle"},
+            "thresholdField": "DENSITY",
+            "thresholdMin": {"path": "/iso"},
+            "thresholdMax": 1,
+            "camera": {"path": "/camera"},
+        },
+        id="MeshViewport-threshold-frames-camera",
+    ),
+    pytest.param(
+        {
+            "id": "iso",
+            "component": "clio.slider.v1",
+            "label": "Density threshold",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "unit": "",
+            "value": {"path": "/iso"},
+        },
+        id="Slider-fractional-step",
+    ),
 ]
 
 
@@ -271,6 +311,62 @@ CLIO_REJECT_CASES: list[Any] = [
         },
         id="TextField-unsupported-property",
     ),
+    pytest.param(
+        {"id": "vp_1", "component": "clio.mesh-viewport.v1", "meshUri": "/scratch/run/part.glb"},
+        id="MeshViewport-filesystem-path",
+    ),
+    pytest.param(
+        {
+            "id": "vp_1",
+            "component": "clio.mesh-viewport.v1",
+            "meshUri": "artifact://artifact_abc123",
+            "vertices": [[0, 0, 0]],
+        },
+        id="MeshViewport-inline-geometry",
+    ),
+    pytest.param(
+        {
+            "id": "vp_1",
+            "component": "clio.mesh-viewport.v1",
+            "meshUri": "artifact://artifact_abc123",
+            "syncGroup": "has spaces",
+        },
+        id="MeshViewport-bad-sync-group",
+    ),
+    pytest.param(
+        {
+            "id": "vp_1",
+            "component": "clio.mesh-viewport.v1",
+            "meshUri": "artifact://artifact_abc123",
+            "upAxis": "w",
+        },
+        id="MeshViewport-bad-up-axis",
+    ),
+    pytest.param(
+        {
+            "id": "vp_1",
+            "component": "clio.mesh-viewport.v1",
+            "meshUri": "artifact://artifact_abc123",
+            "thresholdMin": "low",
+        },
+        id="MeshViewport-non-numeric-threshold",
+    ),
+    pytest.param(
+        {"id": "iso", "component": "clio.slider.v1", "label": "x", "value": 1, "max": 2},
+        id="Slider-missing-min",
+    ),
+    pytest.param(
+        {
+            "id": "iso",
+            "component": "clio.slider.v1",
+            "label": "x",
+            "value": 1,
+            "min": 0,
+            "max": 2,
+            "step": "0.1",
+        },
+        id="Slider-string-step",
+    ),
 ]
 
 
@@ -280,7 +376,7 @@ def test_clio_workspace_reject_case_fails(payload: dict[str, Any]) -> None:
 
 
 def test_clio_workspace_catalog_is_closed() -> None:
-    """A component name outside the catalog's 30 fails the whole-envelope validator."""
+    """A component name outside the catalog's 32 fails the whole-envelope validator."""
 
     validator = message_validator("server_to_client.json", catalog=WORKSPACE_CATALOG)
     message = {

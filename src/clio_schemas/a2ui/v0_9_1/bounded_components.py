@@ -39,8 +39,10 @@ from clio_schemas.a2ui.v0_9_1.components import (
     ImageComponent,
     ListComponent,
     MermaidComponent,
+    MeshViewportComponent,
     MetricComponent,
     ModalComponent,
+    NumberSliderComponent,
     ProgressComponent,
     RowComponent,
     SliderComponent,
@@ -131,7 +133,7 @@ class WorkflowComponent(_ComponentBase):
     action: Action | None = None
 
 
-# All 30 CLIO catalog components, in the same order as the original
+# All 32 CLIO catalog components, in the same order as the original
 # hand-maintained union (a2ui_v091.py, pre-slice) so consumers see no churn.
 COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     TextComponent,
@@ -164,4 +166,6 @@ COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     DiffComponent,
     ActionCardComponent,
     ApprovalComponent,
+    MeshViewportComponent,
+    NumberSliderComponent,
 )

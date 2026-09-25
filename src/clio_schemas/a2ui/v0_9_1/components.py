@@ -1,4 +1,4 @@
-"""CLIO's 30 trusted A2UI 0.9.1 catalog components — the pydantic generator.
+"""CLIO's 32 trusted A2UI 0.9.1 catalog components — the pydantic generator.
 
 These models are the *source of truth* for the ``clio-workspace`` catalog file
 rendered by :mod:`clio_schemas.a2ui.catalog_export` (``catalog.json``, in the
@@ -41,6 +41,11 @@ MAX_MAP_POINTS = 500
 MAX_TIME_SERIES_ROWS = 10_000
 MAX_WORKFLOW_NODES = 128
 MAX_WORKFLOW_EDGES = 256
+
+#: A registered-artifact reference (the only form bulk data may take on the wire).
+ARTIFACT_URI_PATTERN = r"^artifact://artifact_[A-Za-z0-9_-]+$"
+#: Name shared by components that coordinate client-side (camera, color range).
+SYNC_GROUP_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
 
 #: The 3 CLIO-authored functions (see ``catalog_export.py::_render_workspace_functions``).
 #: Kept here, not just there, so the pydantic ``call`` validator below and the
@@ -163,6 +168,11 @@ class _ChildTemplate(_ClosedModel):
 
 
 ChildList = list[str] | _ChildTemplate
+
+# Pattern-constrained string markers: plain strings on the wire, rendered by
+# the catalog canonicaliser as ``{"type": "string", "pattern": ...}``.
+ArtifactUri = Annotated[str, Field(pattern=ARTIFACT_URI_PATTERN)]
+SyncGroup = Annotated[str, Field(pattern=SYNC_GROUP_PATTERN)]
 
 
 class _IconSvgPath(_ClosedModel):
@@ -458,6 +468,29 @@ ApprovalComponent = _component_model(
         "reason": DynamicString,
         "risk": DynamicString,
         "actions": Annotated[list[_CardAction], Field(min_length=1, max_length=4)],
+    },
+)
+NumberSliderComponent = _component_model(
+    "NumberSliderComponent",
+    "clio.slider.v1",
+    required={"label": DynamicString, "value": DynamicNumber, "min": float, "max": float},
+    optional={"step": float, "unit": str},
+)
+MeshViewportComponent = _component_model(
+    "MeshViewportComponent",
+    "clio.mesh-viewport.v1",
+    required={"meshUri": ArtifactUri},
+    optional={
+        "title": DynamicString,
+        "field": DynamicString,
+        "showField": DynamicBoolean,
+        "frame": DynamicNumber,
+        "thresholdField": str,
+        "thresholdMin": DynamicNumber,
+        "thresholdMax": DynamicNumber,
+        "camera": DynamicValue,
+        "syncGroup": SyncGroup,
+        "upAxis": Literal["x", "y", "z"],
     },
 )
 
