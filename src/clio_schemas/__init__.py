@@ -16,6 +16,17 @@ from clio_schemas.a2ui.v0_9_1.messages import (
 )
 from clio_schemas.constants import LOCKED_PYDANTIC_VERSION
 from clio_schemas.gact_v3 import MessageBlock
+from clio_schemas.model_capabilities import (
+    CapabilityTag,
+    DomainTag,
+    FlagTag,
+    ModalityTag,
+    ModelCapabilityTags,
+    ModelTypeTag,
+    RoleTag,
+    TagEvidence,
+    TaskTag,
+)
 from clio_schemas.models import (
     EXPORTED_MODELS,
     RESERVED_KINDS,
@@ -59,23 +70,32 @@ __all__ = [
     "ArtifactKind",
     "ArtifactRecord",
     "ArtifactVersion",
+    "CapabilityTag",
     "CatalogFile",
     "CatalogSidecar",
     "ClioSchemaBase",
     "Custody",
+    "DomainTag",
     "EdgeEvidence",
     "EdgeRole",
     "EnvironmentRecord",
     "EnvironmentTier",
     "EvidenceClass",
+    "FlagTag",
     "FunctionDefinition",
     "IdentityEvidence",
     "Instrument",
     "LegacyToleranceBase",
     "Mechanism",
     "MessageBlock",
+    "ModalityTag",
+    "ModelCapabilityTags",
+    "ModelTypeTag",
     "ProvEdge",
     "ReplayContract",
+    "RoleTag",
+    "TagEvidence",
+    "TaskTag",
     "TransformKind",
     "TransformRecord",
     "TransformStatus",
@@ -84,4 +104,4 @@ __all__ = [
 ]
 
 # Exact-pin lockstep versioning (see README "Versioning policy").
-__version__ = "0.3.2"
+__version__ = "0.3.3"
