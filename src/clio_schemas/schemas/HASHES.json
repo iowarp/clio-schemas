@@ -17,10 +17,11 @@
     "catalog_sidecar.json": "b579bb76749c997ae50cb0123812940043b887c8b827ba7b69c7f260532bd67f",
     "environment_record.json": "f49ed295a42e1f6339b397e148fd67d23ded450cb7645336f3a1052746feb750",
     "identity_evidence.json": "e333287055167d9fe39e6bf23105a242030519dda8d6db207431c2ced17c89e3",
-    "index.json": "25b6f33fc9b265b9a68c4716eb0bb04be210fdab96c0aafe2d174630f7d476cf",
+    "index.json": "4f7c96904ba83340fd6a89c1046ae7a865136e9d85b08ef0a5d89a317159ce1d",
     "instrument.json": "cbdc64b639e4ba9ca65f274b17519c20ac4239125e75e2faab34330fd6c944ea",
     "message_block.json": "83467a53976958278af2988499473b7d0db147ab154bfa3cb733b66d87fb4c00",
     "model_capability_tags.json": "b00a87c199c75c07c20b8de6b51153da6fcd3de43999742384f47c43a6fafc7c",
+    "model_facts.json": "903ae67a423a04e8cc02e2b880ff319a6380169b00331b640a441dfeedd4066a",
     "prov_edge.json": "262ad2564a1dc90da9dde26dad49be4d8ece3353db4ba22806f44d5183add1bb",
     "transform_record.json": "40f82754aecd22f2ae74fdaff9783b66fba7580b901e5183e14eb0e63757621d"
   }

@@ -27,6 +27,21 @@ from clio_schemas.model_capabilities import (
     TagEvidence,
     TaskTag,
 )
+from clio_schemas.model_facts import (
+    DescriptionFact,
+    DescriptionLink,
+    DescriptionValue,
+    ModelFacts,
+    ParametersFact,
+    ParametersValue,
+    Price,
+    PricingAlternative,
+    PricingFact,
+    PricingValue,
+    RecentFact,
+    ReleaseDateFact,
+    ReleaseDateValue,
+)
 from clio_schemas.models import (
     EXPORTED_MODELS,
     RESERVED_KINDS,
@@ -54,10 +69,6 @@ from clio_schemas.models import (
 )
 
 __all__ = [
-    "COMPONENT_MODELS",
-    "EXPORTED_MODELS",
-    "LOCKED_PYDANTIC_VERSION",
-    "RESERVED_KINDS",
     "A2UIAgentCapabilities",
     "A2UIClientAction",
     "A2UIClientCapabilities",
@@ -70,12 +81,17 @@ __all__ = [
     "ArtifactKind",
     "ArtifactRecord",
     "ArtifactVersion",
+    "COMPONENT_MODELS",
     "CapabilityTag",
     "CatalogFile",
     "CatalogSidecar",
     "ClioSchemaBase",
     "Custody",
+    "DescriptionFact",
+    "DescriptionLink",
+    "DescriptionValue",
     "DomainTag",
+    "EXPORTED_MODELS",
     "EdgeEvidence",
     "EdgeRole",
     "EnvironmentRecord",
@@ -85,13 +101,25 @@ __all__ = [
     "FunctionDefinition",
     "IdentityEvidence",
     "Instrument",
+    "LOCKED_PYDANTIC_VERSION",
     "LegacyToleranceBase",
     "Mechanism",
     "MessageBlock",
     "ModalityTag",
     "ModelCapabilityTags",
+    "ModelFacts",
     "ModelTypeTag",
+    "ParametersFact",
+    "ParametersValue",
+    "Price",
+    "PricingAlternative",
+    "PricingFact",
+    "PricingValue",
     "ProvEdge",
+    "RESERVED_KINDS",
+    "RecentFact",
+    "ReleaseDateFact",
+    "ReleaseDateValue",
     "ReplayContract",
     "RoleTag",
     "TagEvidence",
@@ -104,4 +132,4 @@ __all__ = [
 ]
 
 # Exact-pin lockstep versioning (see README "Versioning policy").
-__version__ = "0.3.3"
+__version__ = "0.3.4"
