@@ -13,7 +13,7 @@ types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
 > **Status: canonical records, live UI vocabularies, and A2UI 0.9.1 catalog
-> files, model-capability tags and model facts (version 0.4.0).**
+> files, model-capability tags, model facts and accepted parameters (version 0.4.1).**
 > `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 13 GACT 0.3
 > message blocks, the official A2UI 0.9.1 envelope/capability/catalog-file models, and
 > the two builtin catalog files (`clio-workspace`'s 32 CLIO components, the vendored
@@ -25,7 +25,11 @@ shared shape again.
 > (`clio_schemas.model_facts`) carries one model's description, release date (and
 > server-derived recency), pricing per 1M tokens (`usd`, or a typed `variable` /
 > `subscription` with no number) and parameter count (total, plus MoE active/expert
-> counts), each with its evidence or `null`. There is no closed component/action Python union
+> counts), each with its evidence or `null`. `AcceptedParameter`
+> (`clio_schemas.model_parameters`) is one request setting a model accepts (temperature,
+> top_p, penalties, seed, output length, a local server's context size, ...): its kind,
+> range or options, group, default (or `null` for the provider's own) and evidence; a
+> catalog row lists only the settings some source states the model accepts. There is no closed component/action Python union
 > anymore — a catalog is a JSON Schema document, validated with
 > `clio_schemas.a2ui.validation` (`jsonschema` + `referencing`), not a pydantic
 > discriminated union.

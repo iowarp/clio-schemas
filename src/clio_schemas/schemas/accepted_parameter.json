@@ -1,0 +1,167 @@
+{
+  "$defs": {
+    "TagEvidence": {
+      "additionalProperties": false,
+      "description": "One source's statement behind a tag.",
+      "properties": {
+        "detail": {
+          "description": "The upstream field and value as the source stated it, e.g. \"openrouter architecture.output_modalities=['decisions']\" or \"ALCF gateway /models framework='sam3service'\".",
+          "title": "Detail",
+          "type": "string"
+        },
+        "observed_at": {
+          "description": "ISO-8601 time the evidence was produced (empty when the source gives none).",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "source": {
+          "description": "Who stated the value.",
+          "enum": [
+            "user",
+            "overlay",
+            "server_report",
+            "hf_repo",
+            "models.dev",
+            "litellm",
+            "db",
+            "openrouter",
+            "dialect",
+            "probe",
+            "catalog"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "detail",
+        "observed_at"
+      ],
+      "title": "TagEvidence",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One request setting the model accepts, how to enter it, and who says so.",
+  "properties": {
+    "default": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The value that applies when nothing is set, when a source states one; null means the provider's own default.",
+      "title": "Default"
+    },
+    "description": {
+      "description": "One sentence on what the setting changes.",
+      "title": "Description",
+      "type": "string"
+    },
+    "evidence": {
+      "description": "Every source that states this value; the first is the winning one.",
+      "items": {
+        "$ref": "#/$defs/TagEvidence"
+      },
+      "minItems": 1,
+      "title": "Evidence",
+      "type": "array"
+    },
+    "group": {
+      "enum": [
+        "sampling",
+        "length",
+        "advanced"
+      ],
+      "title": "Group",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "number",
+        "integer",
+        "enum"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "label": {
+      "description": "The setting's name for display.",
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+    },
+    "maximum": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Largest accepted value; null when unbounded.",
+      "title": "Maximum"
+    },
+    "minimum": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Smallest accepted value; null when unbounded.",
+      "title": "Minimum"
+    },
+    "name": {
+      "description": "The setting's key as the server stores it (e.g. `temperature`, `max_tokens`, `context_length`).",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Name",
+      "type": "string"
+    },
+    "options": {
+      "description": "The accepted values of an enum; empty otherwise.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Options",
+      "type": "array"
+    },
+    "step": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "A sensible increment for the control; null for an enum.",
+      "title": "Step"
+    }
+  },
+  "required": [
+    "name",
+    "label",
+    "description",
+    "group",
+    "kind",
+    "minimum",
+    "maximum",
+    "step",
+    "default",
+    "evidence"
+  ],
+  "title": "AcceptedParameter",
+  "type": "object"
+}

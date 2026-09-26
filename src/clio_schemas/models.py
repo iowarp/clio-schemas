@@ -27,6 +27,7 @@ from clio_schemas.a2ui.v0_9_1.messages import A2UIClientMessage, A2UIServerMessa
 from clio_schemas.gact_v3 import MessageBlock
 from clio_schemas.model_capabilities import ModelCapabilityTags
 from clio_schemas.model_facts import ModelFacts
+from clio_schemas.model_parameters import AcceptedParameter
 
 
 class ClioSchemaBase(BaseModel):
@@ -470,6 +471,7 @@ EXPORTED_MODELS: tuple[type[BaseModel], ...] = (
     A2UIClientDataModel,
     A2UIClientMessage,
     A2UIServerMessage,
+    AcceptedParameter,
     ArtifactRecord,
     ArtifactVersion,
     CatalogFile,
