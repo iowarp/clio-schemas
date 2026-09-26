@@ -13,11 +13,15 @@ types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
 > **Status: canonical records, live UI vocabularies, and A2UI 0.9.1 catalog
-> files (version 0.3.2).**
+> files, model-capability tags (version 0.3.3).**
 > `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 13 GACT 0.3
 > message blocks, the official A2UI 0.9.1 envelope/capability/catalog-file models, and
 > the two builtin catalog files (`clio-workspace`'s 30 CLIO components, the vendored
-> `basic` catalog) are canonical. There is no closed component/action Python union
+> `basic` catalog) are canonical. `ModelCapabilityTags`
+> (`clio_schemas.model_capabilities`) tags one model's input/output modalities,
+> capabilities, model type and role (general vs surrogate), Hugging Face
+> `pipeline_tag` tasks, domains, and free/router flags, every tag with its
+> evidence source; an absent tag means no source stated it. There is no closed component/action Python union
 > anymore — a catalog is a JSON Schema document, validated with
 > `clio_schemas.a2ui.validation` (`jsonschema` + `referencing`), not a pydantic
 > discriminated union.

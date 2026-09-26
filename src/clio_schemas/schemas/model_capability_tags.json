@@ -1,0 +1,379 @@
+{
+  "$defs": {
+    "CapabilityTag": {
+      "additionalProperties": false,
+      "description": "A capability the model has.",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "enum": [
+            "tool_calling",
+            "parallel_tool_calls",
+            "reasoning",
+            "structured_output",
+            "web_search",
+            "code_execution",
+            "computer_use",
+            "prompt_caching"
+          ],
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "CapabilityTag",
+      "type": "object"
+    },
+    "DomainTag": {
+      "additionalProperties": false,
+      "description": "A subject domain the model is built for.",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "enum": [
+            "language",
+            "vision",
+            "speech",
+            "biology",
+            "chemistry",
+            "materials",
+            "climate",
+            "physics",
+            "astronomy",
+            "geoscience",
+            "medical"
+          ],
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "DomainTag",
+      "type": "object"
+    },
+    "FlagTag": {
+      "additionalProperties": false,
+      "description": "A yes/no fact about how the model is offered (free of charge, a router).",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "title": "Value",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "FlagTag",
+      "type": "object"
+    },
+    "ModalityTag": {
+      "additionalProperties": false,
+      "description": "A modality the model reads or produces.",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "enum": [
+            "text",
+            "image",
+            "audio",
+            "video",
+            "pdf",
+            "embeddings",
+            "masks",
+            "scores",
+            "tensor"
+          ],
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "ModalityTag",
+      "type": "object"
+    },
+    "ModelTypeTag": {
+      "additionalProperties": false,
+      "description": "What kind of model it is.",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "enum": [
+            "chat",
+            "embedding",
+            "rerank",
+            "audio_transcription",
+            "audio_speech",
+            "image_generation",
+            "image_edit",
+            "video_generation",
+            "moderation",
+            "ocr",
+            "segmentation",
+            "classification",
+            "forecasting",
+            "scientific_surrogate",
+            "other"
+          ],
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "ModelTypeTag",
+      "type": "object"
+    },
+    "RoleTag": {
+      "additionalProperties": false,
+      "description": "Whether the model holds a conversation (general) or does one task (surrogate).",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "enum": [
+            "general",
+            "surrogate"
+          ],
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "RoleTag",
+      "type": "object"
+    },
+    "TagEvidence": {
+      "additionalProperties": false,
+      "description": "One source's statement behind a tag.",
+      "properties": {
+        "detail": {
+          "description": "The upstream field and value as the source stated it, e.g. \"openrouter architecture.output_modalities=['decisions']\" or \"ALCF gateway /models framework='sam3service'\".",
+          "title": "Detail",
+          "type": "string"
+        },
+        "observed_at": {
+          "description": "ISO-8601 time the evidence was produced (empty when the source gives none).",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "source": {
+          "description": "Who stated the value.",
+          "enum": [
+            "user",
+            "overlay",
+            "server_report",
+            "hf_repo",
+            "models.dev",
+            "litellm",
+            "db",
+            "openrouter",
+            "dialect",
+            "probe",
+            "catalog"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "detail",
+        "observed_at"
+      ],
+      "title": "TagEvidence",
+      "type": "object"
+    },
+    "TaskTag": {
+      "additionalProperties": false,
+      "description": "A task the model performs, as a Hugging Face ``pipeline_tag`` id (or ``clio:<id>``).",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "pattern": "^(?:text-classification|token-classification|table-question-answering|question-answering|zero-shot-classification|translation|summarization|feature-extraction|text-generation|fill-mask|sentence-similarity|table-to-text|multiple-choice|text-ranking|text-retrieval|text-to-speech|text-to-audio|automatic-speech-recognition|audio-to-audio|audio-classification|voice-activity-detection|audio-text-to-text|image-text-to-text|image-text-to-image|image-text-to-video|visual-question-answering|document-question-answering|video-text-to-text|visual-document-retrieval|any-to-any|depth-estimation|image-classification|object-detection|image-segmentation|text-to-image|image-to-text|image-to-image|image-to-video|unconditional-image-generation|video-classification|text-to-video|zero-shot-image-classification|mask-generation|zero-shot-object-detection|text-to-3d|image-to-3d|image-feature-extraction|keypoint-detection|video-to-video|tabular-classification|tabular-regression|tabular-to-text|time-series-forecasting|reinforcement-learning|robotics|graph-ml|other|clio:[a-z0-9]+(?:-[a-z0-9]+)*)$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "TaskTag",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Everything a model picker may tag one model with, each tag with its evidence.\n\nAn absent tag means no source stated it -- never \"no\". ``role`` always\nagrees with ``model_type`` when both are present (``chat`` is general,\nevery other type a surrogate).",
+  "properties": {
+    "capabilities": {
+      "description": "What it can do.",
+      "items": {
+        "$ref": "#/$defs/CapabilityTag"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "domains": {
+      "description": "Subject domains.",
+      "items": {
+        "$ref": "#/$defs/DomainTag"
+      },
+      "title": "Domains",
+      "type": "array"
+    },
+    "free": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FlagTag"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Whether this endpoint serves the model at no cost."
+    },
+    "input_modalities": {
+      "description": "What it reads.",
+      "items": {
+        "$ref": "#/$defs/ModalityTag"
+      },
+      "title": "Input Modalities",
+      "type": "array"
+    },
+    "model_key": {
+      "description": "The canonical model identity the tags describe (a Hub repo id, a cloud model id, ...).",
+      "minLength": 1,
+      "title": "Model Key",
+      "type": "string"
+    },
+    "model_type": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelTypeTag"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "What kind of model it is."
+    },
+    "output_modalities": {
+      "description": "What it produces.",
+      "items": {
+        "$ref": "#/$defs/ModalityTag"
+      },
+      "title": "Output Modalities",
+      "type": "array"
+    },
+    "role": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RoleTag"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "general or surrogate."
+    },
+    "router": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FlagTag"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Whether the model id is a router that picks another model per request."
+    },
+    "tasks": {
+      "description": "Tasks it performs.",
+      "items": {
+        "$ref": "#/$defs/TaskTag"
+      },
+      "title": "Tasks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "model_key"
+  ],
+  "title": "ModelCapabilityTags",
+  "type": "object"
+}
