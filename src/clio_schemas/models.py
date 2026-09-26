@@ -26,6 +26,7 @@ from clio_schemas.a2ui.v0_9_1.data_model import A2UIClientDataModel
 from clio_schemas.a2ui.v0_9_1.messages import A2UIClientMessage, A2UIServerMessage
 from clio_schemas.gact_v3 import MessageBlock
 from clio_schemas.model_capabilities import ModelCapabilityTags
+from clio_schemas.model_facts import ModelFacts
 
 
 class ClioSchemaBase(BaseModel):
@@ -478,6 +479,7 @@ EXPORTED_MODELS: tuple[type[BaseModel], ...] = (
     Instrument,
     MessageBlock,
     ModelCapabilityTags,
+    ModelFacts,
     ProvEdge,
     TransformRecord,
 )

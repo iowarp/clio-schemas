@@ -1,0 +1,500 @@
+{
+  "$defs": {
+    "DescriptionFact": {
+      "additionalProperties": false,
+      "description": "What the model is, in its source's words.",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "$ref": "#/$defs/DescriptionValue"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "DescriptionFact",
+      "type": "object"
+    },
+    "DescriptionLink": {
+      "additionalProperties": false,
+      "description": "One markdown link found in a description, kept as data.",
+      "properties": {
+        "text": {
+          "description": "The link's label as it reads in the text.",
+          "title": "Text",
+          "type": "string"
+        },
+        "url": {
+          "description": "The link target exactly as the source wrote it.",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "url"
+      ],
+      "title": "DescriptionLink",
+      "type": "object"
+    },
+    "DescriptionValue": {
+      "additionalProperties": false,
+      "description": "A description in its raw form and as plain text for display.",
+      "properties": {
+        "links": {
+          "description": "The links reduced out of `plain`, in order.",
+          "items": {
+            "$ref": "#/$defs/DescriptionLink"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "plain": {
+          "description": "The text with each markdown link reduced to its label.",
+          "title": "Plain",
+          "type": "string"
+        },
+        "text": {
+          "description": "The source's text, verbatim.",
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "plain"
+      ],
+      "title": "DescriptionValue",
+      "type": "object"
+    },
+    "ParametersFact": {
+      "additionalProperties": false,
+      "description": "How big the model is.",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "$ref": "#/$defs/ParametersValue"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "ParametersFact",
+      "type": "object"
+    },
+    "ParametersValue": {
+      "additionalProperties": false,
+      "description": "A model's size in parameters.",
+      "properties": {
+        "active": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Parameters used per token (mixture-of-experts), when stated.",
+          "title": "Active"
+        },
+        "experts_active": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Experts chosen per token.",
+          "title": "Experts Active"
+        },
+        "experts_total": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Routed experts per MoE layer.",
+          "title": "Experts Total"
+        },
+        "precision": {
+          "enum": [
+            "exact",
+            "rounded"
+          ],
+          "title": "Precision",
+          "type": "string"
+        },
+        "total": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Every parameter: the slider value.",
+          "title": "Total"
+        }
+      },
+      "required": [
+        "total",
+        "active",
+        "experts_total",
+        "experts_active",
+        "precision"
+      ],
+      "title": "ParametersValue",
+      "type": "object"
+    },
+    "Price": {
+      "additionalProperties": false,
+      "description": "One side (input or output) of a price, per 1M tokens.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "usd",
+            "variable",
+            "subscription"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "per_1m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "USD per 1M tokens for kind `usd`; null for `variable` and `subscription`.",
+          "title": "Per 1M"
+        }
+      },
+      "required": [
+        "kind",
+        "per_1m"
+      ],
+      "title": "Price",
+      "type": "object"
+    },
+    "PricingAlternative": {
+      "additionalProperties": false,
+      "description": "Another source's price that did not win (e.g. a catalog list price).",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "$ref": "#/$defs/PricingValue"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "PricingAlternative",
+      "type": "object"
+    },
+    "PricingFact": {
+      "additionalProperties": false,
+      "description": "What the model costs: the endpoint's own price first, a catalog list price otherwise.",
+      "properties": {
+        "alternatives": {
+          "description": "Other sources' prices, each with its evidence.",
+          "items": {
+            "$ref": "#/$defs/PricingAlternative"
+          },
+          "title": "Alternatives",
+          "type": "array"
+        },
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "$ref": "#/$defs/PricingValue"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "PricingFact",
+      "type": "object"
+    },
+    "PricingValue": {
+      "additionalProperties": false,
+      "description": "Input and output prices.",
+      "properties": {
+        "input": {
+          "$ref": "#/$defs/Price"
+        },
+        "output": {
+          "$ref": "#/$defs/Price"
+        },
+        "unit": {
+          "const": "usd_per_1m_tokens",
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "unit",
+        "input",
+        "output"
+      ],
+      "title": "PricingValue",
+      "type": "object"
+    },
+    "RecentFact": {
+      "additionalProperties": false,
+      "description": "Whether the release is recent, derived by the server at serve time (never stored).",
+      "properties": {
+        "as_of": {
+          "description": "The day recency was judged against.",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "As Of",
+          "type": "string"
+        },
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "description": "The release falls within `window_months` of `as_of`.",
+          "title": "Value",
+          "type": "boolean"
+        },
+        "window_months": {
+          "description": "The recency window, in calendar months.",
+          "exclusiveMinimum": 0,
+          "title": "Window Months",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "value",
+        "window_months",
+        "as_of",
+        "evidence"
+      ],
+      "title": "RecentFact",
+      "type": "object"
+    },
+    "ReleaseDateFact": {
+      "additionalProperties": false,
+      "description": "When the model was released.",
+      "properties": {
+        "evidence": {
+          "description": "Every source that states this value; the first is the winning one.",
+          "items": {
+            "$ref": "#/$defs/TagEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "value": {
+          "$ref": "#/$defs/ReleaseDateValue"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "title": "ReleaseDateFact",
+      "type": "object"
+    },
+    "ReleaseDateValue": {
+      "additionalProperties": false,
+      "description": "A release date at the precision its source states it.",
+      "properties": {
+        "date": {
+          "description": "YYYY-MM-DD, YYYY-MM or YYYY, matching `precision`.",
+          "pattern": "^\\d{4}(-\\d{2}(-\\d{2})?)?$",
+          "title": "Date",
+          "type": "string"
+        },
+        "precision": {
+          "enum": [
+            "day",
+            "month",
+            "year"
+          ],
+          "title": "Precision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "precision"
+      ],
+      "title": "ReleaseDateValue",
+      "type": "object"
+    },
+    "TagEvidence": {
+      "additionalProperties": false,
+      "description": "One source's statement behind a tag.",
+      "properties": {
+        "detail": {
+          "description": "The upstream field and value as the source stated it, e.g. \"openrouter architecture.output_modalities=['decisions']\" or \"ALCF gateway /models framework='sam3service'\".",
+          "title": "Detail",
+          "type": "string"
+        },
+        "observed_at": {
+          "description": "ISO-8601 time the evidence was produced (empty when the source gives none).",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "source": {
+          "description": "Who stated the value.",
+          "enum": [
+            "user",
+            "overlay",
+            "server_report",
+            "hf_repo",
+            "models.dev",
+            "litellm",
+            "db",
+            "openrouter",
+            "dialect",
+            "probe",
+            "catalog"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "detail",
+        "observed_at"
+      ],
+      "title": "TagEvidence",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Descriptive facts about one model, each with its evidence; ``null`` = no source stated it.",
+  "properties": {
+    "description": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DescriptionFact"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "What the model is."
+    },
+    "model_key": {
+      "description": "The model identity the facts describe (as in ModelCapabilityTags).",
+      "minLength": 1,
+      "title": "Model Key",
+      "type": "string"
+    },
+    "parameters": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ParametersFact"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How many parameters it has."
+    },
+    "pricing": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PricingFact"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "What it costs, per 1M tokens."
+    },
+    "recent": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RecentFact"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Whether that release is recent."
+    },
+    "released_at": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReleaseDateFact"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "When it was released."
+    }
+  },
+  "required": [
+    "model_key",
+    "description",
+    "released_at",
+    "recent",
+    "pricing",
+    "parameters"
+  ],
+  "title": "ModelFacts",
+  "type": "object"
+}
