@@ -42,6 +42,7 @@ from clio_schemas.model_facts import (
     ReleaseDateFact,
     ReleaseDateValue,
 )
+from clio_schemas.model_parameters import AcceptedParameter, ParameterGroup, ParameterKind
 from clio_schemas.models import (
     EXPORTED_MODELS,
     RESERVED_KINDS,
@@ -77,6 +78,7 @@ __all__ = [
     "A2UIGenericError",
     "A2UIServerMessage",
     "A2UIValidationError",
+    "AcceptedParameter",
     "AgentRole",
     "ArtifactKind",
     "ArtifactRecord",
@@ -109,6 +111,8 @@ __all__ = [
     "ModelCapabilityTags",
     "ModelFacts",
     "ModelTypeTag",
+    "ParameterGroup",
+    "ParameterKind",
     "ParametersFact",
     "ParametersValue",
     "Price",
@@ -132,4 +136,4 @@ __all__ = [
 ]
 
 # Exact-pin lockstep versioning (see README "Versioning policy").
-__version__ = "0.4.0"
+__version__ = "0.4.1"
