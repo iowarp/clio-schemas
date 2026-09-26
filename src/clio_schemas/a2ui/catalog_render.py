@@ -1,4 +1,4 @@
-"""Canonicalise the 27 factory-built CLIO components to official catalog style.
+"""Canonicalise the 29 factory-built CLIO components to official catalog style.
 
 Reads the exact declarative ``required``/``optional`` field-type mapping
 (:data:`clio_schemas.a2ui.v0_9_1.components.COMPONENT_SPECS`) that builds
@@ -24,8 +24,11 @@ from pydantic import JsonValue
 from pydantic.fields import FieldInfo
 
 from clio_schemas.a2ui.v0_9_1.components import (
+    ARTIFACT_URI_PATTERN,
     COMPONENT_SPECS,
+    SYNC_GROUP_PATTERN,
     Action,
+    ArtifactUri,
     ChildList,
     ComponentId,
     DynamicBoolean,
@@ -34,6 +37,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     DynamicStringList,
     DynamicValue,
     IconValue,
+    SyncGroup,
     _CardAction,
     _ChoiceOption,
     _DataTableColumn,
@@ -161,6 +165,11 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
             ]
         }
 
+    if t == ArtifactUri:
+        return {"type": "string", "pattern": ARTIFACT_URI_PATTERN}
+    if t == SyncGroup:
+        return {"type": "string", "pattern": SYNC_GROUP_PATTERN}
+
     origin = typing.get_origin(t)
 
     if origin is Annotated:
@@ -224,7 +233,7 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
 
 
 def _render_factory_component(name: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Render one component built through ``_component_model`` (27 of the 30)."""
+    """Render one component built through ``_component_model`` (29 of the 32)."""
 
     required, optional = COMPONENT_SPECS[name]
     properties: dict[str, Any] = {"component": {"const": name}}
@@ -257,7 +266,7 @@ def _render_factory_component(name: str) -> tuple[dict[str, Any], dict[str, Any]
 
 
 def render_factory_components() -> tuple[dict[str, Any], dict[str, Any]]:
-    """Render all 27 factory-built components: ``(components, shared $defs)``."""
+    """Render all 29 factory-built components: ``(components, shared $defs)``."""
 
     components: dict[str, Any] = {}
     defs: dict[str, Any] = {"CatalogComponentCommon": CATALOG_COMPONENT_COMMON_DEF}
