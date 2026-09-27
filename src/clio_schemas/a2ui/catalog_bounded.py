@@ -32,12 +32,15 @@ from clio_schemas.a2ui.chart_spec import (
 )
 from clio_schemas.a2ui.v0_9_1.bounded_components import (
     CHART_PRESET_FIELDS,
+    DEFAULT_QUERY_PER_ENTITY,
     MAX_CHART_FIELD_LENGTH,
     MAX_CHART_HEIGHT,
     MAX_QUERY_COLUMNS,
     MAX_QUERY_FILTERS,
+    MAX_QUERY_IN_VALUES,
     MAX_QUERY_LIMIT,
-    MAX_QUERY_OBJECT_KEYS,
+    MAX_QUERY_METRICS,
+    MAX_QUERY_PER_ENTITY,
     MIN_CHART_HEIGHT,
 )
 from clio_schemas.a2ui.v0_9_1.components import (
@@ -221,20 +224,146 @@ _CHART_FIELD_NAME: dict[str, Any] = {
     "minLength": 1,
     "maxLength": MAX_CHART_FIELD_LENGTH,
 }
-_BOUNDED_OBJECT: dict[str, Any] = {"type": "object", "maxProperties": MAX_QUERY_OBJECT_KEYS}
+_QUERY_SCALAR: dict[str, Any] = {"type": ["string", "number", "boolean"]}
+
+
+def _filter_op_rule(op: str, value: dict[str, Any], *, required: bool) -> dict[str, Any]:
+    then: dict[str, Any] = {"properties": {"value": value}}
+    if required:
+        then["required"] = ["value"]
+    return {"if": {"properties": {"op": {"const": op}}}, "then": then}
+
+
+_CHART_QUERY_FILTER_DEF: dict[str, Any] = {
+    "type": "object",
+    "description": (
+        "One predicate; all filter entries are AND-ed. eq: value is a non-null scalar. "
+        "in: value is a non-empty list of scalars. range: value is [min, max], inclusive, "
+        "either side may be null. isnull: value omitted or true matches nulls, false "
+        "matches non-nulls."
+    ),
+    "properties": {
+        "column": _CHART_FIELD_NAME,
+        "op": {"type": "string", "enum": ["eq", "in", "range", "isnull"]},
+        "value": {},
+    },
+    "required": ["column", "op"],
+    "additionalProperties": False,
+    "allOf": [
+        _filter_op_rule("eq", _QUERY_SCALAR, required=True),
+        _filter_op_rule(
+            "in",
+            {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": MAX_QUERY_IN_VALUES,
+                "items": _QUERY_SCALAR,
+            },
+            required=True,
+        ),
+        _filter_op_rule(
+            "range",
+            {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {"type": ["string", "number", "boolean", "null"]},
+            },
+            required=True,
+        ),
+        _filter_op_rule("isnull", {"type": ["boolean", "null"]}, required=False),
+    ],
+}
+
+_CHART_QUERY_AGGREGATE_DEF: dict[str, Any] = {
+    "type": "object",
+    "description": (
+        "Group rows by groupBy (empty or omitted: one global group) and reduce; each "
+        "metric becomes a result column named {column}_{fn}, which must not repeat a "
+        "groupBy column."
+    ),
+    "properties": {
+        "groupBy": {
+            "type": "array",
+            "maxItems": MAX_QUERY_COLUMNS,
+            "uniqueItems": True,
+            "items": _CHART_FIELD_NAME,
+        },
+        "metrics": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": MAX_QUERY_METRICS,
+            "uniqueItems": True,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "column": _CHART_FIELD_NAME,
+                    "fn": {
+                        "type": "string",
+                        "enum": ["mean", "min", "max", "count", "sum", "median"],
+                    },
+                },
+                "required": ["column", "fn"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "required": ["metrics"],
+    "additionalProperties": False,
+}
+
+_CHART_QUERY_DOWNSAMPLE_DEF: dict[str, Any] = {
+    "type": "object",
+    "description": (
+        "How the server thins rows before limit applies. none keeps every row; stride "
+        "keeps evenly spaced rows (per entityColumn up to maxPerEntity when set, else "
+        "overall up to limit); per_entity_lttb runs LTTB on (x, y) per entityColumn "
+        "(the whole table is one series without it) and needs x and y."
+    ),
+    "properties": {
+        "mode": {
+            "type": "string",
+            "enum": ["none", "stride", "per_entity_lttb"],
+            "default": "none",
+        },
+        "entityColumn": _CHART_FIELD_NAME,
+        "x": _CHART_FIELD_NAME,
+        "y": _CHART_FIELD_NAME,
+        "maxPerEntity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": MAX_QUERY_PER_ENTITY,
+            "default": DEFAULT_QUERY_PER_ENTITY,
+        },
+    },
+    "additionalProperties": False,
+    "if": {"properties": {"mode": {"const": "per_entity_lttb"}}, "required": ["mode"]},
+    "then": {"required": ["x", "y"]},
+}
 
 _CHART_DATA_QUERY_DEF: dict[str, Any] = {
     "type": "object",
     "description": (
-        "A server-side table query applied to dataUri: columns (projection), filter, "
-        "aggregate, downsample, limit. Filter/aggregate/downsample entries are open "
-        "objects the server interprets, bounded in size."
+        "A server-side table query applied to dataUri: the table-query request body "
+        "(POST /v1/artifacts/{id}/table-query) without format. The server runs filter, "
+        "then aggregate, then downsample, then limit. Omit columns to request the "
+        "preset fill fields, the selection field and the spec's fields."
     ),
     "properties": {
-        "columns": {"type": "array", "maxItems": MAX_QUERY_COLUMNS, "items": _CHART_FIELD_NAME},
-        "filter": {"type": "array", "maxItems": MAX_QUERY_FILTERS, "items": _BOUNDED_OBJECT},
-        "aggregate": _BOUNDED_OBJECT,
-        "downsample": _BOUNDED_OBJECT,
+        "columns": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": MAX_QUERY_COLUMNS,
+            "uniqueItems": True,
+            "items": _CHART_FIELD_NAME,
+        },
+        "filter": {
+            "type": "array",
+            "maxItems": MAX_QUERY_FILTERS,
+            "items": {"$ref": "#/$defs/ChartQueryFilter"},
+        },
+        "aggregate": {"$ref": "#/$defs/ChartQueryAggregate"},
+        "downsample": {"$ref": "#/$defs/ChartQueryDownsample"},
         "limit": {"type": "integer", "minimum": 1, "maximum": MAX_QUERY_LIMIT},
     },
     "additionalProperties": False,
@@ -363,6 +492,9 @@ def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
         "WorkflowNode": _WORKFLOW_NODE_DEF,
         "WorkflowEdge": _WORKFLOW_EDGE_DEF,
         "ChartDataQuery": _CHART_DATA_QUERY_DEF,
+        "ChartQueryFilter": _CHART_QUERY_FILTER_DEF,
+        "ChartQueryAggregate": _CHART_QUERY_AGGREGATE_DEF,
+        "ChartQueryDownsample": _CHART_QUERY_DOWNSAMPLE_DEF,
         "SelectionState": _SELECTION_STATE_DEF,
     }
     return components, defs

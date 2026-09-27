@@ -101,8 +101,14 @@ group), `facetField` (small multiples), and `xType` (`temporal`,
 `quantitative`, `ordinal`). Every preset already highlights the clicked
 entity and dims the rest. The rows come only from `data` (small inline
 rows) or `dataUri` (a registered table artifact, optionally narrowed with
-`dataQuery`: columns, filter, aggregate, downsample, limit) — never from the
-spec. When no preset fits, a hand-written `spec` must leave `data` out (or
+`dataQuery`) — never from the spec. `dataQuery` is the server's table query:
+`columns`, `filter` (`{column, op, value}` with `op` one of `eq`, `in`,
+`range`, `isnull`), `aggregate` (`groupBy` plus `metrics` of `{column, fn}`),
+`downsample` (`mode` `none`, `stride`, or `per_entity_lttb` with `x`, `y`,
+`entityColumn`, `maxPerEntity`), and `limit`. For many long series, keep
+each entity's shape with `per_entity_lttb`:
+`"dataQuery": {"columns": ["t", "disp_mm", "station"], "filter": [{"column": "network", "op": "eq", "value": "CI"}], "downsample": {"mode": "per_entity_lttb", "entityColumn": "station", "x": "t", "y": "disp_mm", "maxPerEntity": 500}}`.
+When no preset fits, a hand-written `spec` must leave `data` out (or
 use exactly `{"name": "source"}`), must not contain `url`, and stays small
 (64 KB, at most 8 views):
 `{"id": "ch1", "component": "clio.chart.v1", "title": "Displacement", "preset": "trajectories", "xField": "t", "xType": "temporal", "yField": "disp_mm", "entityField": "station", "dataUri": "artifact://artifact_abc123", "selection": {"path": "/selection/stations"}}`.
@@ -116,7 +122,10 @@ agent turn in between. Seed a selection with `updateDataModel` at that path,
 and read the current one from the data model (or a `Button` whose event
 context binds the path) when the scientist asks about "the selected" items.
 A chart's selection covers `selectionField` (by default the preset's
-`entityField`).
+`entityField`). To set a selection from an action instead, call
+`selectData` with the path, the field, and the ids; it writes
+`{"field": ..., "values": rowIds, "source": "selectData"}` there:
+`{"functionCall": {"call": "selectData", "args": {"path": "/selection/stations", "field": "station", "rowIds": ["GNSS01", "GNSS07"]}, "returnType": "void"}}`.
 
 **Artifact** — reference a registered artifact by its returned URI (an
 `artifact://` id if that is all registration returned), never a bare

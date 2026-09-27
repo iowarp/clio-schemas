@@ -766,3 +766,53 @@ def test_chart_title_accepts_a_function_call_like_other_dynamic_strings() -> Non
     }
     WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
     ChartComponent.model_validate(payload)
+
+
+def test_chart_aggregate_name_collision_is_a_model_rule() -> None:
+    """A metric named like a groupBy column: JSON Schema cannot see it, the model refuses it."""
+
+    payload = {
+        "id": "ch",
+        "component": "clio.chart.v1",
+        "preset": "scatter",
+        "xField": "run",
+        "yField": "v_mean",
+        "entityField": "run",
+        "dataUri": _URI,
+        "dataQuery": {
+            "columns": ["run", "v_mean"],
+            "aggregate": {"groupBy": ["run", "v_mean"], "metrics": [{"column": "v", "fn": "mean"}]},
+        },
+    }
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    with pytest.raises(ValidationError, match="collide with groupBy"):
+        ChartComponent.model_validate(payload)
+
+
+def _select_data_button(args: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": "pick",
+        "component": "Button",
+        "child": "pick_label",
+        "action": {"functionCall": {"call": "selectData", "args": args, "returnType": "void"}},
+    }
+
+
+def test_select_data_writes_a_selection_path_and_field() -> None:
+    """selectData names the /selection/<key> path and the field its rowIds are values of."""
+
+    args = {"path": "/selection/stations", "field": "station", "rowIds": ["GNSS01", "GNSS07"]}
+    WORKSPACE_VALIDATORS["Button"].validate(_select_data_button(args))
+    WORKSPACE_VALIDATORS["Button"].validate(
+        _select_data_button({**args, "surfaceId": "s", "rowIds": []})
+    )
+    for bad in (
+        {"field": "station", "rowIds": ["GNSS01"]},
+        {"path": "/selection/stations", "rowIds": ["GNSS01"]},
+        {**args, "path": "/stations"},
+        {**args, "path": "/selection/a/b"},
+        {**args, "field": ""},
+        {**args, "rowIds": [1]},
+        {**args, "values": ["GNSS01"]},
+    ):
+        assert not WORKSPACE_VALIDATORS["Button"].is_valid(_select_data_button(bad)), bad

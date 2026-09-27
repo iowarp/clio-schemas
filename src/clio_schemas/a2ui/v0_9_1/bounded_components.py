@@ -149,10 +149,16 @@ class WorkflowComponent(_ComponentBase):
 MAX_CHART_FIELD_LENGTH = 128
 MIN_CHART_HEIGHT = 80
 MAX_CHART_HEIGHT = 2000
-MAX_QUERY_COLUMNS = 256
+#: dataQuery bounds, copied from the table-query server's request model
+#: (clio-agent ``gact/artifacts/table_query.py``). MAX_QUERY_LIMIT is the
+#: server's default row ceiling (``artifacts.table_query_max_rows``).
+MAX_QUERY_COLUMNS = 64
 MAX_QUERY_FILTERS = 64
-MAX_QUERY_OBJECT_KEYS = 16
-MAX_QUERY_LIMIT = 1_000_000
+MAX_QUERY_IN_VALUES = 10_000
+MAX_QUERY_METRICS = 64
+MAX_QUERY_PER_ENTITY = 2_000
+DEFAULT_QUERY_PER_ENTITY = 500
+MAX_QUERY_LIMIT = 50_000
 
 ChartFieldName = Annotated[str, StringConstraints(min_length=1, max_length=MAX_CHART_FIELD_LENGTH)]
 ChartRowValue = str | int | float | bool | None
@@ -169,22 +175,121 @@ CHART_PRESET_FIELDS: tuple[str, ...] = (
 )
 
 
+QueryFilterOp = Literal["eq", "in", "range", "isnull"]
+QueryMetricFn = Literal["mean", "min", "max", "count", "sum", "median"]
+DownsampleMode = Literal["none", "stride", "per_entity_lttb"]
+
+
+def _is_query_scalar(value: object) -> bool:
+    return isinstance(value, str | int | float | bool)
+
+
+class ChartQueryFilter(_ClosedModel):
+    """One ``dataQuery.filter`` predicate; all predicates are AND-ed together.
+
+    * ``eq``: ``value`` is a non-null scalar.
+    * ``in``: ``value`` is a non-empty list of non-null scalars.
+    * ``range``: ``value`` is ``[min, max]``, inclusive; either side may be null.
+    * ``isnull``: ``value`` is omitted/``true`` (match nulls) or ``false``
+      (match non-nulls).
+    """
+
+    column: ChartFieldName
+    op: QueryFilterOp
+    value: JsonValue = None
+
+    @model_validator(mode="after")
+    def _check_value(self) -> ChartQueryFilter:
+        value = self.value
+        if self.op == "eq":
+            if not _is_query_scalar(value):
+                raise ValueError("eq filter requires a non-null scalar value")
+        elif self.op == "in":
+            if not isinstance(value, list) or not 1 <= len(value) <= MAX_QUERY_IN_VALUES:
+                raise ValueError(f"in filter requires a list of 1..{MAX_QUERY_IN_VALUES} values")
+            if not all(_is_query_scalar(item) for item in value):
+                raise ValueError("in filter values must be non-null scalars")
+        elif self.op == "range":
+            if not isinstance(value, list) or len(value) != 2:
+                raise ValueError("range filter requires [min, max]")
+            if not all(item is None or _is_query_scalar(item) for item in value):
+                raise ValueError("range bounds must be scalars or null")
+        elif value is not None and not isinstance(value, bool):
+            raise ValueError("isnull filter value must be a boolean when given")
+        return self
+
+
+class ChartQueryMetric(_ClosedModel):
+    """One aggregate output column; the server names it ``{column}_{fn}``."""
+
+    column: ChartFieldName
+    fn: QueryMetricFn
+
+
+class ChartQueryAggregate(_ClosedModel):
+    """Group rows by ``groupBy`` (empty: one global group) and reduce with ``metrics``."""
+
+    groupBy: list[ChartFieldName] = Field(default_factory=list, max_length=MAX_QUERY_COLUMNS)
+    metrics: list[ChartQueryMetric] = Field(min_length=1, max_length=MAX_QUERY_METRICS)
+
+    @model_validator(mode="after")
+    def _check_names(self) -> ChartQueryAggregate:
+        if len(set(self.groupBy)) != len(self.groupBy):
+            raise ValueError("groupBy columns must be distinct")
+        names = [f"{metric.column}_{metric.fn}" for metric in self.metrics]
+        if len(set(names)) != len(names):
+            raise ValueError("aggregate metrics must be distinct")
+        clash = sorted(set(names) & set(self.groupBy))
+        if clash:
+            raise ValueError(f"metric output names collide with groupBy columns: {clash}")
+        return self
+
+
+class ChartQueryDownsample(_ClosedModel):
+    """How the server thins the filtered/aggregated rows before ``limit`` applies.
+
+    ``none`` keeps every row; ``stride`` keeps evenly spaced rows (per
+    ``entityColumn`` up to ``maxPerEntity`` when set, else overall up to
+    ``limit``); ``per_entity_lttb`` runs Largest-Triangle-Three-Buckets on
+    ``(x, y)`` per entity and needs both ``x`` and ``y``.
+    """
+
+    mode: DownsampleMode = "none"
+    entityColumn: ChartFieldName | None = None
+    x: ChartFieldName | None = None
+    y: ChartFieldName | None = None
+    maxPerEntity: int = Field(default=DEFAULT_QUERY_PER_ENTITY, ge=1, le=MAX_QUERY_PER_ENTITY)
+
+    @model_validator(mode="after")
+    def _check_mode(self) -> ChartQueryDownsample:
+        if self.mode == "per_entity_lttb" and (self.x is None or self.y is None):
+            raise ValueError("per_entity_lttb requires both x and y")
+        return self
+
+
 class ChartDataQuery(_ClosedModel):
     """A server-side table query applied to ``dataUri`` before the rows reach the chart.
 
-    Mirrors a table-query request (projection, filters, aggregation,
-    downsampling, row limit). The top level is closed; the filter, aggregate
-    and downsample entries are open objects the server interprets, bounded
-    in size.
+    The request body of ``POST /v1/artifacts/{id}/table-query`` (clio-agent
+    ``TableQueryRequest``) minus ``format``, which the renderer always sends
+    as ``json``. ``columns`` may be omitted: the renderer then requests the
+    preset fill fields, the selection field and the spec's fields. The
+    server runs filter, then aggregate, then downsample, then limit.
     """
 
-    columns: list[ChartFieldName] | None = Field(default=None, max_length=MAX_QUERY_COLUMNS)
-    filter: (
-        list[Annotated[dict[str, JsonValue], Field(max_length=MAX_QUERY_OBJECT_KEYS)]] | None
-    ) = Field(default=None, max_length=MAX_QUERY_FILTERS)
-    aggregate: dict[str, JsonValue] | None = Field(default=None, max_length=MAX_QUERY_OBJECT_KEYS)
-    downsample: dict[str, JsonValue] | None = Field(default=None, max_length=MAX_QUERY_OBJECT_KEYS)
+    columns: list[ChartFieldName] | None = Field(
+        default=None, min_length=1, max_length=MAX_QUERY_COLUMNS
+    )
+    filter: list[ChartQueryFilter] | None = Field(default=None, max_length=MAX_QUERY_FILTERS)
+    aggregate: ChartQueryAggregate | None = None
+    downsample: ChartQueryDownsample | None = None
     limit: int | None = Field(default=None, ge=1, le=MAX_QUERY_LIMIT)
+
+    @model_validator(mode="after")
+    def _check_columns(self) -> ChartDataQuery:
+        if self.columns is not None and len(set(self.columns)) != len(self.columns):
+            raise ValueError("columns must be distinct")
+        return self
 
 
 class ChartComponent(_ComponentBase):

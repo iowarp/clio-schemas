@@ -23,8 +23,10 @@ from clio_schemas.a2ui.v0_9_1.bounded_components import (
     MAX_MAP_POINTS,
     MAX_QUERY_COLUMNS,
     MAX_QUERY_FILTERS,
+    MAX_QUERY_IN_VALUES,
     MAX_QUERY_LIMIT,
-    MAX_QUERY_OBJECT_KEYS,
+    MAX_QUERY_METRICS,
+    MAX_QUERY_PER_ENTITY,
     MAX_TIME_SERIES_ROWS,
     MAX_WORKFLOW_EDGES,
     MAX_WORKFLOW_NODES,
@@ -299,9 +301,24 @@ def test_chart_enforces_height_query_and_selection_param_bounds() -> None:
         {"height": MAX_CHART_HEIGHT + 1},
         {"dataQuery": {"limit": 0}},
         {"dataQuery": {"limit": MAX_QUERY_LIMIT + 1}},
-        {"dataQuery": {"columns": ["c"] * (MAX_QUERY_COLUMNS + 1)}},
-        {"dataQuery": {"filter": [{}] * (MAX_QUERY_FILTERS + 1)}},
-        {"dataQuery": {"aggregate": {f"k{i}": i for i in range(MAX_QUERY_OBJECT_KEYS + 1)}}},
+        {"dataQuery": {"columns": [f"c{i}" for i in range(MAX_QUERY_COLUMNS + 1)]}},
+        {"dataQuery": {"filter": [{"column": "e", "op": "isnull"}] * (MAX_QUERY_FILTERS + 1)}},
+        {
+            "dataQuery": {
+                "filter": [{"column": "e", "op": "in", "value": [0] * (MAX_QUERY_IN_VALUES + 1)}]
+            }
+        },
+        {
+            "dataQuery": {
+                "aggregate": {
+                    "metrics": [
+                        {"column": f"c{i}", "fn": "sum"} for i in range(MAX_QUERY_METRICS + 1)
+                    ]
+                }
+            }
+        },
+        {"dataQuery": {"downsample": {"mode": "stride", "maxPerEntity": MAX_QUERY_PER_ENTITY + 1}}},
+        {"dataQuery": {"downsample": {"mode": "stride", "maxPerEntity": 0}}},
         {"selectionParam": "9lives"},
         {"xField": ""},
         {"xField": "x" * (MAX_CHART_FIELD_LENGTH + 1)},

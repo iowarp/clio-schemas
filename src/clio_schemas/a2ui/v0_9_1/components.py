@@ -42,6 +42,8 @@ MAX_TIME_SERIES_ROWS = 10_000
 MAX_WORKFLOW_NODES = 128
 MAX_WORKFLOW_EDGES = 256
 MAX_SELECTION_VALUES = 10_000
+#: Where a selection lives in a surface's data model: ``/selection/<key>``.
+SELECTION_PATH_PATTERN = r"^/selection/[^/]+$"
 
 #: A registered-artifact reference (the only form bulk data may take on the wire).
 ARTIFACT_URI_PATTERN = r"^artifact://artifact_[A-Za-z0-9_-]+$"

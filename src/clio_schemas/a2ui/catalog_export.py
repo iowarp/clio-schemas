@@ -19,6 +19,7 @@ from clio_schemas.a2ui.catalog_render import render_factory_components
 from clio_schemas.a2ui.instructions import BASIC_INSTRUCTIONS_MD, WORKSPACE_INSTRUCTIONS_MD
 from clio_schemas.a2ui.sidecar import CatalogSidecar
 from clio_schemas.a2ui.v0_9_1.catalog_file import CatalogFile
+from clio_schemas.a2ui.v0_9_1.components import MAX_SELECTION_VALUES, SELECTION_PATH_PATTERN
 
 WORKSPACE_CATALOG_ID = "https://iowarp.ai/a2ui/catalogs/clio-workspace/v1"
 
@@ -71,14 +72,34 @@ def _render_workspace_functions() -> dict[str, Any]:
                         "The surface the selection applies to; defaults to the current surface."
                     ),
                 },
+                "path": {
+                    "type": "string",
+                    "pattern": SELECTION_PATH_PATTERN,
+                    "maxLength": 256,
+                    "description": (
+                        "The data-model path the selection is written to, /selection/<key>: "
+                        "the same path the linked components bind their selection to."
+                    ),
+                },
+                "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "The data field the row identifiers are values of.",
+                },
                 "rowIds": {
                     "type": "array",
+                    "maxItems": MAX_SELECTION_VALUES,
                     "items": {"type": "string"},
-                    "description": "The selected row identifiers.",
+                    "description": "The selected row identifiers; written as the values.",
                 },
             },
-            ["rowIds"],
-            "Reports a data-table or list row selection back to the workspace.",
+            ["path", "field", "rowIds"],
+            (
+                "Writes a selection to the data model: a SelectionState {field, values: "
+                "rowIds, source: 'selectData'} at path. Every component whose selection "
+                "is bound to that path follows it."
+            ),
         ),
         "focusWorkflow": call_schema(
             "focusWorkflow",
