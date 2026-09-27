@@ -9,9 +9,9 @@ declared field type is recognised once, by identity/equality, and rendered
 into the matching official ``common_types.json`` ``$ref`` (or a local
 ``$defs`` entry for a CLIO-only nested shape: option/tab/column/card-action).
 
-The three components with bounded lists or cross-field rules
-(``clio.map.v1``, ``clio.time-series.v1``, ``clio.workflow.v1``) are not
-built through ``COMPONENT_SPECS`` at all — see ``catalog_bounded.py``.
+The four components with bounded lists or cross-field rules
+(``clio.map.v1``, ``clio.time-series.v1``, ``clio.workflow.v1``,
+``clio.chart.v1``) are not built through ``COMPONENT_SPECS`` at all — see ``catalog_bounded.py``.
 """
 
 from __future__ import annotations
@@ -233,7 +233,7 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
 
 
 def _render_factory_component(name: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Render one component built through ``_component_model`` (29 of the 32)."""
+    """Render one component built through ``_component_model`` (29 of the 33)."""
 
     required, optional = COMPONENT_SPECS[name]
     properties: dict[str, Any] = {"component": {"const": name}}

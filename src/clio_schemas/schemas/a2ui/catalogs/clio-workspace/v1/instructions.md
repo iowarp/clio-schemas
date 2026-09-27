@@ -51,7 +51,8 @@ rather than reaching for an aggregate shape:
 
 **DataTable** — tabular rows; give a title via a sibling `Text`, not a
 property on the table itself:
-`{"id": "t1", "component": "clio.data-table.v1", "columns": ["station", "displacement_mm"], "rows": [{"station": "GNSS01", "displacement_mm": 3.1}]}`.
+`{"id": "t1", "component": "clio.data-table.v1", "columns": ["station", "displacement_mm"], "rows": [{"station": "GNSS01", "displacement_mm": 3.1}]}`. Bind `selection`
+to share selected rows with charts and maps (see Shared selection below).
 
 **TimeSeries** — small inline series go in `series`; a registered artifact
 goes in `dataUri` instead (never both):
@@ -63,7 +64,8 @@ handlers:
 
 **Map** — a bounded set of labeled points; the renderer owns the basemap, so
 never pass tile/style URLs:
-`{"id": "map1", "component": "clio.map.v1", "points": [{"id": "s1", "label": "GNSS01", "latitude": 34.1, "longitude": -118.3}]}`.
+`{"id": "map1", "component": "clio.map.v1", "points": [{"id": "s1", "label": "GNSS01", "latitude": 34.1, "longitude": -118.3}]}`. `selected` still marks one point by
+id; bind `selection` instead to share a selection with charts and tables.
 
 **Workflow** — a bounded node/edge graph, useful for showing a multi-step
 plan's progress:
@@ -87,6 +89,34 @@ the view keeps the current camera there (and follows it when it changes),
 so a `Button` can send the scientist's chosen angle to the agent. Viewports
 that share a `syncGroup` move one camera and one color range together:
 `{"id": "vp1", "component": "clio.mesh-viewport.v1", "title": "Design", "meshUri": "artifact://artifact_abc123", "field": "DENSITY", "frame": {"path": "/cycle"}, "thresholdField": "DENSITY", "thresholdMin": {"path": "/iso"}, "thresholdMax": 1}`.
+
+**Chart** — `clio.chart.v1` draws any Vega-Lite chart over tabular rows.
+Prefer a `preset` over writing a `spec`: `trajectories` (one line per entity
+over time or a step), `spectra` (one curve per entity over wavelength or
+frequency), `scatter`, `boxplot` (distribution per category, with each entity
+as a point), and `heatmap` (grid colored by a value). Fill a preset by naming
+columns: `xField`, `yField`, `entityField` (what one line, point, or cell
+belongs to — a run, a sample, a station), and optionally `colorField` (a
+group), `facetField` (small multiples), and `xType` (`temporal`,
+`quantitative`, `ordinal`). Every preset already highlights the clicked
+entity and dims the rest. The rows come only from `data` (small inline
+rows) or `dataUri` (a registered table artifact, optionally narrowed with
+`dataQuery`: columns, filter, aggregate, downsample, limit) — never from the
+spec. When no preset fits, a hand-written `spec` must leave `data` out (or
+use exactly `{"name": "source"}`), must not contain `url`, and stays small
+(64 KB, at most 8 views):
+`{"id": "ch1", "component": "clio.chart.v1", "title": "Displacement", "preset": "trajectories", "xField": "t", "xType": "temporal", "yField": "disp_mm", "entityField": "station", "dataUri": "artifact://artifact_abc123", "selection": {"path": "/selection/stations"}}`.
+
+**Shared selection** — `clio.chart.v1`, `clio.data-table.v1`, and
+`clio.map.v1` accept `selection`. Bind it to `/selection/<key>`; the value
+there is `{"field": "<column>", "values": [...], "source": "<component id>"}`.
+Every component bound to the same path follows it: clicking a line in a
+chart highlights the same stations in the table and on the map, with no
+agent turn in between. Seed a selection with `updateDataModel` at that path,
+and read the current one from the data model (or a `Button` whose event
+context binds the path) when the scientist asks about "the selected" items.
+A chart's selection covers `selectionField` (by default the preset's
+`entityField`).
 
 **Artifact** — reference a registered artifact by its returned URI (an
 `artifact://` id if that is all registration returned), never a bare

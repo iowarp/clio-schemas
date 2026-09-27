@@ -41,6 +41,7 @@ from pydantic import BaseModel
 from pydantic.json_schema import models_json_schema
 
 from clio_schemas.a2ui.catalog_export import render_a2ui_catalog_bundle
+from clio_schemas.a2ui.chart_spec import CHART_RESOURCE_DIR, render_chart_resources
 from clio_schemas.constants import (
     AGGREGATE_FILENAME,
     HASH_ALGORITHM,
@@ -55,6 +56,9 @@ from clio_schemas.models import EXPORTED_MODELS
 #: tracked by its own ``SOURCE.json`` manifest (``scripts/vendor_a2ui_spec.py``),
 #: never by ``HASHES.json``.
 _A2UI_CATALOGS_DIRNAME = "a2ui/catalogs"
+#: ``clio.chart.v1`` resources: the spec-guard rules and the preset templates
+#: (see :mod:`clio_schemas.a2ui.chart_spec`). Same hash manifest as above.
+_A2UI_CHART_DIRNAME = CHART_RESOURCE_DIR
 
 __all__ = [
     "AGGREGATE_FILENAME",
@@ -169,11 +173,14 @@ def render_bundle(
     files, sidecars, and instructions) is a second kind of committed
     artifact alongside the flat per-model schemas: both are rendered
     deterministically, both are covered by the same ``HASHES.json``, keyed
-    by their path relative to the schema root.
+    by their path relative to the schema root. The ``clio.chart.v1``
+    resources (``a2ui/chart/**``: guard rules + preset templates) ride along
+    under the same manifest.
     """
 
     rendered = render_all(models)
     rendered.update(render_a2ui_catalog_bundle())
+    rendered.update(render_chart_resources())
     bundle = dict(rendered)
     bundle[HASHES_FILENAME] = render_hashes(rendered)
     return bundle
@@ -193,7 +200,8 @@ def _iter_tracked_files(root: Path) -> set[str]:
 
     Flat ``*.json`` directly under ``root`` (the per-model schemas +
     ``HASHES.json``), plus every ``*.json``/``*.md`` under
-    ``a2ui/catalogs/`` (CLIO's builtin catalog tree). Deliberately excludes
+    ``a2ui/catalogs/`` (CLIO's builtin catalog tree), plus every ``*.json``
+    under ``a2ui/chart/`` (chart guard rules + presets). Deliberately excludes
     the vendored ``a2ui/v0_9_1/**`` tree and ``a2ui/LICENSE``/``NOTICE`` —
     those are tracked by their own ``SOURCE.json`` manifest
     (``scripts/vendor_a2ui_spec.py``), never by this one.
@@ -208,6 +216,13 @@ def _iter_tracked_files(root: Path) -> set[str]:
             path.relative_to(root).as_posix()
             for path in catalogs_dir.rglob("*")
             if path.is_file() and path.suffix in (".json", ".md")
+        )
+    chart_dir = root / _A2UI_CHART_DIRNAME
+    if chart_dir.is_dir():
+        names.update(
+            path.relative_to(root).as_posix()
+            for path in chart_dir.rglob("*.json")
+            if path.is_file()
         )
     return names
 

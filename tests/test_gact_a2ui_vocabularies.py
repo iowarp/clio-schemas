@@ -18,10 +18,18 @@ import pytest
 from pydantic import ValidationError
 
 from clio_schemas.a2ui.v0_9_1.bounded_components import (
+    MAX_CHART_FIELD_LENGTH,
+    MAX_CHART_HEIGHT,
     MAX_MAP_POINTS,
+    MAX_QUERY_COLUMNS,
+    MAX_QUERY_FILTERS,
+    MAX_QUERY_LIMIT,
+    MAX_QUERY_OBJECT_KEYS,
     MAX_TIME_SERIES_ROWS,
     MAX_WORKFLOW_EDGES,
     MAX_WORKFLOW_NODES,
+    MIN_CHART_HEIGHT,
+    ChartComponent,
     MapComponent,
     TimeSeriesComponent,
     WorkflowComponent,
@@ -38,6 +46,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     DataTableComponent,
     GridComponent,
     ListComponent,
+    SelectionState,
     SliderComponent,
     TextComponent,
     TextFieldComponent,
@@ -117,13 +126,13 @@ def test_message_block_union_rejects_unknown_types_and_properties() -> None:
         )
 
 
-def test_catalog_declares_thirty_two_components_and_preserves_checkbox_spelling() -> None:
-    """The 32 CLIO catalog components (29 factory-built + 3 bounded) are closed and correct."""
+def test_catalog_declares_thirty_three_components_and_preserves_checkbox_spelling() -> None:
+    """The 33 CLIO catalog components (29 factory-built + 4 bounded) are closed and correct."""
 
     factory_names = set(COMPONENT_SPECS)
-    bounded_names = {"clio.map.v1", "clio.time-series.v1", "clio.workflow.v1"}
+    bounded_names = {"clio.map.v1", "clio.time-series.v1", "clio.workflow.v1", "clio.chart.v1"}
     names = factory_names | bounded_names
-    assert len(names) == 32
+    assert len(names) == 33
     assert "CheckBox" in names
     assert "Checkbox" not in names
 
@@ -267,6 +276,65 @@ def test_catalog_enforces_map_time_series_and_workflow_limits() -> None:
                 "edges": [{"source": "a", "target": "a"} for _ in range(MAX_WORKFLOW_EDGES + 1)],
             }
         )
+
+
+def test_chart_enforces_height_query_and_selection_param_bounds() -> None:
+    """clio.chart.v1's scalar bounds, independent of the spec guard."""
+
+    base = {
+        "id": "chart_1",
+        "component": "clio.chart.v1",
+        "preset": "scatter",
+        "xField": "x",
+        "yField": "y",
+        "entityField": "e",
+        "dataUri": "artifact://artifact_1",
+    }
+    chart = ChartComponent.model_validate(
+        {**base, "height": MAX_CHART_HEIGHT, "dataQuery": {"limit": MAX_QUERY_LIMIT}}
+    )
+    assert chart.selectionParam is None  # the renderer's default is "sel"
+    for bad in (
+        {"height": MIN_CHART_HEIGHT - 1},
+        {"height": MAX_CHART_HEIGHT + 1},
+        {"dataQuery": {"limit": 0}},
+        {"dataQuery": {"limit": MAX_QUERY_LIMIT + 1}},
+        {"dataQuery": {"columns": ["c"] * (MAX_QUERY_COLUMNS + 1)}},
+        {"dataQuery": {"filter": [{}] * (MAX_QUERY_FILTERS + 1)}},
+        {"dataQuery": {"aggregate": {f"k{i}": i for i in range(MAX_QUERY_OBJECT_KEYS + 1)}}},
+        {"selectionParam": "9lives"},
+        {"xField": ""},
+        {"xField": "x" * (MAX_CHART_FIELD_LENGTH + 1)},
+    ):
+        with pytest.raises(ValidationError):
+            ChartComponent.model_validate({**base, **bad})
+
+
+def test_selection_is_a_dynamic_value_on_table_map_and_chart() -> None:
+    """``selection`` binds to a path on all three; the table's legacy string still validates."""
+
+    binding = {"path": "/selection/stations"}
+    table = {
+        "id": "t",
+        "component": "clio.data-table.v1",
+        "columns": ["station"],
+        "rows": [{"station": "GNSS01"}],
+    }
+    point = {"id": "p", "label": "Point", "latitude": 1.0, "longitude": 2.0}
+    assert DataTableComponent.model_validate({**table, "selection": binding})
+    assert DataTableComponent.model_validate({**table, "selection": "multiple"})
+    map_component = MapComponent.model_validate(
+        {"id": "m", "component": "clio.map.v1", "points": [point], "selection": binding}
+    )
+    assert map_component.selected is None
+    with pytest.raises(ValidationError):
+        DataTableComponent.model_validate(
+            {**table, "selection": {"field": "station", "values": ["GNSS01"]}}
+        )
+    state = SelectionState.model_validate(
+        {"field": "station", "values": ["GNSS01", 7], "source": "chart_1"}
+    )
+    assert state.values == ["GNSS01", 7]
 
 
 def test_client_action_requires_known_keys_but_tolerates_extensions() -> None:

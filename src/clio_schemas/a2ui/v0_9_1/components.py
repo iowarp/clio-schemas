@@ -1,4 +1,4 @@
-"""CLIO's 32 trusted A2UI 0.9.1 catalog components — the pydantic generator.
+"""CLIO's 33 trusted A2UI 0.9.1 catalog components — the pydantic generator.
 
 These models are the *source of truth* for the ``clio-workspace`` catalog file
 rendered by :mod:`clio_schemas.a2ui.catalog_export` (``catalog.json``, in the
@@ -41,6 +41,7 @@ MAX_MAP_POINTS = 500
 MAX_TIME_SERIES_ROWS = 10_000
 MAX_WORKFLOW_NODES = 128
 MAX_WORKFLOW_EDGES = 256
+MAX_SELECTION_VALUES = 10_000
 
 #: A registered-artifact reference (the only form bulk data may take on the wire).
 ARTIFACT_URI_PATTERN = r"^artifact://artifact_[A-Za-z0-9_-]+$"
@@ -173,6 +174,24 @@ ChildList = list[str] | _ChildTemplate
 # the catalog canonicaliser as ``{"type": "string", "pattern": ...}``.
 ArtifactUri = Annotated[str, Field(pattern=ARTIFACT_URI_PATTERN)]
 SyncGroup = Annotated[str, Field(pattern=SYNC_GROUP_PATTERN)]
+
+
+class SelectionState(_ClosedModel):
+    """The value a bound ``selection`` path holds: ``/selection/<key>``.
+
+    ``selection`` props (``clio.chart.v1``, ``clio.data-table.v1``,
+    ``clio.map.v1``) are declared as :data:`DynamicValue` so they can be a
+    ``{"path": ...}`` binding; the value *at* that path follows this shape.
+    Every component bound to the same path reads and writes it, so a click
+    in one (a chart line, a table row, a map point) highlights the same
+    entities in the others without an agent turn. ``source`` is the id of
+    the component that made the selection, so it can skip its own echo.
+    Rendered into the workspace catalog as ``$defs/SelectionState``.
+    """
+
+    field: Annotated[str, Field(min_length=1, max_length=128)]
+    values: Annotated[list[str | float], Field(max_length=MAX_SELECTION_VALUES)]
+    source: Annotated[str, Field(min_length=1, max_length=128)] | None = None
 
 
 class _IconSvgPath(_ClosedModel):
@@ -424,7 +443,9 @@ DataTableComponent = _component_model(
         "columns": list[str | _DataTableColumn],
         "rows": list[dict[str, JsonValue]],
     },
-    optional={"selection": str, "action": Action},
+    # DynamicValue (not a static string): bind it to /selection/<key>, whose
+    # value is a SelectionState. A plain string stays valid (backward compatible).
+    optional={"selection": DynamicValue, "action": Action},
 )
 MermaidComponent = _component_model(
     "MermaidComponent",
@@ -494,7 +515,7 @@ MeshViewportComponent = _component_model(
     },
 )
 
-# The three bounded/cross-field-validated components (clio.map.v1,
-# clio.time-series.v1, clio.workflow.v1) are not built through
+# The four bounded/cross-field-validated components (clio.map.v1,
+# clio.time-series.v1, clio.workflow.v1, clio.chart.v1) are not built through
 # `_component_model` — see bounded_components.py — but COMPONENT_MODELS
 # there is the single list consumers should import.
