@@ -9,7 +9,10 @@ extra ``oneOf`` ``allOf`` branches. The chart's per-preset required fields
 are derived from the shipped preset templates. Most of the Vega-Lite spec
 guard IS expressible in JSON Schema and is included on ``spec`` below: the
 top-level key allowlist (``propertyNames``), a recursive ban on ``url``/
-``usermeta`` keys at any depth (``$defs/SpecNoForbiddenKeys``), and the rule
+``usermeta`` keys at any depth (``$defs/SpecNoForbiddenKeys``), a recursive
+ban on ``element`` inside any ``bind`` object at any depth
+(``$defs/SpecNoBindElement`` — ``bind.element`` is a CSS selector that could
+mount a Vega input widget into any element of the host page), and the rule
 that every ``data`` key at any depth is absent or exactly ``{"name":
 "source"}`` (``$defs/SpecDataNamedSource``). Two rules are NOT expressible in
 plain JSON Schema and stay pydantic/renderer-only: the serialized-size cap
@@ -121,6 +124,29 @@ _SPEC_DATA_NAMED_SOURCE_DEF: dict[str, Any] = {
     "else": {
         "if": {"type": "array"},
         "then": {"items": {"$ref": "#/$defs/SpecDataNamedSource"}},
+    },
+}
+_SPEC_NO_BIND_ELEMENT_DEF: dict[str, Any] = {
+    "description": (
+        "No `element` key inside any `bind` object (params[].bind.element) anywhere in a "
+        "Vega-Lite spec, at any depth — it is a CSS selector that could mount a Vega input "
+        "widget into any element on the host page, not just this chart."
+    ),
+    "if": {"type": "object"},
+    "then": {
+        "properties": {
+            "bind": {
+                "allOf": [
+                    {"if": {"type": "object"}, "then": {"not": {"required": ["element"]}}},
+                    {"$ref": "#/$defs/SpecNoBindElement"},
+                ]
+            }
+        },
+        "additionalProperties": {"$ref": "#/$defs/SpecNoBindElement"},
+    },
+    "else": {
+        "if": {"type": "array"},
+        "then": {"items": {"$ref": "#/$defs/SpecNoBindElement"}},
     },
 }
 
@@ -527,16 +553,19 @@ def _chart_component_schema() -> dict[str, Any]:
                             "dataset 'source' — the spec is chart configuration, never a data "
                             "channel, and the dataset itself is unbounded via dataUri regardless "
                             "of this cap. This schema already enforces the top-level key "
-                            "allowlist, no url/usermeta key at any depth, and data only as "
-                            "{name: source} at any depth; the renderer additionally enforces the "
-                            "config-size (65536 bytes) and view-count (8) caps that keep the spec "
-                            "itself bounded and abuse-resistant, which JSON Schema cannot "
-                            "express. See a2ui/chart/guard_rules.json."
+                            "allowlist, no url/usermeta key at any depth, no bind.element at any "
+                            "depth (a CSS selector that could mount an input widget anywhere on "
+                            "the host page), and data only as {name: source} at any depth; the "
+                            "renderer additionally enforces the config-size (65536 bytes) and "
+                            "view-count (8) caps that keep the spec itself bounded and "
+                            "abuse-resistant, which JSON Schema cannot express. See "
+                            "a2ui/chart/guard_rules.json."
                         ),
                         "propertyNames": {"enum": list(ALLOWED_TOP_LEVEL_KEYS)},
                         "allOf": [
                             {"$ref": "#/$defs/SpecNoForbiddenKeys"},
                             {"$ref": "#/$defs/SpecDataNamedSource"},
+                            {"$ref": "#/$defs/SpecNoBindElement"},
                         ],
                     },
                     "preset": {"type": "string", "enum": list(PRESET_NAMES)},
@@ -627,6 +656,7 @@ def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
         "WorkflowEdge": _WORKFLOW_EDGE_DEF,
         "SpecNoForbiddenKeys": _SPEC_NO_FORBIDDEN_KEYS_DEF,
         "SpecDataNamedSource": _SPEC_DATA_NAMED_SOURCE_DEF,
+        "SpecNoBindElement": _SPEC_NO_BIND_ELEMENT_DEF,
         "ChartDataQuery": _CHART_DATA_QUERY_DEF,
         "ChartQueryFilter": _CHART_QUERY_FILTER_DEF,
         "ChartQuerySort": _CHART_QUERY_SORT_DEF,

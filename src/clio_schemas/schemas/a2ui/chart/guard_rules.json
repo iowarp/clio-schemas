@@ -36,7 +36,8 @@
     "top_level_key_not_allowed",
     "too_many_views",
     "data_not_named_source",
-    "forbidden_key"
+    "forbidden_key",
+    "bind_element_not_allowed"
   ],
   "forbiddenKeys": [
     "url",
