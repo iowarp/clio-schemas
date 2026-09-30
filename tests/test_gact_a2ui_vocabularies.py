@@ -103,9 +103,11 @@ BASIC_CATALOG = json.loads(BASIC_CATALOG_PATH.read_text(encoding="utf-8"))
         ("diff", {"path": "file.py", "unified_diff": "@@"}),
         ("error", {"code": "failed", "message": "Failed", "recoverable": False}),
         ("routing", {"label": "Compacted"}),
+        ("injection", {"source": "todos", "text": "- [ ] load the data"}),
+        ("injection", {"source": "path_hint", "text": "did you mean a.csv?", "call_id": "c1"}),
     ],
 )
-def test_message_block_union_accepts_exactly_the_thirteen_v3_types(
+def test_message_block_union_accepts_exactly_the_fourteen_v3_types(
     block_type: str,
     payload: dict[str, object],
 ) -> None:
@@ -113,6 +115,17 @@ def test_message_block_union_accepts_exactly_the_thirteen_v3_types(
 
     block = MessageBlock.model_validate({"id": "block_1", "type": block_type, **payload})
     assert block.root.type == block_type
+
+
+def test_an_injection_names_its_source_and_carries_the_exact_text() -> None:
+    """What the harness gave the agent, shown to the user as exactly what it got."""
+
+    with pytest.raises(ValidationError):
+        MessageBlock.model_validate({"id": "b", "type": "injection", "text": "no source"})
+    block = MessageBlock.model_validate(
+        {"id": "b", "type": "injection", "source": "plan_mode", "text": "Plan mode is on."}
+    )
+    assert (block.root.source, block.root.call_id) == ("plan_mode", None)
 
 
 def test_message_block_union_rejects_unknown_types_and_properties() -> None:

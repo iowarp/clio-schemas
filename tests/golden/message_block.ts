@@ -14,6 +14,7 @@ export type {
   CitationMessageBlock,
   DiffMessageBlock,
   ErrorMessageBlock,
+  InjectionMessageBlock,
   MessageBlock,
   PlanMessageBlock,
   ReasoningMessageBlock,

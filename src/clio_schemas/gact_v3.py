@@ -148,6 +148,17 @@ class RoutingMessageBlock(_ClosedBlock):
     detail: str | None = None
 
 
+class InjectionMessageBlock(_ClosedBlock):
+    """Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path
+    suggestion, a saved oversize result, a hook's effect. ``source`` names what it is;
+    ``text`` is exactly what the agent got; ``call_id`` ties a note to its tool call."""
+
+    type: Literal["injection"]
+    source: str
+    text: str
+    call_id: str | None = None
+
+
 MessageBlockValue = Annotated[
     TextMessageBlock
     | ReasoningMessageBlock
@@ -161,10 +172,11 @@ MessageBlockValue = Annotated[
     | CitationMessageBlock
     | DiffMessageBlock
     | ErrorMessageBlock
-    | RoutingMessageBlock,
+    | RoutingMessageBlock
+    | InjectionMessageBlock,
     Field(discriminator="type"),
 ]
 
 
 class MessageBlock(RootModel[MessageBlockValue]):
-    """Closed discriminated union of the 13 GACT 0.3 message-block types."""
+    """Closed discriminated union of the 14 GACT 0.3 message-block types."""

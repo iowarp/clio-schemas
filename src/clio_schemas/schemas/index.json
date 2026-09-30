@@ -1712,6 +1712,98 @@
       "title": "IdentityEvidence",
       "type": "object"
     },
+    "InjectionMessageBlock": {
+      "additionalProperties": false,
+      "description": "Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path\nsuggestion, a saved oversize result, a hook's effect. ``source`` names what it is;\n``text`` is exactly what the agent got; ``call_id`` ties a note to its tool call.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "type": {
+          "const": "injection",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "source",
+        "text"
+      ],
+      "title": "InjectionMessageBlock",
+      "type": "object"
+    },
     "InlineCatalog": {
       "additionalProperties": false,
       "description": "One inline catalog a client bundles into its declared capabilities.\n\nMatches ``client_capabilities.json#/$defs/Catalog``. Only sent when the\nserver declares ``acceptsInlineCatalogs: true``.",
@@ -1810,7 +1902,7 @@
       "type": "string"
     },
     "MessageBlock": {
-      "description": "Closed discriminated union of the 13 GACT 0.3 message-block types.",
+      "description": "Closed discriminated union of the 14 GACT 0.3 message-block types.",
       "discriminator": {
         "mapping": {
           "a2ui": "#/$defs/A2UIMessageBlock",
@@ -1819,6 +1911,7 @@
           "citation": "#/$defs/CitationMessageBlock",
           "diff": "#/$defs/DiffMessageBlock",
           "error": "#/$defs/ErrorMessageBlock",
+          "injection": "#/$defs/InjectionMessageBlock",
           "plan": "#/$defs/PlanMessageBlock",
           "reasoning": "#/$defs/ReasoningMessageBlock",
           "routing": "#/$defs/RoutingMessageBlock",
@@ -1868,6 +1961,9 @@
         },
         {
           "$ref": "#/$defs/RoutingMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/InjectionMessageBlock"
         }
       ],
       "title": "MessageBlock"
