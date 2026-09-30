@@ -36,7 +36,11 @@ from pydantic import (
 )
 
 # Bounds shared with bounded_components.py's clio.map.v1 / clio.workflow.v1
-# (and their catalog-render mirrors in catalog_bounded.py).
+# (and their catalog-render mirrors in catalog_bounded.py). Each bounds an
+# INLINE array only — these components' inline properties ride the surface's
+# own wire message, so a resource-protecting cap belongs there; a larger
+# dataset/graph goes through dataUri instead, unbounded by these constants
+# and paged/downsampled by the viewer.
 MAX_MAP_POINTS = 500
 MAX_WORKFLOW_NODES = 128
 MAX_WORKFLOW_EDGES = 256

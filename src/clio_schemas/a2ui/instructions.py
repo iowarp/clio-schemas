@@ -56,13 +56,18 @@ dataset it names columns with `*Field` properties (`xField`,
 validator checks these names against the dataset's real columns, so a wrong
 one is a typed error, not a blank view.
 
-Link components by pointing more than one at the same dataset and binding
-them to the same `selection` path (see Shared selection below). For example,
-a script writes `stations.csv`, registered as `artifact://artifact_stations01`;
-a `clio.chart.v1` `scatter` preset and a `clio.map.v1` both set `"dataUri":
-"artifact://artifact_stations01"` and bind `"selection": {"path":
-"/selection/stations"}` — clicking a point on the map highlights the matching
-row in the chart, and vice versa, with no agent turn in between.
+Link components by pointing more than one at the same dataset, binding them
+to the same `selection` path, and naming the same column as `selectionField`
+(see Shared selection below) — without a matching column name on both sides
+nothing actually links. For example, a script writes `stations.csv`
+(columns `station`, `lat`, `lon`, `displacement_mm`), registered as
+`artifact://artifact_stations01`; a `clio.chart.v1` `scatter` preset
+(`"entityField": "station"`) and a `clio.map.v1`
+(`"latitudeField": "lat"`, `"longitudeField": "lon"`, `"labelField":
+"station"`) both set `"dataUri": "artifact://artifact_stations01"`, bind
+`"selection": {"path": "/selection/stations"}`, and set `"selectionField":
+"station"` — clicking a point on the map highlights the matching row in the
+chart, and vice versa, with no agent turn in between.
 
 ## Routing actions
 
@@ -99,8 +104,8 @@ table itself. Inline rows require `columns`; a `dataUri` table takes
 `{"id": "t1", "component": "clio.data-table.v1", "columns": ["station", "displacement_mm"], \
 "rows": [{"station": "GNSS01", "displacement_mm": 3.1}]}`, or `{"id": "t1", "component": \
 "clio.data-table.v1", "dataUri": "artifact://artifact_stations01", "dataQuery": {"limit": \
-500}}`. Bind `selection` to share selected rows with charts and maps (see Shared selection
-below).
+500}}`. Bind `selection` (with a matching `selectionField`, required whenever `selection`
+is bound) to share selected rows with charts and maps (see Shared selection below).
 
 **Mermaid** — declarative diagram source only; no init directives or click
 handlers. Inline `source`, or `dataUri` to a registered `.mmd`/text file:
@@ -114,8 +119,9 @@ basemap, so never pass tile/style URLs. Inline points are capped at 500; a
 `{"id": "map1", "component": "clio.map.v1", "points": [{"id": "s1", "label": "GNSS01", \
 "latitude": 34.1, "longitude": -118.3}]}`, or `{"id": "map1", "component": "clio.map.v1", \
 "dataUri": "artifact://artifact_stations01", "latitudeField": "lat", "longitudeField": "lon", \
-"labelField": "station"}`. `selected` still marks one point by id; bind `selection` instead
-to share a selection with charts and tables.
+"labelField": "station"}`. `selected` still marks one point by id; bind `selection` (with
+a matching `selectionField`, required whenever `selection` is bound) instead to share a
+selection with charts and tables.
 
 **Workflow** — a bounded node/edge graph, useful for showing a multi-step
 plan's progress. Inline `nodes` and `edges` together, or `dataUri` to a
@@ -183,7 +189,11 @@ agent turn in between. Seed a selection with `updateDataModel` at that path,
 and read the current one from the data model (or a `Button` whose event
 context binds the path) when the scientist asks about "the selected" items.
 A chart's selection covers `selectionField` (by default the preset's
-`entityField`). To set a selection from an action instead, call
+`entityField`); `clio.map.v1` and `clio.data-table.v1` have no such default,
+so `selectionField` is required on either whenever `selection` is bound to
+a path — name the same dataset column every linked component uses, or the
+values on each side won't actually match up. To set a selection from an
+action instead, call
 `selectData` with the path, the field, and the ids; it writes
 `{"field": ..., "values": rowIds, "source": "selectData"}` there:
 `{"functionCall": {"call": "selectData", "args": {"path": "/selection/stations", \

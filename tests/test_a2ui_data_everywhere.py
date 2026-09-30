@@ -122,6 +122,29 @@ CASES: list[Any] = [
         False,
         id="Map-dataQuery-without-dataUri-invalid",
     ),
+    pytest.param(
+        MapComponent,
+        {
+            "id": "m",
+            "component": "clio.map.v1",
+            "points": [{"id": "p", "label": "GNSS01", "latitude": 34.1, "longitude": -118.3}],
+            "selection": {"path": "/selection/stations"},
+        },
+        False,
+        id="Map-selection-bound-without-selectionField-invalid",
+    ),
+    pytest.param(
+        MapComponent,
+        {
+            "id": "m",
+            "component": "clio.map.v1",
+            "points": [{"id": "p", "label": "GNSS01", "latitude": 34.1, "longitude": -118.3}],
+            "selection": {"path": "/selection/stations"},
+            "selectionField": "station",
+        },
+        True,
+        id="Map-selection-bound-with-selectionField-valid",
+    ),
     # --- clio.data-table.v1 --------------------------------------------- #
     pytest.param(
         DataTableComponent,
@@ -186,6 +209,43 @@ CASES: list[Any] = [
         },
         False,
         id="Table-dataQuery-without-dataUri-invalid",
+    ),
+    pytest.param(
+        DataTableComponent,
+        {
+            "id": "t",
+            "component": "clio.data-table.v1",
+            "columns": ["station"],
+            "rows": [{"station": "GNSS01"}],
+            "selection": {"path": "/selection/stations"},
+        },
+        False,
+        id="Table-selection-bound-without-selectionField-invalid",
+    ),
+    pytest.param(
+        DataTableComponent,
+        {
+            "id": "t",
+            "component": "clio.data-table.v1",
+            "columns": ["station"],
+            "rows": [{"station": "GNSS01"}],
+            "selection": {"path": "/selection/stations"},
+            "selectionField": "station",
+        },
+        True,
+        id="Table-selection-bound-with-selectionField-valid",
+    ),
+    pytest.param(
+        DataTableComponent,
+        {
+            "id": "t",
+            "component": "clio.data-table.v1",
+            "columns": ["station"],
+            "rows": [{"station": "GNSS01"}],
+            "selection": "single",
+        },
+        True,
+        id="Table-selection-legacy-string-needs-no-selectionField",
     ),
     # --- clio.workflow.v1 ------------------------------------------------ #
     pytest.param(
@@ -372,6 +432,7 @@ def test_data_query_shape_is_shared_not_duplicated_across_components() -> None:
         ({"columns": ["a", "b"], "limit": 10}, True),
         (
             {
+                "columns": ["station", "t", "v", "network"],
                 "filter": [{"column": "network", "op": "in", "value": ["CI", "NC"]}],
                 "aggregate": {"groupBy": ["station"], "metrics": [{"column": "v", "fn": "mean"}]},
                 "downsample": {

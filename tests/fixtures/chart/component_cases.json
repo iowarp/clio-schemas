@@ -156,7 +156,7 @@
     {
       "name": "reject-spec-data-url",
       "valid": false,
-      "jsonSchemaValid": true,
+      "jsonSchemaValid": false,
       "payload": {
         "id": "ch5",
         "component": "clio.chart.v1",

@@ -335,10 +335,18 @@ def test_selection_is_a_dynamic_value_on_table_map_and_chart() -> None:
         "rows": [{"station": "GNSS01"}],
     }
     point = {"id": "p", "label": "Point", "latitude": 1.0, "longitude": 2.0}
-    assert DataTableComponent.model_validate({**table, "selection": binding})
+    assert DataTableComponent.model_validate(
+        {**table, "selection": binding, "selectionField": "station"}
+    )
     assert DataTableComponent.model_validate({**table, "selection": "multiple"})
     map_component = MapComponent.model_validate(
-        {"id": "m", "component": "clio.map.v1", "points": [point], "selection": binding}
+        {
+            "id": "m",
+            "component": "clio.map.v1",
+            "points": [point],
+            "selection": binding,
+            "selectionField": "station",
+        }
     )
     assert map_component.selected is None
     with pytest.raises(ValidationError):
