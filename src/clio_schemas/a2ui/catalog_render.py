@@ -1,4 +1,4 @@
-"""Canonicalise the 29 factory-built CLIO components to official catalog style.
+"""Canonicalise the 25 factory-built CLIO components to official catalog style.
 
 Reads the exact declarative ``required``/``optional`` field-type mapping
 (:data:`clio_schemas.a2ui.v0_9_1.components.COMPONENT_SPECS`) that builds
@@ -7,11 +7,14 @@ which would make this fragile (pydantic's own encoding of a union like
 ``DynamicString`` is an implementation detail, not a public contract). Each
 declared field type is recognised once, by identity/equality, and rendered
 into the matching official ``common_types.json`` ``$ref`` (or a local
-``$defs`` entry for a CLIO-only nested shape: option/tab/column/card-action).
+``$defs`` entry for a CLIO-only nested shape: option/tab/card-action). Each
+component's one-sentence :data:`COMPONENT_DESCRIPTIONS` entry is rendered
+onto its schema's top-level ``description``.
 
-The three components with bounded lists or cross-field rules
-(``clio.map.v1``, ``clio.time-series.v1``, ``clio.workflow.v1``) are not
-built through ``COMPONENT_SPECS`` at all — see ``catalog_bounded.py``.
+The 7 components with bounded lists or cross-field rules (``clio.map.v1``,
+``clio.data-table.v1``, ``clio.code.v1``, ``clio.mermaid.v1``,
+``clio.diff.v1``, ``clio.workflow.v1``, ``clio.chart.v1``) are not built
+through ``COMPONENT_SPECS`` at all — see ``catalog_bounded.py``.
 """
 
 from __future__ import annotations
@@ -25,6 +28,7 @@ from pydantic.fields import FieldInfo
 
 from clio_schemas.a2ui.v0_9_1.components import (
     ARTIFACT_URI_PATTERN,
+    COMPONENT_DESCRIPTIONS,
     COMPONENT_SPECS,
     SYNC_GROUP_PATTERN,
     Action,
@@ -40,7 +44,6 @@ from clio_schemas.a2ui.v0_9_1.components import (
     SyncGroup,
     _CardAction,
     _ChoiceOption,
-    _DataTableColumn,
     _TabDefinition,
 )
 
@@ -199,14 +202,6 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
         if item_type == _CardAction:
             local_defs.setdefault("CardAction", _render_nested_model(_CardAction.model_fields))
             return {"type": "array", "items": {"$ref": "#/$defs/CardAction"}}
-        if item_type == (str | _DataTableColumn):
-            local_defs.setdefault(
-                "DataTableColumn", _render_nested_model(_DataTableColumn.model_fields)
-            )
-            return {
-                "type": "array",
-                "items": {"oneOf": [{"type": "string"}, {"$ref": "#/$defs/DataTableColumn"}]},
-            }
         if item_type == dict[str, JsonValue]:
             return {"type": "array", "items": {"type": "object"}}
         if item_type is str:
@@ -233,7 +228,7 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
 
 
 def _render_factory_component(name: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Render one component built through ``_component_model`` (29 of the 32)."""
+    """Render one component built through ``_component_model`` (25 of the 32)."""
 
     required, optional = COMPONENT_SPECS[name]
     properties: dict[str, Any] = {"component": {"const": name}}
@@ -261,12 +256,17 @@ def _render_factory_component(name: str) -> tuple[dict[str, Any], dict[str, Any]
         all_of.append({"$ref": f"{COMMON_TYPES_ID}#/$defs/Checkable"})
     all_of.append({"type": "object", "properties": properties, "required": required_names})
 
-    schema = {"type": "object", "allOf": all_of, "unevaluatedProperties": False}
+    schema = {
+        "type": "object",
+        "description": COMPONENT_DESCRIPTIONS[name],
+        "allOf": all_of,
+        "unevaluatedProperties": False,
+    }
     return schema, local_defs
 
 
 def render_factory_components() -> tuple[dict[str, Any], dict[str, Any]]:
-    """Render all 29 factory-built components: ``(components, shared $defs)``."""
+    """Render all 25 factory-built components: ``(components, shared $defs)``."""
 
     components: dict[str, Any] = {}
     defs: dict[str, Any] = {"CatalogComponentCommon": CATALOG_COMPONENT_COMMON_DEF}

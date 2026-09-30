@@ -74,6 +74,9 @@
     "clio.callout.v1": {
       "kernel": "clio.callout.v1"
     },
+    "clio.chart.v1": {
+      "kernel": "clio.chart.v1"
+    },
     "clio.code.v1": {
       "kernel": "clio.code.v1"
     },
@@ -103,9 +106,6 @@
     },
     "clio.status.v1": {
       "kernel": "clio.status.v1"
-    },
-    "clio.time-series.v1": {
-      "kernel": "clio.time-series.v1"
     },
     "clio.workflow.v1": {
       "kernel": "clio.workflow.v1"

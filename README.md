@@ -13,7 +13,7 @@ types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
 > **Status: canonical records, live UI vocabularies, and A2UI 0.9.1 catalog
-> files, model-capability tags, model facts and accepted parameters (version 0.4.1).**
+> files, model-capability tags, model facts and accepted parameters (version 0.5.1).**
 > `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 13 GACT 0.3
 > message blocks, the official A2UI 0.9.1 envelope/capability/catalog-file models, and
 > the two builtin catalog files (`clio-workspace`'s 32 CLIO components, the vendored
@@ -69,17 +69,21 @@ clio-schemas/
 │   │   ├── sidecar.py                 #   CLIO catalog packaging metadata (never on the wire)
 │   │   ├── validation.py              #   jsonschema + referencing validators
 │   │   ├── catalog_render.py          #   canonicaliser: pydantic spec -> official JSON Schema
-│   │   ├── catalog_bounded.py         #   hand-authored map/time-series/workflow definitions
+│   │   ├── catalog_bounded.py         #   hand-authored map/table/code/mermaid/diff/workflow/chart
+│   │   ├── chart_spec.py              #   clio.chart.v1 Vega-Lite spec guard + preset renderer
 │   │   └── catalog_export.py          #   assembles + renders a2ui/catalogs/**
 │   └── schemas/                       # COMMITTED immutable artifacts (in the wheel)
 │       ├── artifact_version.json      #   per-model, self-contained
 │       ├── artifact_record.json       #   per-model, self-contained
 │       ├── transform_record.json      #   plus provenance/value model schemas
 │       ├── index.json                 #   aggregate: shared $defs emitted once
-│       ├── HASHES.json                #   canonical sha256 manifest (covers a2ui/catalogs/** too)
+│       ├── HASHES.json                #   canonical sha256 manifest (covers a2ui/catalogs/**
+│       │                              #   and a2ui/chart/** too)
 │       └── a2ui/
 │           ├── v0_9_1/                #   VENDORED spec + basic catalog (SOURCE.json-tracked)
-│           └── catalogs/              #   RENDERED: clio-workspace/v1 + basic sidecars
+│           ├── catalogs/              #   RENDERED: clio-workspace/v1 + basic sidecars
+│           └── chart/                 #   clio.chart.v1: guard_rules.json (RENDERED) +
+│                                      #   presets/*.json (hand-authored Vega-Lite templates)
 ├── tools/ts-gen/
 │   ├── schemas-to-ts.mjs              # JSON Schema dir -> TS module graph (deterministic)
 │   ├── tsconfig.check.json            # isolated strict typecheck of generated TS
