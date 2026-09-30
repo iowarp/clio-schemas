@@ -35,6 +35,40 @@ reserve bindings for values that change after the surface is created — the
 data model is a separate `updateDataModel` call, so a bound value can be
 refreshed without re-sending the component tree.
 
+## Inline values or a dataset
+
+Every component that carries rows, points, a diagram, source code, or a diff
+takes its content two ways — inline (`data`/`rows`/`points`/`source`/`code`/
+`diff`, small and bounded) or `dataUri` (a reference to a registered
+artifact) — never both, never neither. Like `plot([1, 2, 3])` versus
+`plot(dataset.x)`: inline is enough for what the agent already holds in the
+turn; `dataUri` is for anything read from a file or a prior tool result, of
+any size — an inline cap (e.g. the map's 500 points) limits what can be
+drawn inline, never what can be referenced.
+
+The three tabular components — `clio.chart.v1`, `clio.map.v1`,
+`clio.data-table.v1` — additionally accept `dataQuery` alongside `dataUri`
+(never with inline values): one shared shape (`$defs/DataQuery`) that
+filters, aggregates, downsamples, and limits the referenced table
+server-side before it reaches the component. When a component reads a
+dataset it names columns with `*Field` properties (`xField`,
+`latitudeField`, `entityField`, ...) instead of assuming a shape; the
+validator checks these names against the dataset's real columns, so a wrong
+one is a typed error, not a blank view.
+
+Link components by pointing more than one at the same dataset, binding them
+to the same `selection` path, and naming the same column as `selectionField`
+(see Shared selection below) — without a matching column name on both sides
+nothing actually links. For example, a script writes `stations.csv`
+(columns `station`, `lat`, `lon`, `displacement_mm`), registered as
+`artifact://artifact_stations01`; a `clio.chart.v1` `scatter` preset
+(`"entityField": "station"`) and a `clio.map.v1`
+(`"latitudeField": "lat"`, `"longitudeField": "lon"`, `"labelField":
+"station"`) both set `"dataUri": "artifact://artifact_stations01"`, bind
+`"selection": {"path": "/selection/stations"}`, and set `"selectionField":
+"station"` — clicking a point on the map highlights the matching row in the
+chart, and vice versa, with no agent turn in between.
+
 ## Routing actions
 
 `Button`, checks, and several scientific components accept an `action`. Most
@@ -63,29 +97,36 @@ rather than reaching for an aggregate shape:
 `{"id": "c1", "component": "clio.callout.v1", "title": "Heads up", "body": "Station GNSS01 has a \
 data gap.", "severity": "warning"}`.
 
-**DataTable** — tabular rows; give a title via a sibling `Text`, not a
-property on the table itself:
+**DataTable** — tabular rows, inline or from a dataset (see Inline values or
+a dataset above); give a title via a sibling `Text`, not a property on the
+table itself. Inline rows require `columns`; a `dataUri` table takes
+`columns` from the dataset when omitted:
 `{"id": "t1", "component": "clio.data-table.v1", "columns": ["station", "displacement_mm"], \
-"rows": [{"station": "GNSS01", "displacement_mm": 3.1}]}`. Bind `selection`
-to share selected rows with charts and maps (see Shared selection below).
-
-**TimeSeries** — small inline series go in `series`; a registered artifact
-goes in `dataUri` instead (never both):
-`{"id": "ts1", "component": "clio.time-series.v1", "xKey": "t", "yKeys": ["value"], "series": \
-[{"t": 0, "value": 1.0}, {"t": 1, "value": 1.4}]}`.
+"rows": [{"station": "GNSS01", "displacement_mm": 3.1}]}`, or `{"id": "t1", "component": \
+"clio.data-table.v1", "dataUri": "artifact://artifact_stations01", "dataQuery": {"limit": \
+500}}`. Bind `selection` (with a matching `selectionField`, required whenever `selection`
+is bound) to share selected rows with charts and maps (see Shared selection below).
 
 **Mermaid** — declarative diagram source only; no init directives or click
-handlers:
+handlers. Inline `source`, or `dataUri` to a registered `.mmd`/text file:
 `{"id": "d1", "component": "clio.mermaid.v1", "source": "graph TD; A-->B;"}`.
 
-**Map** — a bounded set of labeled points; the renderer owns the basemap, so
-never pass tile/style URLs:
+**Map** — labeled points, inline or from a dataset; the renderer owns the
+basemap, so never pass tile/style URLs. Inline points are capped at 500; a
+`dataUri` map names its columns with `latitudeField`/`longitudeField`/
+`labelField` (required) and optionally `idField`/`detailField`/
+`categoryField`, and is bounded by `dataQuery`/`limit` instead:
 `{"id": "map1", "component": "clio.map.v1", "points": [{"id": "s1", "label": "GNSS01", \
-"latitude": 34.1, "longitude": -118.3}]}`. `selected` still marks one point by
-id; bind `selection` instead to share a selection with charts and tables.
+"latitude": 34.1, "longitude": -118.3}]}`, or `{"id": "map1", "component": "clio.map.v1", \
+"dataUri": "artifact://artifact_stations01", "latitudeField": "lat", "longitudeField": "lon", \
+"labelField": "station"}`. `selected` still marks one point by id; bind `selection` (with
+a matching `selectionField`, required whenever `selection` is bound) instead to share a
+selection with charts and tables.
 
 **Workflow** — a bounded node/edge graph, useful for showing a multi-step
-plan's progress:
+plan's progress. Inline `nodes` and `edges` together, or `dataUri` to a
+registered JSON file shaped `{"nodes": [...], "edges": [...]}` (never both,
+never neither):
 `{"id": "wf1", "component": "clio.workflow.v1", "nodes": [{"id": "fetch", "label": "Fetch"}, \
 {"id": "process", "label": "Process"}], "edges": [{"source": "fetch", "target": "process"}]}`.
 
@@ -148,7 +189,11 @@ agent turn in between. Seed a selection with `updateDataModel` at that path,
 and read the current one from the data model (or a `Button` whose event
 context binds the path) when the scientist asks about "the selected" items.
 A chart's selection covers `selectionField` (by default the preset's
-`entityField`). To set a selection from an action instead, call
+`entityField`); `clio.map.v1` and `clio.data-table.v1` have no such default,
+so `selectionField` is required on either whenever `selection` is bound to
+a path — name the same dataset column every linked component uses, or the
+values on each side won't actually match up. To set a selection from an
+action instead, call
 `selectData` with the path, the field, and the ids; it writes
 `{"field": ..., "values": rowIds, "source": "selectData"}` there:
 `{"functionCall": {"call": "selectData", "args": {"path": "/selection/stations", \
@@ -160,10 +205,13 @@ filesystem path:
 `{"id": "a1", "component": "clio.artifact.v1", "name": "results.csv", "uri": \
 "artifact://artifact_abc123", "mediaType": "text/csv"}`.
 
-**Code** — syntax-highlighted source, not wrapped in a `Text` block:
+**Code** — syntax-highlighted source, not wrapped in a `Text` block. Inline
+`code`, or `dataUri` to a registered source file (`language` is always
+required, since it can't be inferred from either):
 `{"id": "code1", "component": "clio.code.v1", "code": "print('hello')", "language": "python"}`.
 
-**Diff** — a unified diff for one path:
+**Diff** — a unified diff for one path. Inline `diff`, or `dataUri` to a
+registered diff/patch file:
 `{"id": "diff1", "component": "clio.diff.v1", "path": "src/model.py", "diff": "@@ -1,2 +1,2 \
 @@..."}`.
 

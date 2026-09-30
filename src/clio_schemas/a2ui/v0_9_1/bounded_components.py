@@ -1,13 +1,20 @@
-"""The four CLIO components with bounded lists or cross-field business rules.
+"""The 7 CLIO components with bounded lists or cross-field business rules.
 
-``clio.map.v1``, ``clio.time-series.v1``, ``clio.workflow.v1``, and
+``clio.map.v1``, ``clio.workflow.v1``, ``clio.data-table.v1``,
+``clio.code.v1``, ``clio.mermaid.v1``, ``clio.diff.v1``, and
 ``clio.chart.v1`` are not built through ``_component_model`` (see
-``components.py``) because they need ``Field(min_length=/max_length=)``
-bounds and, for the time series and the chart, cross-field
-``model_validator``s ("exactly one of series or dataUri"; for the chart,
-exactly one of spec/preset and of data/dataUri plus the Vega-Lite spec guard
-in :mod:`clio_schemas.a2ui.chart_spec`). Their catalog-file renderings are
+``components.py``) because every one of them needs an "exactly one of inline
+values or ``dataUri``" cross-field rule (plus, for map/table/chart,
+``Field(min_length=/max_length=)`` bounds and a shared ``dataQuery`` shape,
+and for the chart, the Vega-Lite spec guard in
+:mod:`clio_schemas.a2ui.chart_spec`). Their catalog-file renderings are
 hand-authored to match, in ``clio_schemas.a2ui.catalog_bounded``.
+
+Every data-carrying component in this module follows the same contract:
+inline values (bounded by a ``max_length``) OR ``dataUri`` (a registered
+artifact reference), never both, never neither. The three tabular ones
+(map, table, chart) additionally accept ``dataQuery``, a server-side table
+query (:class:`DataQuery`) that only applies alongside ``dataUri``.
 """
 
 from __future__ import annotations
@@ -33,7 +40,6 @@ from clio_schemas.a2ui.chart_spec import (
 from clio_schemas.a2ui.v0_9_1.components import (
     ARTIFACT_URI_PATTERN,
     MAX_MAP_POINTS,
-    MAX_TIME_SERIES_ROWS,
     MAX_WORKFLOW_EDGES,
     MAX_WORKFLOW_NODES,
     Action,
@@ -44,10 +50,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     CalloutComponent,
     CheckBoxComponent,
     ChoicePickerComponent,
-    CodeComponent,
     ColumnComponent,
-    DataTableComponent,
-    DiffComponent,
     DividerComponent,
     DynamicString,
     DynamicValue,
@@ -56,7 +59,6 @@ from clio_schemas.a2ui.v0_9_1.components import (
     IconComponent,
     ImageComponent,
     ListComponent,
-    MermaidComponent,
     MeshViewportComponent,
     MetricComponent,
     ModalComponent,
@@ -70,6 +72,9 @@ from clio_schemas.a2ui.v0_9_1.components import (
     TextFieldComponent,
     _ClosedModel,
     _ComponentBase,
+    _DataBinding,
+    _DataTableColumn,
+    _FunctionCall,
 )
 
 
@@ -84,76 +89,9 @@ class MapPoint(_ClosedModel):
     category: str | None = Field(default=None, max_length=120)
 
 
-class MapComponent(_ComponentBase):
-    """Interactive bounded geospatial component."""
-
-    component: Literal["clio.map.v1"] = "clio.map.v1"
-    title: DynamicString | None = None
-    points: list[MapPoint] = Field(min_length=1, max_length=MAX_MAP_POINTS)
-    selected: str | None = Field(default=None, max_length=128)
-    selection: DynamicValue | None = None
-    action: Action | None = None
-    actionLabel: DynamicString | None = None
-
-
-class TimeSeriesComponent(_ComponentBase):
-    """Inline or artifact-backed interactive time-series component."""
-
-    component: Literal["clio.time-series.v1"] = "clio.time-series.v1"
-    series: list[dict[str, str | float | int | None]] | None = Field(
-        default=None,
-        min_length=1,
-        max_length=MAX_TIME_SERIES_ROWS,
-    )
-    dataUri: str | None = Field(
-        default=None,
-        pattern=r"^artifact://artifact_[A-Za-z0-9_-]+$",
-    )
-    xKey: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
-    yKeys: list[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]] = Field(
-        min_length=1,
-        max_length=5,
-    )
-    title: DynamicString | None = None
-
-    @model_validator(mode="after")
-    def _validate_data_source_and_columns(self) -> TimeSeriesComponent:
-        if (self.series is None) == (self.dataUri is None):
-            raise ValueError("exactly one of series or dataUri is required")
-        if len(set(self.yKeys)) != len(self.yKeys):
-            raise ValueError("yKeys must contain distinct column names")
-        return self
-
-
-class WorkflowNode(_ClosedModel):
-    """One node in a bounded workflow graph."""
-
-    id: str
-    label: str
-    state: str | None = None
-    detail: str | None = None
-
-
-class WorkflowEdge(_ClosedModel):
-    """One directed relationship in a workflow graph."""
-
-    source: str
-    target: str
-    label: str | None = None
-
-
-class WorkflowComponent(_ComponentBase):
-    """Bounded interactive workflow topology."""
-
-    component: Literal["clio.workflow.v1"] = "clio.workflow.v1"
-    nodes: list[WorkflowNode] = Field(min_length=1, max_length=MAX_WORKFLOW_NODES)
-    edges: list[WorkflowEdge] = Field(max_length=MAX_WORKFLOW_EDGES)
-    selected: str | None = None
-    action: Action | None = None
-
-
-#: Bounds for clio.chart.v1 (mirrored by catalog_bounded.py).
-MAX_CHART_FIELD_LENGTH = 128
+#: Bounds shared by every ``*Field``/``dataQuery`` column name across map,
+#: table, and chart (mirrored by catalog_bounded.py).
+MAX_FIELD_NAME_LENGTH = 128
 MIN_CHART_HEIGHT = 80
 MAX_CHART_HEIGHT = 2000
 #: dataQuery bounds, copied from the table-query server's request model
@@ -170,7 +108,7 @@ MAX_QUERY_PER_ENTITY = 2_000
 DEFAULT_QUERY_PER_ENTITY = 500
 MAX_QUERY_LIMIT = 50_000
 
-ChartFieldName = Annotated[str, StringConstraints(min_length=1, max_length=MAX_CHART_FIELD_LENGTH)]
+FieldName = Annotated[str, StringConstraints(min_length=1, max_length=MAX_FIELD_NAME_LENGTH)]
 ChartRowValue = str | int | float | bool | None
 ChartPreset = Literal["trajectories", "heatmap", "spectra", "boxplot", "scatter"]
 
@@ -202,9 +140,9 @@ def _int_from_whole_number(value: object) -> object:
     legitimate JSON number) passes catalog validation but was then rejected
     by this model's ``strict=True`` config, which does not coerce ``float``
     to ``int`` even losslessly. Used as a ``field_validator(mode="before")``
-    on ``limit``/``maxPerEntity`` so the two validators agree: a bare
-    ``int`` passes through untouched, a fractional ``float`` (``5.5``) is
-    left for strict ``int`` validation to reject, and any other type
+    on ``limit``/``maxPerEntity``/``offset`` so the two validators agree: a
+    bare ``int`` passes through untouched, a fractional ``float`` (``5.5``)
+    is left for strict ``int`` validation to reject, and any other type
     (``str``, ``bool``, ...) is also left alone so strict validation still
     rejects it exactly as before.
     """
@@ -216,7 +154,7 @@ def _int_from_whole_number(value: object) -> object:
     return value
 
 
-class ChartQueryFilter(_ClosedModel):
+class QueryFilter(_ClosedModel):
     """One ``dataQuery.filter`` predicate; all predicates are AND-ed together.
 
     * ``eq``: ``value`` is a non-null scalar.
@@ -228,12 +166,12 @@ class ChartQueryFilter(_ClosedModel):
       substring of a string column (the table viewer's per-column text filter).
     """
 
-    column: ChartFieldName
+    column: FieldName
     op: QueryFilterOp
     value: JsonValue = None
 
     @model_validator(mode="after")
-    def _check_value(self) -> ChartQueryFilter:
+    def _check_value(self) -> QueryFilter:
         value = self.value
         if self.op == "eq":
             if not _is_query_scalar(value):
@@ -256,21 +194,21 @@ class ChartQueryFilter(_ClosedModel):
         return self
 
 
-class ChartQueryMetric(_ClosedModel):
+class QueryMetric(_ClosedModel):
     """One aggregate output column; the server names it ``{column}_{fn}``."""
 
-    column: ChartFieldName
+    column: FieldName
     fn: QueryMetricFn
 
 
-class ChartQueryAggregate(_ClosedModel):
+class QueryAggregate(_ClosedModel):
     """Group rows by ``groupBy`` (empty: one global group) and reduce with ``metrics``."""
 
-    groupBy: list[ChartFieldName] = Field(default_factory=list, max_length=MAX_QUERY_COLUMNS)
-    metrics: list[ChartQueryMetric] = Field(min_length=1, max_length=MAX_QUERY_METRICS)
+    groupBy: list[FieldName] = Field(default_factory=list, max_length=MAX_QUERY_COLUMNS)
+    metrics: list[QueryMetric] = Field(min_length=1, max_length=MAX_QUERY_METRICS)
 
     @model_validator(mode="after")
-    def _check_names(self) -> ChartQueryAggregate:
+    def _check_names(self) -> QueryAggregate:
         if len(set(self.groupBy)) != len(self.groupBy):
             raise ValueError("groupBy columns must be distinct")
         names = [f"{metric.column}_{metric.fn}" for metric in self.metrics]
@@ -282,14 +220,14 @@ class ChartQueryAggregate(_ClosedModel):
         return self
 
 
-class ChartQuerySort(_ClosedModel):
+class QuerySort(_ClosedModel):
     """One ``dataQuery.sort`` key; earlier entries in the list sort first."""
 
-    column: ChartFieldName
+    column: FieldName
     desc: bool = False
 
 
-class ChartQueryDownsample(_ClosedModel):
+class QueryDownsample(_ClosedModel):
     """How the server thins the filtered/aggregated rows before ``limit`` applies.
 
     ``none`` keeps every row; ``stride`` keeps evenly spaced rows (per
@@ -299,9 +237,9 @@ class ChartQueryDownsample(_ClosedModel):
     """
 
     mode: DownsampleMode = "none"
-    entityColumn: ChartFieldName | None = None
-    x: ChartFieldName | None = None
-    y: ChartFieldName | None = None
+    entityColumn: FieldName | None = None
+    x: FieldName | None = None
+    y: FieldName | None = None
     maxPerEntity: int = Field(default=DEFAULT_QUERY_PER_ENTITY, ge=1, le=MAX_QUERY_PER_ENTITY)
 
     @field_validator("maxPerEntity", mode="before")
@@ -310,14 +248,14 @@ class ChartQueryDownsample(_ClosedModel):
         return _int_from_whole_number(value)
 
     @model_validator(mode="after")
-    def _check_mode(self) -> ChartQueryDownsample:
+    def _check_mode(self) -> QueryDownsample:
         if self.mode == "per_entity_lttb" and (self.x is None or self.y is None):
             raise ValueError("per_entity_lttb requires both x and y")
         return self
 
 
-class ChartDataQuery(_ClosedModel):
-    """A server-side table query applied to ``dataUri`` before the rows reach the chart.
+class DataQuery(_ClosedModel):
+    """A server-side table query applied to ``dataUri`` before rows reach the component.
 
     The request body of ``POST /v1/artifacts/{id}/table-query`` (clio-agent
     ``TableQueryRequest``) minus ``format``, which the renderer always sends
@@ -325,7 +263,10 @@ class ChartDataQuery(_ClosedModel):
     ``dataUri`` — except alongside ``aggregate``, where ``columns`` is
     required: an aggregate's output columns (e.g. ``price_mean``) don't
     exist in the source and so cannot be inferred. The server runs filter,
-    then aggregate, then downsample, then sort, then offset/limit.
+    then aggregate, then downsample, then sort, then offset/limit. Shared
+    verbatim by ``clio.chart.v1``, ``clio.map.v1``, and
+    ``clio.data-table.v1`` — the only three tabular components; never
+    duplicated per component.
 
     ``limit`` bounds the rows in ONE response (a transfer size), not the
     underlying data: ``offset`` pages through a larger result across several
@@ -340,13 +281,13 @@ class ChartDataQuery(_ClosedModel):
     downsample intent still applies underneath.
     """
 
-    columns: list[ChartFieldName] | None = Field(
+    columns: list[FieldName] | None = Field(
         default=None, min_length=1, max_length=MAX_QUERY_COLUMNS
     )
-    filter: list[ChartQueryFilter] | None = Field(default=None, max_length=MAX_QUERY_FILTERS)
-    aggregate: ChartQueryAggregate | None = None
-    downsample: ChartQueryDownsample | None = None
-    sort: list[ChartQuerySort] | None = Field(default=None, max_length=MAX_QUERY_COLUMNS)
+    filter: list[QueryFilter] | None = Field(default=None, max_length=MAX_QUERY_FILTERS)
+    aggregate: QueryAggregate | None = None
+    downsample: QueryDownsample | None = None
+    sort: list[QuerySort] | None = Field(default=None, max_length=MAX_QUERY_COLUMNS)
     offset: int | None = Field(default=None, ge=0)
     limit: int | None = Field(default=None, ge=1, le=MAX_QUERY_LIMIT)
 
@@ -356,11 +297,164 @@ class ChartDataQuery(_ClosedModel):
         return _int_from_whole_number(value)
 
     @model_validator(mode="after")
-    def _check_columns(self) -> ChartDataQuery:
+    def _check_columns(self) -> DataQuery:
         if self.columns is not None and len(set(self.columns)) != len(self.columns):
             raise ValueError("columns must be distinct")
         if self.aggregate is not None and self.columns is None:
             raise ValueError("columns is required when aggregate is set")
+        return self
+
+
+class MapComponent(_ComponentBase):
+    """Interactive bounded geospatial component: inline points or a referenced dataset."""
+
+    component: Literal["clio.map.v1"] = "clio.map.v1"
+    title: DynamicString | None = None
+    points: list[MapPoint] | None = Field(default=None, min_length=1, max_length=MAX_MAP_POINTS)
+    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    dataQuery: DataQuery | None = None
+    latitudeField: FieldName | None = None
+    longitudeField: FieldName | None = None
+    labelField: FieldName | None = None
+    idField: FieldName | None = None
+    detailField: FieldName | None = None
+    categoryField: FieldName | None = None
+    selected: str | None = Field(default=None, max_length=128)
+    selection: DynamicValue | None = None
+    selectionField: FieldName | None = None
+    action: Action | None = None
+    actionLabel: DynamicString | None = None
+
+    @model_validator(mode="after")
+    def _validate_data_source(self) -> MapComponent:
+        if (self.points is None) == (self.dataUri is None):
+            raise ValueError("exactly one of points or dataUri is required")
+        if self.dataUri is not None:
+            missing = [
+                name
+                for name in ("latitudeField", "longitudeField", "labelField")
+                if getattr(self, name) is None
+            ]
+            if missing:
+                raise ValueError(f"dataUri requires field(s) {missing}")
+        elif self.dataQuery is not None:
+            raise ValueError("dataQuery applies only to dataUri")
+        if isinstance(self.selection, _DataBinding | _FunctionCall) and self.selectionField is None:
+            raise ValueError("selectionField is required when selection is bound")
+        return self
+
+
+class WorkflowNode(_ClosedModel):
+    """One node in a bounded workflow graph."""
+
+    id: str
+    label: str
+    state: str | None = None
+    detail: str | None = None
+
+
+class WorkflowEdge(_ClosedModel):
+    """One directed relationship in a workflow graph."""
+
+    source: str
+    target: str
+    label: str | None = None
+
+
+class WorkflowComponent(_ComponentBase):
+    """Bounded interactive workflow topology: inline nodes/edges or a referenced file."""
+
+    component: Literal["clio.workflow.v1"] = "clio.workflow.v1"
+    nodes: list[WorkflowNode] | None = Field(
+        default=None, min_length=1, max_length=MAX_WORKFLOW_NODES
+    )
+    edges: list[WorkflowEdge] | None = Field(default=None, max_length=MAX_WORKFLOW_EDGES)
+    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    selected: str | None = None
+    action: Action | None = None
+
+    @model_validator(mode="after")
+    def _validate_data_source(self) -> WorkflowComponent:
+        inline = self.nodes is not None or self.edges is not None
+        if inline == (self.dataUri is not None):
+            raise ValueError("exactly one of nodes+edges or dataUri is required")
+        if inline and (self.nodes is None or self.edges is None):
+            raise ValueError("nodes and edges are both required when given inline")
+        return self
+
+
+class DataTableComponent(_ComponentBase):
+    """Tabular rows, inline or from a referenced dataset."""
+
+    component: Literal["clio.data-table.v1"] = "clio.data-table.v1"
+    columns: list[str | _DataTableColumn] | None = None
+    rows: list[dict[str, JsonValue]] | None = None
+    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    dataQuery: DataQuery | None = None
+    # DynamicValue (not a static string): bind it to /selection/<key>, whose
+    # value is a SelectionState. A plain string stays valid (backward compatible).
+    selection: DynamicValue | None = None
+    selectionField: FieldName | None = None
+    action: Action | None = None
+
+    @model_validator(mode="after")
+    def _validate_data_source(self) -> DataTableComponent:
+        if (self.rows is None) == (self.dataUri is None):
+            raise ValueError("exactly one of rows or dataUri is required")
+        if self.rows is not None and self.columns is None:
+            raise ValueError("columns is required with inline rows")
+        if self.dataQuery is not None and self.dataUri is None:
+            raise ValueError("dataQuery applies only to dataUri")
+        if isinstance(self.selection, _DataBinding | _FunctionCall) and self.selectionField is None:
+            raise ValueError("selectionField is required when selection is bound")
+        return self
+
+
+class CodeComponent(_ComponentBase):
+    """Syntax-highlighted source, inline or from a referenced file."""
+
+    component: Literal["clio.code.v1"] = "clio.code.v1"
+    code: DynamicString | None = None
+    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    language: str
+    title: DynamicString | None = None
+
+    @model_validator(mode="after")
+    def _validate_data_source(self) -> CodeComponent:
+        if (self.code is None) == (self.dataUri is None):
+            raise ValueError("exactly one of code or dataUri is required")
+        return self
+
+
+class MermaidComponent(_ComponentBase):
+    """A declarative diagram, inline source or from a referenced file."""
+
+    component: Literal["clio.mermaid.v1"] = "clio.mermaid.v1"
+    source: DynamicString | None = None
+    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    title: DynamicString | None = None
+
+    @model_validator(mode="after")
+    def _validate_data_source(self) -> MermaidComponent:
+        if (self.source is None) == (self.dataUri is None):
+            raise ValueError("exactly one of source or dataUri is required")
+        return self
+
+
+class DiffComponent(_ComponentBase):
+    """A unified diff for one path, inline or from a referenced file."""
+
+    component: Literal["clio.diff.v1"] = "clio.diff.v1"
+    path: str
+    diff: DynamicString | None = None
+    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    status: DynamicString | None = None
+    action: Action | None = None
+
+    @model_validator(mode="after")
+    def _validate_data_source(self) -> DiffComponent:
+        if (self.diff is None) == (self.dataUri is None):
+            raise ValueError("exactly one of diff or dataUri is required")
         return self
 
 
@@ -370,18 +464,18 @@ class ChartComponent(_ComponentBase):
     component: Literal["clio.chart.v1"] = "clio.chart.v1"
     spec: dict[str, JsonValue] | None = None
     preset: ChartPreset | None = None
-    xField: ChartFieldName | None = None
-    yField: ChartFieldName | None = None
-    entityField: ChartFieldName | None = None
-    colorField: ChartFieldName | None = None
-    facetField: ChartFieldName | None = None
+    xField: FieldName | None = None
+    yField: FieldName | None = None
+    entityField: FieldName | None = None
+    colorField: FieldName | None = None
+    facetField: FieldName | None = None
     xType: Literal["temporal", "quantitative", "ordinal"] | None = None
     data: list[dict[str, ChartRowValue]] | None = Field(default=None, max_length=MAX_INLINE_ROWS)
     dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
-    dataQuery: ChartDataQuery | None = None
+    dataQuery: DataQuery | None = None
     selection: DynamicValue | None = None
     selectionParam: str | None = Field(default=None, pattern=SELECTION_PARAM_PATTERN)
-    selectionField: ChartFieldName | None = None
+    selectionField: FieldName | None = None
     title: DynamicString | None = None
     height: float | None = Field(
         default=None, ge=MIN_CHART_HEIGHT, le=MAX_CHART_HEIGHT, allow_inf_nan=False
@@ -409,8 +503,10 @@ class ChartComponent(_ComponentBase):
         return self
 
 
-# All 33 CLIO catalog components, in the same order as the original
-# hand-maintained union (a2ui_v091.py, pre-slice) so consumers see no churn.
+# All 32 CLIO catalog components (33 minus the removed clio.time-series.v1,
+# replaced by clio.chart.v1 — owner ruling, issue #1533), in the same relative
+# order as the original hand-maintained union (a2ui_v091.py, pre-slice) so
+# consumers see minimal churn.
 COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     TextComponent,
     IconComponent,
@@ -433,7 +529,6 @@ COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     ProgressComponent,
     CalloutComponent,
     DataTableComponent,
-    TimeSeriesComponent,
     MermaidComponent,
     MapComponent,
     WorkflowComponent,

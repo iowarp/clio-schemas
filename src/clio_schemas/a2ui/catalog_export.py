@@ -1,7 +1,7 @@
 """Assemble and render the CLIO builtin A2UI catalog tree (``a2ui/catalogs/**``).
 
-Two catalogs ship: ``clio-workspace`` (the 33 CLIO scientific-agent
-components — 29 canonicalised by :mod:`clio_schemas.a2ui.catalog_render`, 4
+Two catalogs ship: ``clio-workspace`` (the 32 CLIO scientific-agent
+components — 25 canonicalised by :mod:`clio_schemas.a2ui.catalog_render`, 7
 hand-authored by :mod:`clio_schemas.a2ui.catalog_bounded`) and ``basic`` (the
 vendored upstream catalog; only its CLIO sidecar/instructions are authored
 here — the catalog file itself is vendored verbatim, untouched).
@@ -111,7 +111,7 @@ def _render_workspace_functions() -> dict[str, Any]:
 
 
 def render_workspace_catalog() -> dict[str, Any]:
-    """Render the ``clio-workspace`` catalog file: all 33 CLIO components.
+    """Render the ``clio-workspace`` catalog file: all 32 CLIO components.
 
     ``$defs.theme`` and the 14 Basic ``functions`` (``required``, ``regex``,
     ``formatString``, ...) are copied VERBATIM from the vendored Basic
@@ -148,7 +148,7 @@ def render_workspace_catalog() -> dict[str, Any]:
         "$id": WORKSPACE_CATALOG_ID,
         "title": "CLIO Workspace Catalog",
         "description": (
-            "The 33 CLIO scientific-agent A2UI 0.9.1 components, in official catalog-file style."
+            "The 32 CLIO scientific-agent A2UI 0.9.1 components, in official catalog-file style."
         ),
         "catalogId": WORKSPACE_CATALOG_ID,
         "components": components,

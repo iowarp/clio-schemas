@@ -1,16 +1,17 @@
-"""Hand-authored catalog definitions for the 4 bounded/cross-field components.
+"""Hand-authored catalog definitions for the 7 bounded/cross-field components.
 
-``clio.map.v1``, ``clio.time-series.v1``, ``clio.workflow.v1``, and
-``clio.chart.v1`` mirror ``MapComponent`` / ``TimeSeriesComponent`` /
-``WorkflowComponent`` / ``ChartComponent``
-(``a2ui/v0_9_1/bounded_components.py``): bounded list lengths and, for the
-time series and the chart, "exactly one of" cross-field rules expressed as
-extra ``oneOf`` ``allOf`` branches. The chart's per-preset required fields
-are derived from the shipped preset templates. Most of the Vega-Lite spec
-guard IS expressible in JSON Schema and is included on ``spec`` below: the
-top-level key allowlist (``propertyNames``), a recursive ban on ``url``/
-``usermeta`` keys at any depth (``$defs/SpecNoForbiddenKeys``), a recursive
-ban on ``element`` inside any ``bind`` object at any depth
+``clio.map.v1``, ``clio.data-table.v1``, ``clio.code.v1``, ``clio.mermaid.v1``,
+``clio.diff.v1``, ``clio.workflow.v1``, and ``clio.chart.v1`` mirror
+``MapComponent`` / ``DataTableComponent`` / ``CodeComponent`` /
+``MermaidComponent`` / ``DiffComponent`` / ``WorkflowComponent`` /
+``ChartComponent`` (``a2ui/v0_9_1/bounded_components.py``): bounded list
+lengths and "exactly one of inline values or ``dataUri``" cross-field rules
+expressed as extra ``oneOf``/``allOf`` branches. The chart's per-preset
+required fields are derived from the shipped preset templates. Most of the
+Vega-Lite spec guard IS expressible in JSON Schema and is included on
+``spec`` below: the top-level key allowlist (``propertyNames``), a recursive
+ban on ``url``/``usermeta`` keys at any depth (``$defs/SpecNoForbiddenKeys``),
+a recursive ban on ``element`` inside any ``bind`` object at any depth
 (``$defs/SpecNoBindElement`` — ``bind.element`` is a CSS selector that could
 mount a Vega input widget into any element of the host page), and the rule
 that every ``data`` key at any depth is absent or exactly ``{"name":
@@ -21,10 +22,15 @@ assertion) and the view-composition count (recursively counting
 mark-bearing views across ``layer``/``concat``/``facet``/``repeat`` — JSON
 Schema cannot count matches across a recursive structure). Both still run in
 :mod:`clio_schemas.a2ui.chart_spec`, in the pydantic model and the renderer.
-These are not built through
-the generic canonicaliser (``catalog_render.py``) because
-``Field(min_length=/max_length=)`` bounds and cross-field
-``model_validator``s are pydantic *business rules*, not field-type shapes.
+These are not built through the generic canonicaliser
+(``catalog_render.py``) because ``Field(min_length=/max_length=)`` bounds and
+cross-field ``model_validator``s are pydantic *business rules*, not
+field-type shapes.
+
+Every data-carrying component here follows one contract (the
+``a2ui-component-design`` skill's rule #1): inline values OR ``dataUri``,
+never both, never neither. The three tabular ones (map, table, chart) share
+one ``$defs/DataQuery`` shape — reused, never duplicated per component.
 """
 
 from __future__ import annotations
@@ -44,8 +50,8 @@ from clio_schemas.a2ui.chart_spec import (
 from clio_schemas.a2ui.v0_9_1.bounded_components import (
     CHART_PRESET_FIELDS,
     DEFAULT_QUERY_PER_ENTITY,
-    MAX_CHART_FIELD_LENGTH,
     MAX_CHART_HEIGHT,
+    MAX_FIELD_NAME_LENGTH,
     MAX_QUERY_COLUMNS,
     MAX_QUERY_FILTERS,
     MAX_QUERY_IN_VALUES,
@@ -58,7 +64,6 @@ from clio_schemas.a2ui.v0_9_1.components import (
     ARTIFACT_URI_PATTERN,
     MAX_MAP_POINTS,
     MAX_SELECTION_VALUES,
-    MAX_TIME_SERIES_ROWS,
     MAX_WORKFLOW_EDGES,
     MAX_WORKFLOW_NODES,
 )
@@ -68,10 +73,25 @@ _SELECTION_DESCRIPTION = (
     "({field, values[], source?}, see $defs/SelectionState). Components bound to the "
     "same path share one selection."
 )
+#: selectionField names the dataset column a bound selection's values are drawn from.
+#: Required whenever selection is a binding/function-call object (linking to another
+#: component) — never when it is a literal (e.g. clio.data-table.v1's legacy plain
+#: string selection modes, which are not a link and need no field name). The chart
+#: does not need this rule: its selectionField already falls back to the preset's
+#: entityField.
+_SELECTION_FIELD_REQUIRED_WHEN_BOUND_RULE: dict[str, Any] = {
+    "description": "selectionField is required when selection is bound (an object, not a literal).",
+    "if": {
+        "properties": {"selection": {"type": "object"}},
+        "required": ["selection"],
+    },
+    "then": {"required": ["selectionField"]},
+}
 _DATA_URI_DESCRIPTION = (
     "A workspace file path or artifact:// reference; CLIO registers a path as an "
     "artifact before validation."
 )
+_DATA_QUERY_REF: dict[str, Any] = {"$ref": "#/$defs/DataQuery"}
 
 
 def _nullable(schema: dict[str, Any]) -> dict[str, Any]:
@@ -166,7 +186,7 @@ _MAP_POINT_DEF: dict[str, Any] = {
 
 _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "description": "Interactive bounded geospatial component.",
+    "description": "Points on an interactive map (stations, sites, epicenters).",
     "allOf": [
         {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
         {"$ref": "#/$defs/CatalogComponentCommon"},
@@ -180,60 +200,81 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
                     "minItems": 1,
                     "maxItems": MAX_MAP_POINTS,
                     "items": {"$ref": "#/$defs/MapPoint"},
+                    "description": (
+                        f"Inline points (at most {MAX_MAP_POINTS}) — this array rides the "
+                        "surface's own wire message, so it is capped for transfer size; "
+                        "for a larger dataset use dataUri instead, unbounded and "
+                        "paged/downsampled by the viewer."
+                    ),
+                },
+                "dataUri": {
+                    "type": "string",
+                    "pattern": ARTIFACT_URI_PATTERN,
+                    "not": {"pattern": r"\s"},
+                    "description": (
+                        f"{_DATA_URI_DESCRIPTION} Requires latitudeField/longitudeField/"
+                        "labelField; a referenced dataset is bounded by dataQuery/limit, "
+                        "not the inline point cap."
+                    ),
+                },
+                "dataQuery": _DATA_QUERY_REF,
+                "latitudeField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": "Dataset column holding latitude (required with dataUri).",
+                },
+                "longitudeField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": "Dataset column holding longitude (required with dataUri).",
+                },
+                "labelField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": (
+                        "Dataset column holding each point's label (required with dataUri)."
+                    ),
+                },
+                "idField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": "Dataset column holding each point's stable id.",
+                },
+                "detailField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": "Dataset column holding each point's detail text.",
+                },
+                "categoryField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": "Dataset column grouping points into categories.",
                 },
                 "selected": {"type": "string", "maxLength": 128},
                 "selection": {
                     "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicValue",
                     "description": _SELECTION_DESCRIPTION,
                 },
+                "selectionField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": (
+                        "Dataset column the shared selection's values are drawn from; "
+                        "required when selection is bound."
+                    ),
+                },
                 "action": {"$ref": f"{COMMON_TYPES_ID}#/$defs/Action"},
                 "actionLabel": {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString"},
             },
-            "required": ["component", "points"],
-        },
-    ],
-    "unevaluatedProperties": False,
-}
-
-_TIME_SERIES_COMPONENT_SCHEMA: dict[str, Any] = {
-    "type": "object",
-    "description": "Inline or artifact-backed interactive time-series component.",
-    "allOf": [
-        {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
-        {"$ref": "#/$defs/CatalogComponentCommon"},
-        {
-            "type": "object",
-            "properties": {
-                "component": {"const": "clio.time-series.v1"},
-                "series": {
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": MAX_TIME_SERIES_ROWS,
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": {"type": ["string", "number", "null"]},
-                    },
-                },
-                "dataUri": {"type": "string", "pattern": r"^artifact://artifact_[A-Za-z0-9_-]+$"},
-                "xKey": {"type": "string", "minLength": 1, "pattern": r"\S"},
-                "yKeys": {
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": 5,
-                    "uniqueItems": True,
-                    "items": {"type": "string", "minLength": 1, "pattern": r"\S"},
-                },
-                "title": {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString"},
-            },
-            "required": ["component", "xKey", "yKeys"],
+            "required": ["component"],
+            "dependentRequired": {"dataQuery": ["dataUri"]},
         },
         {
-            "description": "Exactly one of series or dataUri is required.",
+            "description": "Exactly one of points or dataUri is required.",
             "oneOf": [
-                {"required": ["series"], "not": {"required": ["dataUri"]}},
-                {"required": ["dataUri"], "not": {"required": ["series"]}},
+                {"required": ["points"], "not": {"required": ["dataUri"]}},
+                {"required": ["dataUri"], "not": {"required": ["points"]}},
             ],
         },
+        {
+            "description": "dataUri requires the point field names.",
+            "if": {"required": ["dataUri"]},
+            "then": {"required": ["latitudeField", "longitudeField", "labelField"]},
+        },
+        _SELECTION_FIELD_REQUIRED_WHEN_BOUND_RULE,
     ],
     "unevaluatedProperties": False,
 }
@@ -263,7 +304,7 @@ _WORKFLOW_EDGE_DEF: dict[str, Any] = {
 
 _WORKFLOW_COMPONENT_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "description": "Bounded interactive workflow topology.",
+    "description": "A step/edge graph showing a multi-step plan's progress.",
     "allOf": [
         {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
         {"$ref": "#/$defs/CatalogComponentCommon"},
@@ -276,16 +317,225 @@ _WORKFLOW_COMPONENT_SCHEMA: dict[str, Any] = {
                     "minItems": 1,
                     "maxItems": MAX_WORKFLOW_NODES,
                     "items": {"$ref": "#/$defs/WorkflowNode"},
+                    "description": (
+                        f"Inline nodes (at most {MAX_WORKFLOW_NODES}) — rides the surface's own "
+                        "wire message; give edges too, or use dataUri instead of both for a "
+                        "larger graph, unbounded."
+                    ),
                 },
                 "edges": {
                     "type": "array",
                     "maxItems": MAX_WORKFLOW_EDGES,
                     "items": {"$ref": "#/$defs/WorkflowEdge"},
+                    "description": f"Inline edges (at most {MAX_WORKFLOW_EDGES}), alongside nodes.",
+                },
+                "dataUri": {
+                    "type": "string",
+                    "pattern": ARTIFACT_URI_PATTERN,
+                    "not": {"pattern": r"\s"},
+                    "description": (
+                        f'{_DATA_URI_DESCRIPTION} A JSON file shaped {{"nodes": [...], '
+                        '"edges": [...]}.'
+                    ),
                 },
                 "selected": {"type": "string"},
                 "action": {"$ref": f"{COMMON_TYPES_ID}#/$defs/Action"},
             },
-            "required": ["component", "nodes", "edges"],
+            "required": ["component"],
+        },
+        {
+            "description": "Exactly one of nodes+edges or dataUri is required.",
+            "oneOf": [
+                {"required": ["nodes", "edges"], "not": {"required": ["dataUri"]}},
+                {
+                    "required": ["dataUri"],
+                    "not": {"anyOf": [{"required": ["nodes"]}, {"required": ["edges"]}]},
+                },
+            ],
+        },
+    ],
+    "unevaluatedProperties": False,
+}
+
+_DATA_TABLE_COLUMN_DEF: dict[str, Any] = {
+    "type": "object",
+    "properties": {"key": {"type": "string"}, "label": {"type": "string"}},
+    "required": ["key", "label"],
+    "additionalProperties": False,
+}
+
+_DATA_TABLE_COMPONENT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "description": "Tabular rows, inline or from a referenced dataset.",
+    "allOf": [
+        {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
+        {"$ref": "#/$defs/CatalogComponentCommon"},
+        {
+            "type": "object",
+            "properties": {
+                "component": {"const": "clio.data-table.v1"},
+                "columns": {
+                    "type": "array",
+                    "items": {"oneOf": [{"type": "string"}, {"$ref": "#/$defs/DataTableColumn"}]},
+                    "description": (
+                        "Required with inline rows; optional with dataUri (defaults to the "
+                        "queried/dataset columns)."
+                    ),
+                },
+                "rows": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Inline rows; use dataUri instead for a registered dataset.",
+                },
+                "dataUri": {
+                    "type": "string",
+                    "pattern": ARTIFACT_URI_PATTERN,
+                    "not": {"pattern": r"\s"},
+                    "description": _DATA_URI_DESCRIPTION,
+                },
+                "dataQuery": _DATA_QUERY_REF,
+                # DynamicValue (not a static string): bind it to /selection/<key>, whose
+                # value is a SelectionState. A plain string stays valid (backward compatible).
+                "selection": {
+                    "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicValue",
+                    "description": _SELECTION_DESCRIPTION,
+                },
+                "selectionField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": (
+                        "Dataset column the shared selection's values are drawn from; "
+                        "required when selection is bound."
+                    ),
+                },
+                "action": {"$ref": f"{COMMON_TYPES_ID}#/$defs/Action"},
+            },
+            "required": ["component"],
+            "dependentRequired": {"dataQuery": ["dataUri"]},
+        },
+        {
+            "description": "Exactly one of rows or dataUri is required.",
+            "oneOf": [
+                {"required": ["rows"], "not": {"required": ["dataUri"]}},
+                {"required": ["dataUri"], "not": {"required": ["rows"]}},
+            ],
+        },
+        {
+            "description": "columns is required alongside inline rows.",
+            "if": {"required": ["rows"]},
+            "then": {"required": ["columns"]},
+        },
+        _SELECTION_FIELD_REQUIRED_WHEN_BOUND_RULE,
+    ],
+    "unevaluatedProperties": False,
+}
+
+_CODE_COMPONENT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "description": "Syntax-highlighted source, inline or from a referenced file.",
+    "allOf": [
+        {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
+        {"$ref": "#/$defs/CatalogComponentCommon"},
+        {
+            "type": "object",
+            "properties": {
+                "component": {"const": "clio.code.v1"},
+                "code": {
+                    "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString",
+                    "description": "Inline source; use dataUri instead for a referenced file.",
+                },
+                "dataUri": {
+                    "type": "string",
+                    "pattern": ARTIFACT_URI_PATTERN,
+                    "not": {"pattern": r"\s"},
+                    "description": f"{_DATA_URI_DESCRIPTION} Its file content is the source.",
+                },
+                "language": {"type": "string"},
+                "title": {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString"},
+            },
+            "required": ["component", "language"],
+        },
+        {
+            "description": "Exactly one of code or dataUri is required.",
+            "oneOf": [
+                {"required": ["code"], "not": {"required": ["dataUri"]}},
+                {"required": ["dataUri"], "not": {"required": ["code"]}},
+            ],
+        },
+    ],
+    "unevaluatedProperties": False,
+}
+
+_MERMAID_COMPONENT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "description": "A declarative Mermaid diagram, inline source or from a referenced file.",
+    "allOf": [
+        {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
+        {"$ref": "#/$defs/CatalogComponentCommon"},
+        {
+            "type": "object",
+            "properties": {
+                "component": {"const": "clio.mermaid.v1"},
+                "source": {
+                    "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString",
+                    "description": (
+                        "Inline diagram source; use dataUri instead for a referenced file."
+                    ),
+                },
+                "dataUri": {
+                    "type": "string",
+                    "pattern": ARTIFACT_URI_PATTERN,
+                    "not": {"pattern": r"\s"},
+                    "description": f"{_DATA_URI_DESCRIPTION} Its file content is the source.",
+                },
+                "title": {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString"},
+            },
+            "required": ["component"],
+        },
+        {
+            "description": "Exactly one of source or dataUri is required.",
+            "oneOf": [
+                {"required": ["source"], "not": {"required": ["dataUri"]}},
+                {"required": ["dataUri"], "not": {"required": ["source"]}},
+            ],
+        },
+    ],
+    "unevaluatedProperties": False,
+}
+
+_DIFF_COMPONENT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "description": "A unified diff for one path, inline or from a referenced file.",
+    "allOf": [
+        {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
+        {"$ref": "#/$defs/CatalogComponentCommon"},
+        {
+            "type": "object",
+            "properties": {
+                "component": {"const": "clio.diff.v1"},
+                "path": {"type": "string"},
+                "diff": {
+                    "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString",
+                    "description": (
+                        "Inline unified diff text; use dataUri instead for a referenced file."
+                    ),
+                },
+                "dataUri": {
+                    "type": "string",
+                    "pattern": ARTIFACT_URI_PATTERN,
+                    "not": {"pattern": r"\s"},
+                    "description": f"{_DATA_URI_DESCRIPTION} Its file content is the diff text.",
+                },
+                "status": {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString"},
+                "action": {"$ref": f"{COMMON_TYPES_ID}#/$defs/Action"},
+            },
+            "required": ["component", "path"],
+        },
+        {
+            "description": "Exactly one of diff or dataUri is required.",
+            "oneOf": [
+                {"required": ["diff"], "not": {"required": ["dataUri"]}},
+                {"required": ["dataUri"], "not": {"required": ["diff"]}},
+            ],
         },
     ],
     "unevaluatedProperties": False,
@@ -311,10 +561,10 @@ _SELECTION_STATE_DEF: dict[str, Any] = {
     "additionalProperties": False,
 }
 
-_CHART_FIELD_NAME: dict[str, Any] = {
+_FIELD_NAME_DEF: dict[str, Any] = {
     "type": "string",
     "minLength": 1,
-    "maxLength": MAX_CHART_FIELD_LENGTH,
+    "maxLength": MAX_FIELD_NAME_LENGTH,
 }
 _QUERY_SCALAR: dict[str, Any] = {"type": ["string", "number", "boolean"]}
 
@@ -326,7 +576,7 @@ def _filter_op_rule(op: str, value: dict[str, Any], *, required: bool) -> dict[s
     return {"if": {"properties": {"op": {"const": op}}}, "then": then}
 
 
-_CHART_QUERY_FILTER_DEF: dict[str, Any] = {
+_QUERY_FILTER_DEF: dict[str, Any] = {
     "type": "object",
     "description": (
         "One predicate; all filter entries are AND-ed. eq: value is a non-null scalar. "
@@ -336,7 +586,7 @@ _CHART_QUERY_FILTER_DEF: dict[str, Any] = {
         "case-insensitive substring of a string column (a per-column text filter)."
     ),
     "properties": {
-        "column": _CHART_FIELD_NAME,
+        "column": {"$ref": "#/$defs/FieldName"},
         "op": {"type": "string", "enum": ["eq", "in", "range", "isnull", "contains"]},
         "value": {},
     },
@@ -369,18 +619,18 @@ _CHART_QUERY_FILTER_DEF: dict[str, Any] = {
     ],
 }
 
-_CHART_QUERY_SORT_DEF: dict[str, Any] = {
+_QUERY_SORT_DEF: dict[str, Any] = {
     "type": "object",
     "description": "One dataQuery.sort key; earlier entries in the list sort first.",
     "properties": {
-        "column": _CHART_FIELD_NAME,
+        "column": {"$ref": "#/$defs/FieldName"},
         "desc": {"type": "boolean", "default": False},
     },
     "required": ["column"],
     "additionalProperties": False,
 }
 
-_CHART_QUERY_AGGREGATE_DEF: dict[str, Any] = {
+_QUERY_AGGREGATE_DEF: dict[str, Any] = {
     "type": "object",
     "description": (
         "Group rows by groupBy (empty or omitted: one global group) and reduce; each "
@@ -392,7 +642,7 @@ _CHART_QUERY_AGGREGATE_DEF: dict[str, Any] = {
             "type": "array",
             "maxItems": MAX_QUERY_COLUMNS,
             "uniqueItems": True,
-            "items": _CHART_FIELD_NAME,
+            "items": {"$ref": "#/$defs/FieldName"},
         },
         "metrics": {
             "type": "array",
@@ -402,7 +652,7 @@ _CHART_QUERY_AGGREGATE_DEF: dict[str, Any] = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "column": _CHART_FIELD_NAME,
+                    "column": {"$ref": "#/$defs/FieldName"},
                     "fn": {
                         "type": "string",
                         "enum": ["mean", "min", "max", "count", "sum", "median"],
@@ -417,7 +667,7 @@ _CHART_QUERY_AGGREGATE_DEF: dict[str, Any] = {
     "additionalProperties": False,
 }
 
-_CHART_QUERY_DOWNSAMPLE_DEF: dict[str, Any] = {
+_QUERY_DOWNSAMPLE_DEF: dict[str, Any] = {
     "type": "object",
     "description": (
         "How the server thins rows before limit applies. none keeps every row; stride "
@@ -431,9 +681,9 @@ _CHART_QUERY_DOWNSAMPLE_DEF: dict[str, Any] = {
             "enum": ["none", "stride", "per_entity_lttb"],
             "default": "none",
         },
-        "entityColumn": _nullable(_CHART_FIELD_NAME),
-        "x": _nullable(_CHART_FIELD_NAME),
-        "y": _nullable(_CHART_FIELD_NAME),
+        "entityColumn": _nullable({"$ref": "#/$defs/FieldName"}),
+        "x": _nullable({"$ref": "#/$defs/FieldName"}),
+        "y": _nullable({"$ref": "#/$defs/FieldName"}),
         "maxPerEntity": {
             "type": "integer",
             "minimum": 1,
@@ -451,7 +701,7 @@ _CHART_QUERY_DOWNSAMPLE_DEF: dict[str, Any] = {
     },
 }
 
-_CHART_DATA_QUERY_DEF: dict[str, Any] = {
+_DATA_QUERY_DEF: dict[str, Any] = {
     "type": "object",
     "description": (
         "A server-side table query applied to dataUri: the table-query request body "
@@ -468,7 +718,8 @@ _CHART_DATA_QUERY_DEF: dict[str, Any] = {
         "deployment's real per-response cap, which is server-configured. A viewer (e.g. "
         "an interactive data-table) may layer its own user-driven paging/filtering/"
         "sorting on top of this dataQuery without replacing it — the agent's own "
-        "filter/aggregate/downsample intent still applies underneath."
+        "filter/aggregate/downsample intent still applies underneath. Shared verbatim by "
+        "clio.chart.v1, clio.map.v1, and clio.data-table.v1."
     ),
     "properties": {
         "columns": _nullable(
@@ -477,23 +728,23 @@ _CHART_DATA_QUERY_DEF: dict[str, Any] = {
                 "minItems": 1,
                 "maxItems": MAX_QUERY_COLUMNS,
                 "uniqueItems": True,
-                "items": _CHART_FIELD_NAME,
+                "items": {"$ref": "#/$defs/FieldName"},
             }
         ),
         "filter": _nullable(
             {
                 "type": "array",
                 "maxItems": MAX_QUERY_FILTERS,
-                "items": {"$ref": "#/$defs/ChartQueryFilter"},
+                "items": {"$ref": "#/$defs/QueryFilter"},
             }
         ),
-        "aggregate": _nullable({"$ref": "#/$defs/ChartQueryAggregate"}),
-        "downsample": _nullable({"$ref": "#/$defs/ChartQueryDownsample"}),
+        "aggregate": _nullable({"$ref": "#/$defs/QueryAggregate"}),
+        "downsample": _nullable({"$ref": "#/$defs/QueryDownsample"}),
         "sort": _nullable(
             {
                 "type": "array",
                 "maxItems": MAX_QUERY_COLUMNS,
-                "items": {"$ref": "#/$defs/ChartQuerySort"},
+                "items": {"$ref": "#/$defs/QuerySort"},
             }
         ),
         "offset": _nullable({"type": "integer", "minimum": 0}),
@@ -532,13 +783,12 @@ def _chart_preset_rules() -> list[dict[str, Any]]:
 
 
 def _chart_component_schema() -> dict[str, Any]:
-    fill_fields = {field: _CHART_FIELD_NAME for field in CHART_PRESET_FIELDS if field != "xType"}
+    fill_fields = {
+        field: {"$ref": "#/$defs/FieldName"} for field in CHART_PRESET_FIELDS if field != "xType"
+    }
     return {
         "type": "object",
-        "description": (
-            "A Vega-Lite chart over inline rows (data) or an artifact (dataUri), from a preset "
-            "or a guarded spec, with a selection bindable to /selection/<key>."
-        ),
+        "description": "Any chart over tabular rows: a preset or an Altair/Vega-Lite spec.",
         "allOf": [
             {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
             {"$ref": "#/$defs/CatalogComponentCommon"},
@@ -593,7 +843,7 @@ def _chart_component_schema() -> dict[str, Any]:
                         "not": {"pattern": r"\s"},
                         "description": _DATA_URI_DESCRIPTION,
                     },
-                    "dataQuery": {"$ref": "#/$defs/ChartDataQuery"},
+                    "dataQuery": _DATA_QUERY_REF,
                     "selection": {
                         "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicValue",
                         "description": _SELECTION_DESCRIPTION,
@@ -603,7 +853,7 @@ def _chart_component_schema() -> dict[str, Any]:
                         "pattern": SELECTION_PARAM_PATTERN,
                         "default": DEFAULT_SELECTION_PARAM,
                     },
-                    "selectionField": _CHART_FIELD_NAME,
+                    "selectionField": {"$ref": "#/$defs/FieldName"},
                     "title": {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString"},
                     "height": {
                         "type": "number",
@@ -642,26 +892,31 @@ def _chart_component_schema() -> dict[str, Any]:
 
 
 def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
-    """The 4 bounded components and their local ``$defs``."""
+    """The 7 bounded components and their local ``$defs``."""
 
     components = {
         "clio.map.v1": _MAP_COMPONENT_SCHEMA,
-        "clio.time-series.v1": _TIME_SERIES_COMPONENT_SCHEMA,
+        "clio.data-table.v1": _DATA_TABLE_COMPONENT_SCHEMA,
+        "clio.code.v1": _CODE_COMPONENT_SCHEMA,
+        "clio.mermaid.v1": _MERMAID_COMPONENT_SCHEMA,
+        "clio.diff.v1": _DIFF_COMPONENT_SCHEMA,
         "clio.workflow.v1": _WORKFLOW_COMPONENT_SCHEMA,
         "clio.chart.v1": _chart_component_schema(),
     }
     defs = {
+        "FieldName": _FIELD_NAME_DEF,
         "MapPoint": _MAP_POINT_DEF,
         "WorkflowNode": _WORKFLOW_NODE_DEF,
         "WorkflowEdge": _WORKFLOW_EDGE_DEF,
+        "DataTableColumn": _DATA_TABLE_COLUMN_DEF,
         "SpecNoForbiddenKeys": _SPEC_NO_FORBIDDEN_KEYS_DEF,
         "SpecDataNamedSource": _SPEC_DATA_NAMED_SOURCE_DEF,
         "SpecNoBindElement": _SPEC_NO_BIND_ELEMENT_DEF,
-        "ChartDataQuery": _CHART_DATA_QUERY_DEF,
-        "ChartQueryFilter": _CHART_QUERY_FILTER_DEF,
-        "ChartQuerySort": _CHART_QUERY_SORT_DEF,
-        "ChartQueryAggregate": _CHART_QUERY_AGGREGATE_DEF,
-        "ChartQueryDownsample": _CHART_QUERY_DOWNSAMPLE_DEF,
+        "DataQuery": _DATA_QUERY_DEF,
+        "QueryFilter": _QUERY_FILTER_DEF,
+        "QuerySort": _QUERY_SORT_DEF,
+        "QueryAggregate": _QUERY_AGGREGATE_DEF,
+        "QueryDownsample": _QUERY_DOWNSAMPLE_DEF,
         "SelectionState": _SELECTION_STATE_DEF,
     }
     return components, defs

@@ -413,6 +413,7 @@ CLIO_ACCEPT_CASES.extend(
                 "columns": ["station"],
                 "rows": [{"station": "GNSS01"}],
                 "selection": {"path": "/selection/stations"},
+                "selectionField": "station",
             },
             id="DataTable-selection-bound",
         ),
@@ -433,6 +434,7 @@ CLIO_ACCEPT_CASES.extend(
                 "points": [{"id": "s1", "label": "GNSS01", "latitude": 34.1, "longitude": -118.3}],
                 "selected": "s1",
                 "selection": {"path": "/selection/stations"},
+                "selectionField": "station",
             },
             id="Map-selected-and-selection-bound",
         ),
@@ -553,41 +555,7 @@ def test_unknown_function_call_is_rejected_by_both() -> None:
         TextComponent.model_validate(payload)
 
 
-CLIO_TIME_SERIES_REJECT_CASES: list[Any] = [
-    pytest.param(
-        {
-            "id": "ts_1",
-            "component": "clio.time-series.v1",
-            "xKey": "t",
-            "yKeys": ["a", "a"],
-            "series": [{"t": 0, "a": 1}],
-        },
-        id="TimeSeries-duplicate-yKeys",
-    ),
-    pytest.param(
-        {
-            "id": "ts_1",
-            "component": "clio.time-series.v1",
-            "xKey": "t",
-            "yKeys": ["  "],
-            "series": [{"t": 0, "a": 1}],
-        },
-        id="TimeSeries-blank-yKey",
-    ),
-    pytest.param(
-        {
-            "id": "ts_1",
-            "component": "clio.time-series.v1",
-            "xKey": "t",
-            "yKeys": ["a"],
-            "series": [{"t": 0, "a": {"x": 1}}],
-        },
-        id="TimeSeries-non-scalar-series-value",
-    ),
-]
-
-
-@pytest.mark.parametrize("payload", [*CLIO_REJECT_CASES, *CLIO_TIME_SERIES_REJECT_CASES])
+@pytest.mark.parametrize("payload", CLIO_REJECT_CASES)
 def test_clio_reject_case_fails_pydantic_and_catalog(payload: dict[str, Any]) -> None:
     """Every reject payload fails BOTH the pydantic model and the catalog validator."""
 
@@ -737,12 +705,14 @@ def test_chart_table_and_map_share_one_selection_path_in_one_surface() -> None:
             "columns": ["station"],
             "rows": [{"station": "GNSS01"}],
             "selection": binding,
+            "selectionField": "station",
         },
         {
             "id": "map",
             "component": "clio.map.v1",
             "points": [{"id": "GNSS01", "label": "GNSS01", "latitude": 34.1, "longitude": -118.3}],
             "selection": binding,
+            "selectionField": "station",
         },
     ]
     message = {
