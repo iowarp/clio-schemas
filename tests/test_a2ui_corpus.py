@@ -553,41 +553,7 @@ def test_unknown_function_call_is_rejected_by_both() -> None:
         TextComponent.model_validate(payload)
 
 
-CLIO_TIME_SERIES_REJECT_CASES: list[Any] = [
-    pytest.param(
-        {
-            "id": "ts_1",
-            "component": "clio.time-series.v1",
-            "xKey": "t",
-            "yKeys": ["a", "a"],
-            "series": [{"t": 0, "a": 1}],
-        },
-        id="TimeSeries-duplicate-yKeys",
-    ),
-    pytest.param(
-        {
-            "id": "ts_1",
-            "component": "clio.time-series.v1",
-            "xKey": "t",
-            "yKeys": ["  "],
-            "series": [{"t": 0, "a": 1}],
-        },
-        id="TimeSeries-blank-yKey",
-    ),
-    pytest.param(
-        {
-            "id": "ts_1",
-            "component": "clio.time-series.v1",
-            "xKey": "t",
-            "yKeys": ["a"],
-            "series": [{"t": 0, "a": {"x": 1}}],
-        },
-        id="TimeSeries-non-scalar-series-value",
-    ),
-]
-
-
-@pytest.mark.parametrize("payload", [*CLIO_REJECT_CASES, *CLIO_TIME_SERIES_REJECT_CASES])
+@pytest.mark.parametrize("payload", CLIO_REJECT_CASES)
 def test_clio_reject_case_fails_pydantic_and_catalog(payload: dict[str, Any]) -> None:
     """Every reject payload fails BOTH the pydantic model and the catalog validator."""
 

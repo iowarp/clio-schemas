@@ -13,10 +13,10 @@ types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
 > **Status: canonical records, live UI vocabularies, and A2UI 0.9.1 catalog
-> files, model-capability tags, model facts and accepted parameters (version 0.5.0).**
+> files, model-capability tags, model facts and accepted parameters (version 0.5.1).**
 > `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 13 GACT 0.3
 > message blocks, the official A2UI 0.9.1 envelope/capability/catalog-file models, and
-> the two builtin catalog files (`clio-workspace`'s 33 CLIO components, the vendored
+> the two builtin catalog files (`clio-workspace`'s 32 CLIO components, the vendored
 > `basic` catalog) are canonical. `ModelCapabilityTags`
 > (`clio_schemas.model_capabilities`) tags one model's input/output modalities,
 > capabilities, model type and role (general vs surrogate), Hugging Face
@@ -64,12 +64,12 @@ clio-schemas/
 │   ├── py.typed                       # ships type information
 │   ├── a2ui/                          # A2UI 0.9.1: official shapes + catalog rendering
 │   │   ├── v0_9_1/                    #   messages, capabilities, data model, catalog file,
-│   │   │                              #   the 33 CLIO component models (components.py /
+│   │   │                              #   the 32 CLIO component models (components.py /
 │   │   │                              #   bounded_components.py)
 │   │   ├── sidecar.py                 #   CLIO catalog packaging metadata (never on the wire)
 │   │   ├── validation.py              #   jsonschema + referencing validators
 │   │   ├── catalog_render.py          #   canonicaliser: pydantic spec -> official JSON Schema
-│   │   ├── catalog_bounded.py         #   hand-authored map/time-series/workflow/chart definitions
+│   │   ├── catalog_bounded.py         #   hand-authored map/table/code/mermaid/diff/workflow/chart
 │   │   ├── chart_spec.py              #   clio.chart.v1 Vega-Lite spec guard + preset renderer
 │   │   └── catalog_export.py          #   assembles + renders a2ui/catalogs/**
 │   └── schemas/                       # COMMITTED immutable artifacts (in the wheel)

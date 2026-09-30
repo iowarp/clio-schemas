@@ -18,8 +18,8 @@ import pytest
 from pydantic import ValidationError
 
 from clio_schemas.a2ui.v0_9_1.bounded_components import (
-    MAX_CHART_FIELD_LENGTH,
     MAX_CHART_HEIGHT,
+    MAX_FIELD_NAME_LENGTH,
     MAX_MAP_POINTS,
     MAX_QUERY_COLUMNS,
     MAX_QUERY_FILTERS,
@@ -27,13 +27,13 @@ from clio_schemas.a2ui.v0_9_1.bounded_components import (
     MAX_QUERY_LIMIT,
     MAX_QUERY_METRICS,
     MAX_QUERY_PER_ENTITY,
-    MAX_TIME_SERIES_ROWS,
     MAX_WORKFLOW_EDGES,
     MAX_WORKFLOW_NODES,
     MIN_CHART_HEIGHT,
     ChartComponent,
+    CodeComponent,
+    DataTableComponent,
     MapComponent,
-    TimeSeriesComponent,
     WorkflowComponent,
 )
 from clio_schemas.a2ui.v0_9_1.capabilities import (
@@ -44,8 +44,6 @@ from clio_schemas.a2ui.v0_9_1.capabilities import (
 from clio_schemas.a2ui.v0_9_1.components import (
     COMPONENT_SPECS,
     ButtonComponent,
-    CodeComponent,
-    DataTableComponent,
     GridComponent,
     ListComponent,
     SelectionState,
@@ -128,15 +126,25 @@ def test_message_block_union_rejects_unknown_types_and_properties() -> None:
         )
 
 
-def test_catalog_declares_thirty_three_components_and_preserves_checkbox_spelling() -> None:
-    """The 33 CLIO catalog components (29 factory-built + 4 bounded) are closed and correct."""
+def test_catalog_declares_thirty_two_components_and_preserves_checkbox_spelling() -> None:
+    """The 32 CLIO catalog components (25 factory-built + 7 bounded) are closed and correct."""
 
     factory_names = set(COMPONENT_SPECS)
-    bounded_names = {"clio.map.v1", "clio.time-series.v1", "clio.workflow.v1", "clio.chart.v1"}
+    bounded_names = {
+        "clio.map.v1",
+        "clio.data-table.v1",
+        "clio.code.v1",
+        "clio.mermaid.v1",
+        "clio.diff.v1",
+        "clio.workflow.v1",
+        "clio.chart.v1",
+    }
     names = factory_names | bounded_names
-    assert len(names) == 33
+    assert len(names) == 32
+    assert factory_names.isdisjoint(bounded_names)
     assert "CheckBox" in names
     assert "Checkbox" not in names
+    assert "clio.time-series.v1" not in names
 
 
 def test_catalog_rejects_wrong_types_and_unsupported_properties() -> None:
@@ -234,7 +242,7 @@ def test_catalog_accepts_official_dynamic_bindings_and_actions() -> None:
     assert button.model_dump()["component"] == "Button"
 
 
-def test_catalog_enforces_map_time_series_and_workflow_limits() -> None:
+def test_catalog_enforces_map_and_workflow_limits() -> None:
     """Renderer resource bounds are part of the cross-repository contract."""
 
     point = {"id": "p", "label": "Point", "latitude": 1.0, "longitude": 2.0}
@@ -244,17 +252,6 @@ def test_catalog_enforces_map_time_series_and_workflow_limits() -> None:
                 "id": "map_1",
                 "component": "clio.map.v1",
                 "points": [point] * (MAX_MAP_POINTS + 1),
-            }
-        )
-    with pytest.raises(ValidationError):
-        TimeSeriesComponent.model_validate(
-            {
-                "id": "series_1",
-                "component": "clio.time-series.v1",
-                "series": [{"x": index, "y": index} for index in range(MAX_TIME_SERIES_ROWS + 1)],
-                "dataUri": "artifact://artifact_1",
-                "xKey": "x",
-                "yKeys": ["y"],
             }
         )
     with pytest.raises(ValidationError):
@@ -321,7 +318,7 @@ def test_chart_enforces_height_query_and_selection_param_bounds() -> None:
         {"dataQuery": {"downsample": {"mode": "stride", "maxPerEntity": 0}}},
         {"selectionParam": "9lives"},
         {"xField": ""},
-        {"xField": "x" * (MAX_CHART_FIELD_LENGTH + 1)},
+        {"xField": "x" * (MAX_FIELD_NAME_LENGTH + 1)},
     ):
         with pytest.raises(ValidationError):
             ChartComponent.model_validate({**base, **bad})

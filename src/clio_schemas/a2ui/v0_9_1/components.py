@@ -1,4 +1,4 @@
-"""CLIO's 33 trusted A2UI 0.9.1 catalog components — the pydantic generator.
+"""CLIO's 32 trusted A2UI 0.9.1 catalog components — the pydantic generator.
 
 These models are the *source of truth* for the ``clio-workspace`` catalog file
 rendered by :mod:`clio_schemas.a2ui.catalog_export` (``catalog.json``, in the
@@ -35,10 +35,9 @@ from pydantic import (
     field_validator,
 )
 
-# Bounds shared with bounded_components.py's clio.map.v1 / clio.time-series.v1
-# / clio.workflow.v1 (and their catalog-render mirrors in catalog_bounded.py).
+# Bounds shared with bounded_components.py's clio.map.v1 / clio.workflow.v1
+# (and their catalog-render mirrors in catalog_bounded.py).
 MAX_MAP_POINTS = 500
-MAX_TIME_SERIES_ROWS = 10_000
 MAX_WORKFLOW_NODES = 128
 MAX_WORKFLOW_EDGES = 256
 MAX_SELECTION_VALUES = 10_000
@@ -265,11 +264,18 @@ class _ComponentBase(_ClosedModel):
 # declaration the catalog canonicaliser (``catalog_export.py``) renders from —
 # the same data that builds the pydantic model below it.
 COMPONENT_SPECS: dict[str, tuple[Mapping[str, Any], Mapping[str, Any]]] = {}
+#: component_name -> one-sentence catalog description, populated alongside
+#: COMPONENT_SPECS. Rendered onto the component's schema by
+#: ``catalog_render.py`` so every catalog component (factory-built or
+#: hand-authored in ``catalog_bounded.py``) carries a short ``description`` —
+#: what the generated one-line catalog index is built from (issue #1533).
+COMPONENT_DESCRIPTIONS: dict[str, str] = {}
 
 
 def _component_model(
     class_name: str,
     component_name: str,
+    description: str,
     *,
     required: Mapping[str, Any] | None = None,
     optional: Mapping[str, Any] | None = None,
@@ -277,6 +283,7 @@ def _component_model(
     """Create one closed component model from the canonical property declaration."""
 
     COMPONENT_SPECS[component_name] = (dict(required or {}), dict(optional or {}))
+    COMPONENT_DESCRIPTIONS[component_name] = description
     fields: dict[str, tuple[Any, Any]] = {
         "component": (Literal[component_name], component_name),
     }
@@ -291,17 +298,20 @@ def _component_model(
 TextComponent = _component_model(
     "TextComponent",
     "Text",
+    "A run of text, plain or headed (h1-h5, caption, body).",
     required={"text": DynamicString},
     optional={"variant": Literal["h1", "h2", "h3", "h4", "h5", "caption", "body"]},
 )
 IconComponent = _component_model(
     "IconComponent",
     "Icon",
+    "A named or SVG icon glyph.",
     required={"name": IconValue},
 )
 ImageComponent = _component_model(
     "ImageComponent",
     "Image",
+    "A raster or vector image by URL, sized to a preset variant.",
     required={"url": DynamicString},
     optional={
         "description": DynamicString,
@@ -314,6 +324,7 @@ ImageComponent = _component_model(
 RowComponent = _component_model(
     "RowComponent",
     "Row",
+    "A horizontal layout container for child components.",
     required={"children": ChildList},
     optional={
         "justify": Literal[
@@ -325,6 +336,7 @@ RowComponent = _component_model(
 ColumnComponent = _component_model(
     "ColumnComponent",
     "Column",
+    "A vertical layout container for child components.",
     required={"children": ChildList},
     optional={
         "justify": Literal[
@@ -336,12 +348,14 @@ ColumnComponent = _component_model(
 GridComponent = _component_model(
     "GridComponent",
     "Grid",
+    "A fixed-column grid layout container for child components.",
     required={"children": list[ComponentId]},
     optional={"columns": int, "gap": float},
 )
 ListComponent = _component_model(
     "ListComponent",
     "List",
+    "A vertical or horizontal list of child components, optionally templated from bound data.",
     required={"children": ChildList},
     optional={
         "direction": Literal["vertical", "horizontal"],
@@ -351,23 +365,32 @@ ListComponent = _component_model(
 FrameComponent = _component_model(
     "FrameComponent",
     "Frame",
+    "A titled container around one child component.",
     required={"child": ComponentId},
     optional={"title": DynamicString, "description": DynamicString},
 )
 TabsComponent = _component_model(
     "TabsComponent",
     "Tabs",
+    "A tabbed switcher between named child components.",
     required={"tabs": Annotated[list[_TabDefinition], Field(min_length=1)]},
 )
 ModalComponent = _component_model(
-    "ModalComponent", "Modal", required={"trigger": ComponentId, "content": ComponentId}
+    "ModalComponent",
+    "Modal",
+    "A dialog opened by a trigger component, showing one content component.",
+    required={"trigger": ComponentId, "content": ComponentId},
 )
 DividerComponent = _component_model(
-    "DividerComponent", "Divider", optional={"axis": Literal["horizontal", "vertical"]}
+    "DividerComponent",
+    "Divider",
+    "A horizontal or vertical rule separating layout regions.",
+    optional={"axis": Literal["horizontal", "vertical"]},
 )
 ButtonComponent = _component_model(
     "ButtonComponent",
     "Button",
+    "A clickable control wrapping one child, firing an action.",
     required={"child": ComponentId, "action": Action},
     optional={
         "variant": Literal["default", "primary", "borderless"],
@@ -377,12 +400,14 @@ ButtonComponent = _component_model(
 CheckBoxComponent = _component_model(
     "CheckBoxComponent",
     "CheckBox",
+    "A single labeled boolean toggle.",
     required={"label": DynamicString, "value": DynamicBoolean},
     optional={"checks": Checks},
 )
 TextFieldComponent = _component_model(
     "TextFieldComponent",
     "TextField",
+    "A single- or multi-line text input.",
     required={"label": DynamicString},
     optional={
         "value": DynamicString,
@@ -394,6 +419,7 @@ TextFieldComponent = _component_model(
 ChoicePickerComponent = _component_model(
     "ChoicePickerComponent",
     "ChoicePicker",
+    "A single- or multiple-selection picker over a fixed option list.",
     required={"options": list[_ChoiceOption], "value": DynamicStringList},
     optional={
         "label": DynamicString,
@@ -406,24 +432,28 @@ ChoicePickerComponent = _component_model(
 SliderComponent = _component_model(
     "SliderComponent",
     "Slider",
+    "A whole-number range control (see clio.slider.v1 for fractional steps).",
     required={"max": float, "value": DynamicNumber},
     optional={"label": DynamicString, "min": float, "checks": Checks},
 )
 StatusComponent = _component_model(
     "StatusComponent",
     "clio.status.v1",
+    "A single labeled state, e.g. a running step.",
     required={"label": DynamicString, "state": DynamicString},
     optional={"detail": DynamicString, "elapsedMs": DynamicNumber},
 )
 MetricComponent = _component_model(
     "MetricComponent",
     "clio.metric.v1",
+    "One labeled number, optionally with a unit and trend.",
     required={"label": DynamicString, "value": DynamicValue},
     optional={"unit": DynamicString, "trend": DynamicString, "detail": DynamicString},
 )
 ProgressComponent = _component_model(
     "ProgressComponent",
     "clio.progress.v1",
+    "A bounded or indeterminate operation's progress.",
     required={"label": DynamicString},
     optional={
         "value": DynamicNumber,
@@ -435,47 +465,21 @@ ProgressComponent = _component_model(
 CalloutComponent = _component_model(
     "CalloutComponent",
     "clio.callout.v1",
+    "A short flagged note distinct from plain text (info/warning/error severity).",
     required={"title": DynamicString, "body": DynamicString, "severity": str},
     optional={"action": Action},
-)
-DataTableComponent = _component_model(
-    "DataTableComponent",
-    "clio.data-table.v1",
-    required={
-        "columns": list[str | _DataTableColumn],
-        "rows": list[dict[str, JsonValue]],
-    },
-    # DynamicValue (not a static string): bind it to /selection/<key>, whose
-    # value is a SelectionState. A plain string stays valid (backward compatible).
-    optional={"selection": DynamicValue, "action": Action},
-)
-MermaidComponent = _component_model(
-    "MermaidComponent",
-    "clio.mermaid.v1",
-    required={"source": DynamicString},
-    optional={"title": DynamicString},
 )
 ArtifactComponent = _component_model(
     "ArtifactComponent",
     "clio.artifact.v1",
+    "A reference card for one registered artifact.",
     required={"name": DynamicString, "uri": str, "mediaType": str},
     optional={"size": DynamicNumber, "action": Action},
-)
-CodeComponent = _component_model(
-    "CodeComponent",
-    "clio.code.v1",
-    required={"code": DynamicString, "language": str},
-    optional={"title": DynamicString},
-)
-DiffComponent = _component_model(
-    "DiffComponent",
-    "clio.diff.v1",
-    required={"path": str, "diff": DynamicString},
-    optional={"status": DynamicString, "action": Action},
 )
 ActionCardComponent = _component_model(
     "ActionCardComponent",
     "clio.action-card.v1",
+    "A short pitch with up to six labeled actions.",
     required={
         "title": DynamicString,
         "body": DynamicString,
@@ -486,6 +490,7 @@ ActionCardComponent = _component_model(
 ApprovalComponent = _component_model(
     "ApprovalComponent",
     "clio.approval.v1",
+    "A gated decision with one to four actions.",
     required={
         "title": DynamicString,
         "reason": DynamicString,
@@ -496,12 +501,14 @@ ApprovalComponent = _component_model(
 NumberSliderComponent = _component_model(
     "NumberSliderComponent",
     "clio.slider.v1",
+    "A fractional-step numeric control for a physical parameter, with a typed value box.",
     required={"label": DynamicString, "value": DynamicNumber, "min": float, "max": float},
     optional={"step": float, "unit": str},
 )
 MeshViewportComponent = _component_model(
     "MeshViewportComponent",
     "clio.mesh-viewport.v1",
+    "An orbitable 3D view of one registered mesh artifact, colored by a field.",
     required={"meshUri": ArtifactUri},
     optional={
         "title": DynamicString,
@@ -517,7 +524,8 @@ MeshViewportComponent = _component_model(
     },
 )
 
-# The four bounded/cross-field-validated components (clio.map.v1,
-# clio.time-series.v1, clio.workflow.v1, clio.chart.v1) are not built through
-# `_component_model` — see bounded_components.py — but COMPONENT_MODELS
-# there is the single list consumers should import.
+# The 7 bounded/cross-field-validated components (clio.map.v1,
+# clio.data-table.v1, clio.code.v1, clio.mermaid.v1, clio.diff.v1,
+# clio.workflow.v1, clio.chart.v1) are not built through `_component_model`
+# — see bounded_components.py — but COMPONENT_MODELS there is the single
+# list consumers should import.

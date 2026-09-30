@@ -3,7 +3,7 @@
 Sub-packages:
 
 - ``v0_9_1``: the official protocol-version-specific pydantic models
-  (envelopes, capabilities, data model, catalog file shape) plus the 33 CLIO
+  (envelopes, capabilities, data model, catalog file shape) plus the 32 CLIO
   catalog component models (the generator for ``catalog_export.py``).
 - ``sidecar``: CLIO's version-neutral catalog packaging metadata (never sent
   on the wire).
