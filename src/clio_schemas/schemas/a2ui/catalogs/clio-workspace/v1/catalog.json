@@ -34,37 +34,114 @@
     },
     "ChartDataQuery": {
       "additionalProperties": false,
-      "description": "A server-side table query applied to dataUri: the table-query request body (POST /v1/artifacts/{id}/table-query) without format. The server runs filter, then aggregate, then downsample, then limit. Omit columns to request the preset fill fields, the selection field and the spec's fields.",
+      "description": "A server-side table query applied to dataUri: the table-query request body (POST /v1/artifacts/{id}/table-query) without format. The server runs filter, then aggregate, then downsample, then sort, then offset/limit. Omit columns to request every column of dataUri — except alongside aggregate, where columns is required, since aggregate's output columns (e.g. price_mean) don't exist in the source and so cannot be inferred. limit bounds the rows in ONE response (a transfer size), not the underlying data; offset pages through a larger result across several requests. When a chart or map query would otherwise exceed limit without an explicit downsample, the server instead samples evenly across the full range and reports that it did, rather than silently truncating to the first rows. limit's own maximum here is a generous safety ceiling, not the deployment's real per-response cap, which is server-configured. A viewer (e.g. an interactive data-table) may layer its own user-driven paging/filtering/sorting on top of this dataQuery without replacing it — the agent's own filter/aggregate/downsample intent still applies underneath.",
+      "if": {
+        "properties": {
+          "aggregate": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "aggregate"
+        ]
+      },
       "properties": {
         "aggregate": {
-          "$ref": "#/$defs/ChartQueryAggregate"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChartQueryAggregate"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "columns": {
-          "items": {
-            "maxLength": 128,
-            "minLength": 1,
-            "type": "string"
-          },
-          "maxItems": 64,
-          "minItems": 1,
-          "type": "array",
-          "uniqueItems": true
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "downsample": {
-          "$ref": "#/$defs/ChartQueryDownsample"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChartQueryDownsample"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "filter": {
-          "items": {
-            "$ref": "#/$defs/ChartQueryFilter"
-          },
-          "maxItems": 64,
-          "type": "array"
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ChartQueryFilter"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "limit": {
-          "maximum": 50000,
-          "minimum": 1,
-          "type": "integer"
+          "anyOf": [
+            {
+              "maximum": 50000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ChartQuerySort"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
+      },
+      "then": {
+        "required": [
+          "columns"
+        ]
       },
       "type": "object"
     },
@@ -135,9 +212,16 @@
       },
       "properties": {
         "entityColumn": {
-          "maxLength": 128,
-          "minLength": 1,
-          "type": "string"
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "maxPerEntity": {
           "default": 500,
@@ -155,17 +239,43 @@
           "type": "string"
         },
         "x": {
-          "maxLength": 128,
-          "minLength": 1,
-          "type": "string"
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "y": {
-          "maxLength": 128,
-          "minLength": 1,
-          "type": "string"
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "then": {
+        "properties": {
+          "x": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "y": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
         "required": [
           "x",
           "y"
@@ -274,9 +384,29 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "const": "contains"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "value"
+            ]
+          }
         }
       ],
-      "description": "One predicate; all filter entries are AND-ed. eq: value is a non-null scalar. in: value is a non-empty list of scalars. range: value is [min, max], inclusive, either side may be null. isnull: value omitted or true matches nulls, false matches non-nulls.",
+      "description": "One predicate; all filter entries are AND-ed. eq: value is a non-null scalar. in: value is a non-empty list of scalars. range: value is [min, max], inclusive, either side may be null. isnull: value omitted or true matches nulls, false matches non-nulls. contains: value is a non-empty string, matched as a case-insensitive substring of a string column (a per-column text filter).",
       "properties": {
         "column": {
           "maxLength": 128,
@@ -288,7 +418,8 @@
             "eq",
             "in",
             "range",
-            "isnull"
+            "isnull",
+            "contains"
           ],
           "type": "string"
         },
@@ -297,6 +428,25 @@
       "required": [
         "column",
         "op"
+      ],
+      "type": "object"
+    },
+    "ChartQuerySort": {
+      "additionalProperties": false,
+      "description": "One dataQuery.sort key; earlier entries in the list sort first.",
+      "properties": {
+        "column": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "desc": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "column"
       ],
       "type": "object"
     },
@@ -414,6 +564,69 @@
         "values"
       ],
       "type": "object"
+    },
+    "SpecDataNamedSource": {
+      "description": "Every `data` key anywhere in a Vega-Lite spec is absent or exactly {\"name\": \"source\"} — rows come from the component's data/dataUri, never the spec.",
+      "else": {
+        "if": {
+          "type": "array"
+        },
+        "then": {
+          "items": {
+            "$ref": "#/$defs/SpecDataNamedSource"
+          }
+        }
+      },
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "additionalProperties": {
+          "$ref": "#/$defs/SpecDataNamedSource"
+        },
+        "properties": {
+          "data": {
+            "const": {
+              "name": "source"
+            }
+          }
+        }
+      }
+    },
+    "SpecNoForbiddenKeys": {
+      "description": "No `url` or `usermeta` key anywhere in a Vega-Lite spec, at any depth.",
+      "else": {
+        "if": {
+          "type": "array"
+        },
+        "then": {
+          "items": {
+            "$ref": "#/$defs/SpecNoForbiddenKeys"
+          }
+        }
+      },
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "additionalProperties": {
+          "$ref": "#/$defs/SpecNoForbiddenKeys"
+        },
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "url"
+              ]
+            },
+            {
+              "required": [
+                "usermeta"
+              ]
+            }
+          ]
+        }
+      }
     },
     "TabDefinition": {
       "additionalProperties": false,
@@ -1493,6 +1706,7 @@
               "const": "clio.chart.v1"
             },
             "data": {
+              "description": "Inline rows (at most 10000) — this array rides the surface's own wire message, so it is capped for transfer size; for a larger or growing dataset use dataUri instead, unbounded and paged/downsampled by the viewer.",
               "items": {
                 "additionalProperties": {
                   "type": [
@@ -1511,6 +1725,10 @@
               "$ref": "#/$defs/ChartDataQuery"
             },
             "dataUri": {
+              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation.",
+              "not": {
+                "pattern": "\\s"
+              },
               "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
               "type": "string"
             },
@@ -1554,7 +1772,15 @@
               "type": "string"
             },
             "spec": {
-              "description": "A Vega-Lite spec whose rows come from data/dataUri as the named dataset 'source'. The renderer also applies the spec guard (size, view count, no url/usermeta keys, data only as {name: source}); see a2ui/chart/guard_rules.json.",
+              "allOf": [
+                {
+                  "$ref": "#/$defs/SpecNoForbiddenKeys"
+                },
+                {
+                  "$ref": "#/$defs/SpecDataNamedSource"
+                }
+              ],
+              "description": "A Vega-Lite spec whose rows come from data/dataUri as the named dataset 'source' — the spec is chart configuration, never a data channel, and the dataset itself is unbounded via dataUri regardless of this cap. This schema already enforces the top-level key allowlist, no url/usermeta key at any depth, and data only as {name: source} at any depth; the renderer additionally enforces the config-size (65536 bytes) and view-count (8) caps that keep the spec itself bounded and abuse-resistant, which JSON Schema cannot express. See a2ui/chart/guard_rules.json.",
               "propertyNames": {
                 "enum": [
                   "$schema",

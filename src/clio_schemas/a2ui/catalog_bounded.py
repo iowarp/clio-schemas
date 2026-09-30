@@ -6,11 +6,19 @@
 (``a2ui/v0_9_1/bounded_components.py``): bounded list lengths and, for the
 time series and the chart, "exactly one of" cross-field rules expressed as
 extra ``oneOf`` ``allOf`` branches. The chart's per-preset required fields
-are derived from the shipped preset templates. The Vega-Lite spec guard
-(size, view count, ``data``/``url`` rules) cannot be written in JSON Schema
-beyond the top-level key allowlist; it lives in
-:mod:`clio_schemas.a2ui.chart_spec` and runs in the pydantic model and the
-renderer. These are not built through
+are derived from the shipped preset templates. Most of the Vega-Lite spec
+guard IS expressible in JSON Schema and is included on ``spec`` below: the
+top-level key allowlist (``propertyNames``), a recursive ban on ``url``/
+``usermeta`` keys at any depth (``$defs/SpecNoForbiddenKeys``), and the rule
+that every ``data`` key at any depth is absent or exactly ``{"name":
+"source"}`` (``$defs/SpecDataNamedSource``). Two rules are NOT expressible in
+plain JSON Schema and stay pydantic/renderer-only: the serialized-size cap
+(65536 UTF-8 bytes — JSON Schema has no "byte length of my own re-encoding"
+assertion) and the view-composition count (recursively counting
+mark-bearing views across ``layer``/``concat``/``facet``/``repeat`` — JSON
+Schema cannot count matches across a recursive structure). Both still run in
+:mod:`clio_schemas.a2ui.chart_spec`, in the pydantic model and the renderer.
+These are not built through
 the generic canonicaliser (``catalog_render.py``) because
 ``Field(min_length=/max_length=)`` bounds and cross-field
 ``model_validator``s are pydantic *business rules*, not field-type shapes.
@@ -57,6 +65,64 @@ _SELECTION_DESCRIPTION = (
     "({field, values[], source?}, see $defs/SelectionState). Components bound to the "
     "same path share one selection."
 )
+_DATA_URI_DESCRIPTION = (
+    "A workspace file path or artifact:// reference; CLIO registers a path as an "
+    "artifact before validation."
+)
+
+
+def _nullable(schema: dict[str, Any]) -> dict[str, Any]:
+    """Wrap a property schema so JSON Schema also accepts an explicit ``null``.
+
+    Matches a pydantic ``X | None = None`` field: the property may be omitted
+    OR explicitly ``null`` OR a value of the wrapped shape. Without this, a
+    client that writes ``{"aggregate": null}`` to explicitly clear a field
+    passes pydantic (``Optional`` accepts ``None``) but fails a schema whose
+    property is a bare ``$ref``/object shape with no ``null`` alternative.
+    ``description``, if present on ``schema``, moves to the wrapper so it
+    still describes the property regardless of which branch matched.
+    """
+
+    schema = dict(schema)
+    description = schema.pop("description", None)
+    wrapped: dict[str, Any] = {"anyOf": [schema, {"type": "null"}]}
+    if description is not None:
+        wrapped["description"] = description
+    return wrapped
+
+
+# Recursive rules for clio.chart.v1's `spec` (a Vega-Lite document): applied
+# to every node regardless of depth, mirroring chart_spec.py's `_walk`. Both
+# are pure structural JSON Schema (no size/count assertions needed), so
+# clio-agent's JSON-Schema-only validation can enforce them without running
+# clio_schemas.a2ui.chart_spec at all — see the module docstring.
+_SPEC_NO_FORBIDDEN_KEYS_DEF: dict[str, Any] = {
+    "description": "No `url` or `usermeta` key anywhere in a Vega-Lite spec, at any depth.",
+    "if": {"type": "object"},
+    "then": {
+        "not": {"anyOf": [{"required": ["url"]}, {"required": ["usermeta"]}]},
+        "additionalProperties": {"$ref": "#/$defs/SpecNoForbiddenKeys"},
+    },
+    "else": {
+        "if": {"type": "array"},
+        "then": {"items": {"$ref": "#/$defs/SpecNoForbiddenKeys"}},
+    },
+}
+_SPEC_DATA_NAMED_SOURCE_DEF: dict[str, Any] = {
+    "description": (
+        "Every `data` key anywhere in a Vega-Lite spec is absent or exactly "
+        '{"name": "source"} — rows come from the component\'s data/dataUri, never the spec.'
+    ),
+    "if": {"type": "object"},
+    "then": {
+        "properties": {"data": {"const": {"name": "source"}}},
+        "additionalProperties": {"$ref": "#/$defs/SpecDataNamedSource"},
+    },
+    "else": {
+        "if": {"type": "array"},
+        "then": {"items": {"$ref": "#/$defs/SpecDataNamedSource"}},
+    },
+}
 
 _MAP_POINT_DEF: dict[str, Any] = {
     "type": "object",
@@ -240,11 +306,12 @@ _CHART_QUERY_FILTER_DEF: dict[str, Any] = {
         "One predicate; all filter entries are AND-ed. eq: value is a non-null scalar. "
         "in: value is a non-empty list of scalars. range: value is [min, max], inclusive, "
         "either side may be null. isnull: value omitted or true matches nulls, false "
-        "matches non-nulls."
+        "matches non-nulls. contains: value is a non-empty string, matched as a "
+        "case-insensitive substring of a string column (a per-column text filter)."
     ),
     "properties": {
         "column": _CHART_FIELD_NAME,
-        "op": {"type": "string", "enum": ["eq", "in", "range", "isnull"]},
+        "op": {"type": "string", "enum": ["eq", "in", "range", "isnull", "contains"]},
         "value": {},
     },
     "required": ["column", "op"],
@@ -272,7 +339,19 @@ _CHART_QUERY_FILTER_DEF: dict[str, Any] = {
             required=True,
         ),
         _filter_op_rule("isnull", {"type": ["boolean", "null"]}, required=False),
+        _filter_op_rule("contains", {"type": "string", "minLength": 1}, required=True),
     ],
+}
+
+_CHART_QUERY_SORT_DEF: dict[str, Any] = {
+    "type": "object",
+    "description": "One dataQuery.sort key; earlier entries in the list sort first.",
+    "properties": {
+        "column": _CHART_FIELD_NAME,
+        "desc": {"type": "boolean", "default": False},
+    },
+    "required": ["column"],
+    "additionalProperties": False,
 }
 
 _CHART_QUERY_AGGREGATE_DEF: dict[str, Any] = {
@@ -326,9 +405,9 @@ _CHART_QUERY_DOWNSAMPLE_DEF: dict[str, Any] = {
             "enum": ["none", "stride", "per_entity_lttb"],
             "default": "none",
         },
-        "entityColumn": _CHART_FIELD_NAME,
-        "x": _CHART_FIELD_NAME,
-        "y": _CHART_FIELD_NAME,
+        "entityColumn": _nullable(_CHART_FIELD_NAME),
+        "x": _nullable(_CHART_FIELD_NAME),
+        "y": _nullable(_CHART_FIELD_NAME),
         "maxPerEntity": {
             "type": "integer",
             "minimum": 1,
@@ -338,7 +417,12 @@ _CHART_QUERY_DOWNSAMPLE_DEF: dict[str, Any] = {
     },
     "additionalProperties": False,
     "if": {"properties": {"mode": {"const": "per_entity_lttb"}}, "required": ["mode"]},
-    "then": {"required": ["x", "y"]},
+    "then": {
+        # required checks presence only; explicitly ban null too, since a null x/y is
+        # not a usable column name (matches the pydantic model_validator's rejection).
+        "properties": {"x": {"not": {"type": "null"}}, "y": {"not": {"type": "null"}}},
+        "required": ["x", "y"],
+    },
 }
 
 _CHART_DATA_QUERY_DEF: dict[str, Any] = {
@@ -346,27 +430,57 @@ _CHART_DATA_QUERY_DEF: dict[str, Any] = {
     "description": (
         "A server-side table query applied to dataUri: the table-query request body "
         "(POST /v1/artifacts/{id}/table-query) without format. The server runs filter, "
-        "then aggregate, then downsample, then limit. Omit columns to request the "
-        "preset fill fields, the selection field and the spec's fields."
+        "then aggregate, then downsample, then sort, then offset/limit. Omit columns to "
+        "request every column of dataUri — except alongside aggregate, where columns is "
+        "required, since aggregate's output columns (e.g. price_mean) don't exist in "
+        "the source and so cannot be inferred. limit bounds the rows in ONE response (a "
+        "transfer size), not the underlying data; offset pages through a larger result "
+        "across several requests. When a chart or map query would otherwise exceed "
+        "limit without an explicit downsample, the server instead samples evenly across "
+        "the full range and reports that it did, rather than silently truncating to the "
+        "first rows. limit's own maximum here is a generous safety ceiling, not the "
+        "deployment's real per-response cap, which is server-configured. A viewer (e.g. "
+        "an interactive data-table) may layer its own user-driven paging/filtering/"
+        "sorting on top of this dataQuery without replacing it — the agent's own "
+        "filter/aggregate/downsample intent still applies underneath."
     ),
     "properties": {
-        "columns": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": MAX_QUERY_COLUMNS,
-            "uniqueItems": True,
-            "items": _CHART_FIELD_NAME,
-        },
-        "filter": {
-            "type": "array",
-            "maxItems": MAX_QUERY_FILTERS,
-            "items": {"$ref": "#/$defs/ChartQueryFilter"},
-        },
-        "aggregate": {"$ref": "#/$defs/ChartQueryAggregate"},
-        "downsample": {"$ref": "#/$defs/ChartQueryDownsample"},
-        "limit": {"type": "integer", "minimum": 1, "maximum": MAX_QUERY_LIMIT},
+        "columns": _nullable(
+            {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": MAX_QUERY_COLUMNS,
+                "uniqueItems": True,
+                "items": _CHART_FIELD_NAME,
+            }
+        ),
+        "filter": _nullable(
+            {
+                "type": "array",
+                "maxItems": MAX_QUERY_FILTERS,
+                "items": {"$ref": "#/$defs/ChartQueryFilter"},
+            }
+        ),
+        "aggregate": _nullable({"$ref": "#/$defs/ChartQueryAggregate"}),
+        "downsample": _nullable({"$ref": "#/$defs/ChartQueryDownsample"}),
+        "sort": _nullable(
+            {
+                "type": "array",
+                "maxItems": MAX_QUERY_COLUMNS,
+                "items": {"$ref": "#/$defs/ChartQuerySort"},
+            }
+        ),
+        "offset": _nullable({"type": "integer", "minimum": 0}),
+        "limit": _nullable({"type": "integer", "minimum": 1, "maximum": MAX_QUERY_LIMIT}),
     },
     "additionalProperties": False,
+    # Presence-and-non-null, not bare `dependentRequired`: an explicit `aggregate: null`
+    # is the same as omitting it (see _nullable) and must not itself demand columns.
+    "if": {
+        "properties": {"aggregate": {"not": {"type": "null"}}},
+        "required": ["aggregate"],
+    },
+    "then": {"required": ["columns"]},
 }
 
 
@@ -410,11 +524,20 @@ def _chart_component_schema() -> dict[str, Any]:
                         "type": "object",
                         "description": (
                             "A Vega-Lite spec whose rows come from data/dataUri as the named "
-                            "dataset 'source'. The renderer also applies the spec guard "
-                            "(size, view count, no url/usermeta keys, data only as "
-                            "{name: source}); see a2ui/chart/guard_rules.json."
+                            "dataset 'source' — the spec is chart configuration, never a data "
+                            "channel, and the dataset itself is unbounded via dataUri regardless "
+                            "of this cap. This schema already enforces the top-level key "
+                            "allowlist, no url/usermeta key at any depth, and data only as "
+                            "{name: source} at any depth; the renderer additionally enforces the "
+                            "config-size (65536 bytes) and view-count (8) caps that keep the spec "
+                            "itself bounded and abuse-resistant, which JSON Schema cannot "
+                            "express. See a2ui/chart/guard_rules.json."
                         ),
                         "propertyNames": {"enum": list(ALLOWED_TOP_LEVEL_KEYS)},
+                        "allOf": [
+                            {"$ref": "#/$defs/SpecNoForbiddenKeys"},
+                            {"$ref": "#/$defs/SpecDataNamedSource"},
+                        ],
                     },
                     "preset": {"type": "string", "enum": list(PRESET_NAMES)},
                     **fill_fields,
@@ -428,8 +551,19 @@ def _chart_component_schema() -> dict[str, Any]:
                                 "type": ["string", "number", "boolean", "null"]
                             },
                         },
+                        "description": (
+                            f"Inline rows (at most {MAX_INLINE_ROWS}) — this array rides the "
+                            "surface's own wire message, so it is capped for transfer size; "
+                            "for a larger or growing dataset use dataUri instead, unbounded "
+                            "and paged/downsampled by the viewer."
+                        ),
                     },
-                    "dataUri": {"type": "string", "pattern": ARTIFACT_URI_PATTERN},
+                    "dataUri": {
+                        "type": "string",
+                        "pattern": ARTIFACT_URI_PATTERN,
+                        "not": {"pattern": r"\s"},
+                        "description": _DATA_URI_DESCRIPTION,
+                    },
                     "dataQuery": {"$ref": "#/$defs/ChartDataQuery"},
                     "selection": {
                         "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicValue",
@@ -491,8 +625,11 @@ def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
         "MapPoint": _MAP_POINT_DEF,
         "WorkflowNode": _WORKFLOW_NODE_DEF,
         "WorkflowEdge": _WORKFLOW_EDGE_DEF,
+        "SpecNoForbiddenKeys": _SPEC_NO_FORBIDDEN_KEYS_DEF,
+        "SpecDataNamedSource": _SPEC_DATA_NAMED_SOURCE_DEF,
         "ChartDataQuery": _CHART_DATA_QUERY_DEF,
         "ChartQueryFilter": _CHART_QUERY_FILTER_DEF,
+        "ChartQuerySort": _CHART_QUERY_SORT_DEF,
         "ChartQueryAggregate": _CHART_QUERY_AGGREGATE_DEF,
         "ChartQueryDownsample": _CHART_QUERY_DOWNSAMPLE_DEF,
         "SelectionState": _SELECTION_STATE_DEF,

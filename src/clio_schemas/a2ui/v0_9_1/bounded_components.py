@@ -14,7 +14,14 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, Field, JsonValue, StringConstraints, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    JsonValue,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 from clio_schemas.a2ui.chart_spec import (
     MAX_INLINE_ROWS,
@@ -150,8 +157,11 @@ MAX_CHART_FIELD_LENGTH = 128
 MIN_CHART_HEIGHT = 80
 MAX_CHART_HEIGHT = 2000
 #: dataQuery bounds, copied from the table-query server's request model
-#: (clio-agent ``gact/artifacts/table_query.py``). MAX_QUERY_LIMIT is the
-#: server's default row ceiling (``artifacts.table_query_max_rows``).
+#: (clio-agent ``gact/artifacts/table_query.py``). MAX_QUERY_LIMIT is a
+#: generous schema-level safety ceiling on ``limit`` (a client cannot ask
+#: for an unbounded response), not the server's actual per-response cap —
+#: that is server-configured (``artifacts.table_query_max_rows``) and may be
+#: lower.
 MAX_QUERY_COLUMNS = 64
 MAX_QUERY_FILTERS = 64
 MAX_QUERY_IN_VALUES = 10_000
@@ -175,13 +185,35 @@ CHART_PRESET_FIELDS: tuple[str, ...] = (
 )
 
 
-QueryFilterOp = Literal["eq", "in", "range", "isnull"]
+QueryFilterOp = Literal["eq", "in", "range", "isnull", "contains"]
 QueryMetricFn = Literal["mean", "min", "max", "count", "sum", "median"]
 DownsampleMode = Literal["none", "stride", "per_entity_lttb"]
 
 
 def _is_query_scalar(value: object) -> bool:
     return isinstance(value, str | int | float | bool)
+
+
+def _int_from_whole_number(value: object) -> object:
+    """Coerce a whole-number ``float`` (e.g. ``5.0``) to ``int`` before strict validation.
+
+    JSON Schema's ``"type": "integer"`` accepts any JSON number without a
+    fractional part, so a producer that serializes an integer as ``5.0`` (a
+    legitimate JSON number) passes catalog validation but was then rejected
+    by this model's ``strict=True`` config, which does not coerce ``float``
+    to ``int`` even losslessly. Used as a ``field_validator(mode="before")``
+    on ``limit``/``maxPerEntity`` so the two validators agree: a bare
+    ``int`` passes through untouched, a fractional ``float`` (``5.5``) is
+    left for strict ``int`` validation to reject, and any other type
+    (``str``, ``bool``, ...) is also left alone so strict validation still
+    rejects it exactly as before.
+    """
+
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    return value
 
 
 class ChartQueryFilter(_ClosedModel):
@@ -192,6 +224,8 @@ class ChartQueryFilter(_ClosedModel):
     * ``range``: ``value`` is ``[min, max]``, inclusive; either side may be null.
     * ``isnull``: ``value`` is omitted/``true`` (match nulls) or ``false``
       (match non-nulls).
+    * ``contains``: ``value`` is a non-empty string; matches a case-insensitive
+      substring of a string column (the table viewer's per-column text filter).
     """
 
     column: ChartFieldName
@@ -214,6 +248,9 @@ class ChartQueryFilter(_ClosedModel):
                 raise ValueError("range filter requires [min, max]")
             if not all(item is None or _is_query_scalar(item) for item in value):
                 raise ValueError("range bounds must be scalars or null")
+        elif self.op == "contains":
+            if not isinstance(value, str) or not value:
+                raise ValueError("contains filter requires a non-empty string value")
         elif value is not None and not isinstance(value, bool):
             raise ValueError("isnull filter value must be a boolean when given")
         return self
@@ -245,6 +282,13 @@ class ChartQueryAggregate(_ClosedModel):
         return self
 
 
+class ChartQuerySort(_ClosedModel):
+    """One ``dataQuery.sort`` key; earlier entries in the list sort first."""
+
+    column: ChartFieldName
+    desc: bool = False
+
+
 class ChartQueryDownsample(_ClosedModel):
     """How the server thins the filtered/aggregated rows before ``limit`` applies.
 
@@ -260,6 +304,11 @@ class ChartQueryDownsample(_ClosedModel):
     y: ChartFieldName | None = None
     maxPerEntity: int = Field(default=DEFAULT_QUERY_PER_ENTITY, ge=1, le=MAX_QUERY_PER_ENTITY)
 
+    @field_validator("maxPerEntity", mode="before")
+    @classmethod
+    def _coerce_max_per_entity(cls, value: object) -> object:
+        return _int_from_whole_number(value)
+
     @model_validator(mode="after")
     def _check_mode(self) -> ChartQueryDownsample:
         if self.mode == "per_entity_lttb" and (self.x is None or self.y is None):
@@ -272,9 +321,23 @@ class ChartDataQuery(_ClosedModel):
 
     The request body of ``POST /v1/artifacts/{id}/table-query`` (clio-agent
     ``TableQueryRequest``) minus ``format``, which the renderer always sends
-    as ``json``. ``columns`` may be omitted: the renderer then requests the
-    preset fill fields, the selection field and the spec's fields. The
-    server runs filter, then aggregate, then downsample, then limit.
+    as ``json``. ``columns`` may be omitted to request every column of
+    ``dataUri`` — except alongside ``aggregate``, where ``columns`` is
+    required: an aggregate's output columns (e.g. ``price_mean``) don't
+    exist in the source and so cannot be inferred. The server runs filter,
+    then aggregate, then downsample, then sort, then offset/limit.
+
+    ``limit`` bounds the rows in ONE response (a transfer size), not the
+    underlying data: ``offset`` pages through a larger result across several
+    requests. When a chart or map query would otherwise exceed ``limit``
+    without an explicit ``downsample``, the server instead samples evenly
+    across the full range and reports that it did, rather than silently
+    truncating to the first rows. The schema's own maximum on ``limit`` is a
+    generous safety ceiling, not the deployment's real per-response cap,
+    which is server-configured. A viewer (e.g. an interactive data-table)
+    may layer its own user-driven paging/filtering/sorting on top of this
+    ``dataQuery`` without replacing it — the agent's own filter/aggregate/
+    downsample intent still applies underneath.
     """
 
     columns: list[ChartFieldName] | None = Field(
@@ -283,12 +346,21 @@ class ChartDataQuery(_ClosedModel):
     filter: list[ChartQueryFilter] | None = Field(default=None, max_length=MAX_QUERY_FILTERS)
     aggregate: ChartQueryAggregate | None = None
     downsample: ChartQueryDownsample | None = None
+    sort: list[ChartQuerySort] | None = Field(default=None, max_length=MAX_QUERY_COLUMNS)
+    offset: int | None = Field(default=None, ge=0)
     limit: int | None = Field(default=None, ge=1, le=MAX_QUERY_LIMIT)
+
+    @field_validator("offset", "limit", mode="before")
+    @classmethod
+    def _coerce_offset_and_limit(cls, value: object) -> object:
+        return _int_from_whole_number(value)
 
     @model_validator(mode="after")
     def _check_columns(self) -> ChartDataQuery:
         if self.columns is not None and len(set(self.columns)) != len(self.columns):
             raise ValueError("columns must be distinct")
+        if self.aggregate is not None and self.columns is None:
+            raise ValueError("columns is required when aggregate is set")
         return self
 
 

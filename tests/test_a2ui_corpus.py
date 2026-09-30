@@ -789,6 +789,188 @@ def test_chart_aggregate_name_collision_is_a_model_rule() -> None:
         ChartComponent.model_validate(payload)
 
 
+# --------------------------------------------------------------------------- #
+# Adversarial-review fixups round 2: aggregate-requires-columns, the dataUri
+# whitespace hole, the spec guard now expressible in JSON Schema, explicit
+# null on optional dataQuery fields, int-from-whole-number, offset/sort, and
+# the contains filter op (issue #1533 phase-2 follow-up).
+# --------------------------------------------------------------------------- #
+def _chart_payload(**overrides: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {
+        "id": "ch",
+        "component": "clio.chart.v1",
+        "preset": "scatter",
+        "xField": "x",
+        "yField": "y",
+        "entityField": "e",
+        "dataUri": _URI,
+    }
+    base.update(overrides)
+    return base
+
+
+def test_chart_query_aggregate_without_columns_is_rejected() -> None:
+    """aggregate's output columns (e.g. v_mean) don't exist in the source without columns."""
+
+    payload = _chart_payload(dataQuery={"aggregate": {"metrics": [{"column": "v", "fn": "mean"}]}})
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_chart_query_aggregate_with_columns_is_valid() -> None:
+    payload = _chart_payload(
+        dataQuery={
+            "columns": ["e", "v"],
+            "aggregate": {"metrics": [{"column": "v", "fn": "mean"}]},
+        }
+    )
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    ChartComponent.model_validate(payload)
+
+
+def test_chart_query_aggregate_explicit_null_does_not_demand_columns() -> None:
+    """An explicit ``aggregate: null`` is the same as omitting it — no columns demand."""
+
+    payload = _chart_payload(dataQuery={"aggregate": None})
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    ChartComponent.model_validate(payload)
+
+
+@pytest.mark.parametrize("field", ["filter", "aggregate", "downsample", "limit", "columns"])
+def test_data_query_optional_fields_accept_explicit_null(field: str) -> None:
+    """Every ``X | None`` dataQuery field also validates an explicit ``null`` in the schema."""
+
+    payload = _chart_payload(dataQuery={field: None})
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    ChartComponent.model_validate(payload)
+
+
+def test_downsample_x_and_y_accept_explicit_null_outside_per_entity_lttb() -> None:
+    payload = _chart_payload(dataQuery={"downsample": {"mode": "none", "x": None, "y": None}})
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    ChartComponent.model_validate(payload)
+
+
+def test_downsample_per_entity_lttb_rejects_null_x_or_y() -> None:
+    """``required`` alone would accept a present-but-null x/y; the schema must not."""
+
+    payload = _chart_payload(
+        dataQuery={"downsample": {"mode": "per_entity_lttb", "x": None, "y": "v"}}
+    )
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_data_uri_pattern_rejects_a_trailing_newline() -> None:
+    """Python's ``$`` matches just before a trailing newline; the schema must not accept it."""
+
+    payload = _chart_payload(dataUri=f"{_URI}\n")
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_chart_query_limit_accepts_a_whole_number_float_like_json_schema_does() -> None:
+    """JSON Schema's "type": "integer" accepts 5.0; the model must agree, not just 5."""
+
+    payload = _chart_payload(dataQuery={"limit": 5.0})
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    chart = ChartComponent.model_validate(payload)
+    assert chart.dataQuery is not None
+    assert chart.dataQuery.limit == 5
+    assert isinstance(chart.dataQuery.limit, int)
+
+
+def test_chart_query_limit_still_rejects_a_fractional_float() -> None:
+    payload = _chart_payload(dataQuery={"limit": 5.5})
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_spec_with_url_anywhere_is_rejected_by_the_json_validator_alone() -> None:
+    """The forbidden-key ban is now real JSON Schema, not just a pydantic-side guard."""
+
+    payload = {
+        "id": "ch",
+        "component": "clio.chart.v1",
+        "spec": {"layer": [{"mark": "point", "encoding": {}, "usermeta": {"url": "x"}}]},
+        "data": [{"x": 1}],
+    }
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_spec_data_named_source_at_any_depth_is_rejected_by_the_json_validator_alone() -> None:
+    payload = {
+        "id": "ch",
+        "component": "clio.chart.v1",
+        "spec": {"layer": [{"mark": "point", "data": {"values": [1, 2, 3]}}]},
+        "data": [{"x": 1}],
+    }
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_spec_data_named_source_nested_still_validates() -> None:
+    payload = {
+        "id": "ch",
+        "component": "clio.chart.v1",
+        "spec": {"layer": [{"mark": "point", "data": {"name": "source"}}]},
+        "data": [{"x": 1}],
+    }
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    ChartComponent.model_validate(payload)
+
+
+def test_data_query_offset_and_sort_shape() -> None:
+    payload = _chart_payload(
+        dataQuery={
+            "sort": [{"column": "e", "desc": True}, {"column": "x"}],
+            "offset": 100,
+            "limit": 50,
+        }
+    )
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    ChartComponent.model_validate(payload)
+
+
+def test_data_query_offset_rejects_negative() -> None:
+    payload = _chart_payload(dataQuery={"offset": -1})
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_data_query_sort_rejects_unknown_property() -> None:
+    payload = _chart_payload(dataQuery={"sort": [{"column": "e", "ascending": True}]})
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_query_filter_contains_op() -> None:
+    payload = _chart_payload(
+        dataQuery={"filter": [{"column": "name", "op": "contains", "value": "station"}]}
+    )
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    ChartComponent.model_validate(payload)
+
+
+def test_query_filter_contains_requires_non_empty_string_value() -> None:
+    for bad_value in ("", 1, ["a"], None):
+        payload = _chart_payload(
+            dataQuery={"filter": [{"column": "name", "op": "contains", "value": bad_value}]}
+        )
+        assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+        with pytest.raises(ValidationError):
+            ChartComponent.model_validate(payload)
+
+
 def _select_data_button(args: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": "pick",
