@@ -582,6 +582,48 @@
         }
       }
     },
+    "SpecNoBindElement": {
+      "description": "No `element` key inside any `bind` object (params[].bind.element) anywhere in a Vega-Lite spec, at any depth — it is a CSS selector that could mount a Vega input widget into any element on the host page, not just this chart.",
+      "else": {
+        "if": {
+          "type": "array"
+        },
+        "then": {
+          "items": {
+            "$ref": "#/$defs/SpecNoBindElement"
+          }
+        }
+      },
+      "if": {
+        "type": "object"
+      },
+      "then": {
+        "additionalProperties": {
+          "$ref": "#/$defs/SpecNoBindElement"
+        },
+        "properties": {
+          "bind": {
+            "allOf": [
+              {
+                "if": {
+                  "type": "object"
+                },
+                "then": {
+                  "not": {
+                    "required": [
+                      "element"
+                    ]
+                  }
+                }
+              },
+              {
+                "$ref": "#/$defs/SpecNoBindElement"
+              }
+            ]
+          }
+        }
+      }
+    },
     "SpecNoForbiddenKeys": {
       "description": "No `url` or `usermeta` key anywhere in a Vega-Lite spec, at any depth.",
       "else": {
@@ -1776,9 +1818,12 @@
                 },
                 {
                   "$ref": "#/$defs/SpecDataNamedSource"
+                },
+                {
+                  "$ref": "#/$defs/SpecNoBindElement"
                 }
               ],
-              "description": "A Vega-Lite spec whose rows come from data/dataUri as the named dataset 'source' — the spec is chart configuration, never a data channel, and the dataset itself is unbounded via dataUri regardless of this cap. This schema already enforces the top-level key allowlist, no url/usermeta key at any depth, and data only as {name: source} at any depth; the renderer additionally enforces the config-size (65536 bytes) and view-count (8) caps that keep the spec itself bounded and abuse-resistant, which JSON Schema cannot express. See a2ui/chart/guard_rules.json.",
+              "description": "A Vega-Lite spec whose rows come from data/dataUri as the named dataset 'source' — the spec is chart configuration, never a data channel, and the dataset itself is unbounded via dataUri regardless of this cap. This schema already enforces the top-level key allowlist, no url/usermeta key at any depth, no bind.element at any depth (a CSS selector that could mount an input widget anywhere on the host page), and data only as {name: source} at any depth; the renderer additionally enforces the config-size (65536 bytes) and view-count (8) caps that keep the spec itself bounded and abuse-resistant, which JSON Schema cannot express. See a2ui/chart/guard_rules.json.",
               "propertyNames": {
                 "enum": [
                   "$schema",

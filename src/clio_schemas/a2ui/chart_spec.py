@@ -5,7 +5,8 @@ rendered from one of the shipped preset templates (``preset``). Either way
 the spec only *describes* marks and encodings: the rows always come from the
 component's ``data``/``dataUri``, which the renderer binds to the one named
 dataset ``source``. The guard below keeps a spec to that contract, so it can
-never fetch a URL, smuggle inline rows, or grow without bound.
+never fetch a URL, smuggle inline rows, mount a Vega input widget into an
+arbitrary element of the host page, or grow without bound.
 
 The rules are exported as data (:data:`CHART_SPEC_RULES`, also shipped as
 ``schemas/a2ui/chart/guard_rules.json``) so a TypeScript mirror can apply the
@@ -29,6 +30,11 @@ Guard rules, each reported with a stable ``code``:
 - ``data_not_named_source``: every ``data`` key, at any depth, must hold
   exactly ``{"name": "source"}``.
 - ``forbidden_key``: no ``url`` or ``usermeta`` key at any depth.
+- ``bind_element_not_allowed``: no ``element`` key inside any ``bind`` object
+  (``params[].bind.element``), at any depth. Vega-Lite's ``bind.element`` is a
+  CSS selector naming where to mount the input widget in the HOST page's DOM —
+  a model-authored spec could otherwise target any element on the app page,
+  not just the chart's own container.
 
 Preset templates use a two-construct grammar, small enough to mirror:
 
@@ -132,6 +138,7 @@ CHART_SPEC_RULES: Final[dict[str, Any]] = {
         "too_many_views",
         "data_not_named_source",
         "forbidden_key",
+        "bind_element_not_allowed",
     ],
 }
 
@@ -280,6 +287,15 @@ def check_chart_spec(spec: Any) -> list[ChartSpecViolation]:
                         _pointer(path, key),
                         'data must be exactly {"name": "source"}; rows come from the '
                         "component's data or dataUri",
+                    )
+                )
+            elif key == "bind" and isinstance(child, dict) and "element" in child:
+                violations.append(
+                    ChartSpecViolation(
+                        "bind_element_not_allowed",
+                        _pointer(_pointer(path, key), "element"),
+                        "bind.element is not allowed; it is a CSS selector that could mount "
+                        "an input widget anywhere on the host page, not just this chart",
                     )
                 )
     return violations

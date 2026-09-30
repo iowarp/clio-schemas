@@ -897,6 +897,72 @@ def test_spec_data_named_source_nested_still_validates() -> None:
     ChartComponent.model_validate(payload)
 
 
+def test_spec_bind_element_anywhere_is_rejected_by_both_validators() -> None:
+    """bind.element is a CSS selector that could mount a widget anywhere on the host page."""
+
+    payload = {
+        "id": "ch",
+        "component": "clio.chart.v1",
+        "spec": {
+            "mark": "point",
+            "params": [
+                {
+                    "name": "range_select",
+                    "value": 0.5,
+                    "bind": {"input": "range", "min": 0, "max": 1, "element": "#evil-target"},
+                }
+            ],
+            "encoding": {"x": {"field": "t", "type": "quantitative"}},
+        },
+        "data": [{"t": 1}],
+    }
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_spec_bind_element_nested_in_a_layer_is_also_rejected() -> None:
+    payload = {
+        "id": "ch",
+        "component": "clio.chart.v1",
+        "spec": {
+            "layer": [
+                {
+                    "mark": "point",
+                    "params": [{"name": "p", "bind": {"input": "checkbox", "element": "body"}}],
+                }
+            ]
+        },
+        "data": [{"t": 1}],
+    }
+    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(payload)
+
+
+def test_spec_bind_without_element_still_validates() -> None:
+    """A bind object with no element (e.g. {"input": "range"}) is unaffected."""
+
+    payload = {
+        "id": "ch",
+        "component": "clio.chart.v1",
+        "spec": {
+            "mark": "point",
+            "params": [
+                {
+                    "name": "range_select",
+                    "value": 0.5,
+                    "bind": {"input": "range", "min": 0, "max": 1},
+                }
+            ],
+            "encoding": {"x": {"field": "t", "type": "quantitative"}},
+        },
+        "data": [{"t": 1}],
+    }
+    WORKSPACE_VALIDATORS["clio.chart.v1"].validate(payload)
+    ChartComponent.model_validate(payload)
+
+
 def test_data_query_offset_and_sort_shape() -> None:
     payload = _chart_payload(
         dataQuery={
