@@ -109,7 +109,92 @@ DEFAULT_QUERY_PER_ENTITY = 500
 MAX_QUERY_LIMIT = 50_000
 
 FieldName = Annotated[str, StringConstraints(min_length=1, max_length=MAX_FIELD_NAME_LENGTH)]
-ChartRowValue = str | int | float | bool | None
+
+# --------------------------------------------------------------------------- #
+# GeoJSON geometry cells (clio.chart.v1 inline rows, issue #1549 G4 — owner
+# ruling: geoshape must actually draw over inline data). A chart row cell may
+# be a scalar (ChartRowValue's original shape) OR one strictly-shaped GeoJSON
+# Geometry object (RFC 7946 §3.1) — never a Feature/FeatureCollection, never a
+# bare coordinate array. Mirrored in the JSON Schema as
+# ``$defs/GeoJsonGeometry`` (clio_schemas.a2ui.catalog_bounded). Reading
+# geometry from a ``.geojson`` artifact by dataUri is a later slice (#1549 G7);
+# today this only covers inline ``data``.
+# --------------------------------------------------------------------------- #
+
+#: [longitude, latitude] or [longitude, latitude, elevation] (RFC 7946
+#: §3.1.1) — shape only, no coordinate-range validation.
+GeoJsonPosition = Annotated[list[float], Field(min_length=2, max_length=3)]
+#: A closed linear ring (RFC 7946 §3.1.6): at least 4 positions, first == last
+#: (not re-checked here — shape only, matching the JSON Schema mirror).
+GeoJsonLinearRing = Annotated[list[GeoJsonPosition], Field(min_length=4)]
+
+
+class GeoJsonPoint(_ClosedModel):
+    """A GeoJSON ``Point`` geometry (RFC 7946 §3.1.2)."""
+
+    type: Literal["Point"]
+    coordinates: GeoJsonPosition
+
+
+class GeoJsonMultiPoint(_ClosedModel):
+    """A GeoJSON ``MultiPoint`` geometry (RFC 7946 §3.1.3)."""
+
+    type: Literal["MultiPoint"]
+    coordinates: list[GeoJsonPosition]
+
+
+class GeoJsonLineString(_ClosedModel):
+    """A GeoJSON ``LineString`` geometry (RFC 7946 §3.1.4): at least 2 positions."""
+
+    type: Literal["LineString"]
+    coordinates: Annotated[list[GeoJsonPosition], Field(min_length=2)]
+
+
+class GeoJsonMultiLineString(_ClosedModel):
+    """A GeoJSON ``MultiLineString`` geometry (RFC 7946 §3.1.5)."""
+
+    type: Literal["MultiLineString"]
+    coordinates: list[Annotated[list[GeoJsonPosition], Field(min_length=2)]]
+
+
+class GeoJsonPolygon(_ClosedModel):
+    """A GeoJSON ``Polygon`` geometry (RFC 7946 §3.1.6): one or more linear rings."""
+
+    type: Literal["Polygon"]
+    coordinates: list[GeoJsonLinearRing]
+
+
+class GeoJsonMultiPolygon(_ClosedModel):
+    """A GeoJSON ``MultiPolygon`` geometry (RFC 7946 §3.1.7)."""
+
+    type: Literal["MultiPolygon"]
+    coordinates: list[list[GeoJsonLinearRing]]
+
+
+class GeoJsonGeometryCollection(_ClosedModel):
+    """A GeoJSON ``GeometryCollection`` (RFC 7946 §3.1.8): nested geometries."""
+
+    type: Literal["GeometryCollection"]
+    geometries: list[GeoJsonGeometry]
+
+
+#: Every GeoJSON Geometry type (RFC 7946 §3.1) a chart row cell may hold.
+GeoJsonGeometry = Annotated[
+    GeoJsonPoint
+    | GeoJsonMultiPoint
+    | GeoJsonLineString
+    | GeoJsonMultiLineString
+    | GeoJsonPolygon
+    | GeoJsonMultiPolygon
+    | GeoJsonGeometryCollection,
+    Field(discriminator="type"),
+]
+# `from __future__ import annotations` means `GeoJsonGeometryCollection.geometries`
+# was built with `GeoJsonGeometry` as an unresolved forward reference; it is a
+# module global by now, so this completes the model.
+GeoJsonGeometryCollection.model_rebuild()
+
+ChartRowValue = str | int | float | bool | None | GeoJsonGeometry
 ChartPreset = Literal["trajectories", "heatmap", "spectra", "boxplot", "scatter"]
 
 #: The preset fill props, in the order render_preset receives them.
@@ -459,7 +544,14 @@ class DiffComponent(_ComponentBase):
 
 
 class ChartComponent(_ComponentBase):
-    """A Vega-Lite chart over inline rows or an artifact, with a bindable selection."""
+    """A Vega-Lite chart over inline rows or an artifact, with a bindable selection.
+
+    An inline row cell (``data[].*``) is a scalar OR a strictly-shaped GeoJSON
+    Geometry object (:data:`GeoJsonGeometry`) — enough for a ``geoshape`` mark
+    to draw real shapes from inline rows (issue #1549 G4). A point map instead
+    uses ``projection`` with longitude/latitude encodings over plain scalar
+    rows; neither needs a geometry cell.
+    """
 
     component: Literal["clio.chart.v1"] = "clio.chart.v1"
     spec: dict[str, JsonValue] | None = None
