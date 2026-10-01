@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "cases": [
     {
       "name": "unit-no-data",
@@ -758,11 +758,8 @@
       }
     },
     {
-      "name": "top-level-padding",
-      "valid": false,
-      "codes": [
-        "top_level_key_not_allowed"
-      ],
+      "name": "top-level-padding-now-allowed",
+      "valid": true,
       "spec": {
         "mark": "point",
         "encoding": {
@@ -1521,6 +1518,119 @@
           "x": {
             "field": "t",
             "type": "quantitative"
+          },
+          "y": {
+            "field": "v",
+            "type": "quantitative"
+          }
+        }
+      }
+    },
+    {
+      "name": "gallery-wrapped-facet-columns",
+      "valid": true,
+      "spec": {
+        "data": {
+          "name": "source"
+        },
+        "facet": {
+          "field": "category",
+          "type": "nominal"
+        },
+        "columns": 3,
+        "spec": {
+          "mark": "point",
+          "encoding": {
+            "x": {
+              "field": "t",
+              "type": "quantitative"
+            },
+            "y": {
+              "field": "v",
+              "type": "quantitative"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "gallery-choropleth-projection-geojson",
+      "valid": true,
+      "spec": {
+        "data": {
+          "name": "source"
+        },
+        "projection": {
+          "type": "mercator"
+        },
+        "mark": "geoshape",
+        "encoding": {
+          "color": {
+            "field": "value",
+            "type": "quantitative"
+          }
+        }
+      }
+    },
+    {
+      "name": "gallery-concat-spacing-and-alignment",
+      "valid": true,
+      "spec": {
+        "data": {
+          "name": "source"
+        },
+        "spacing": 12,
+        "align": "each",
+        "bounds": "flush",
+        "center": true,
+        "hconcat": [
+          {
+            "mark": "point",
+            "encoding": {
+              "x": {
+                "field": "t",
+                "type": "quantitative"
+              },
+              "y": {
+                "field": "v",
+                "type": "quantitative"
+              }
+            }
+          },
+          {
+            "mark": "line",
+            "encoding": {
+              "x": {
+                "field": "t",
+                "type": "quantitative"
+              },
+              "y": {
+                "field": "v",
+                "type": "quantitative"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "gallery-padding-layout",
+      "valid": true,
+      "spec": {
+        "data": {
+          "name": "source"
+        },
+        "padding": {
+          "left": 10,
+          "right": 10,
+          "top": 5,
+          "bottom": 5
+        },
+        "mark": "bar",
+        "encoding": {
+          "x": {
+            "field": "category",
+            "type": "nominal"
           },
           "y": {
             "field": "v",

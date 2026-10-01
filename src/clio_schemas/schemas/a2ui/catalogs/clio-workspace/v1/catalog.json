@@ -1849,6 +1849,13 @@
                   "config",
                   "autosize",
                   "description",
+                  "columns",
+                  "spacing",
+                  "padding",
+                  "align",
+                  "bounds",
+                  "center",
+                  "projection",
                   "data"
                 ]
               },

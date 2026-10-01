@@ -22,7 +22,11 @@ Guard rules, each reported with a stable ``code``:
   ":")``, no ASCII escaping, keys in their given order — what
   ``JSON.stringify`` produces) must be at most 65536 bytes.
 - ``top_level_key_not_allowed``: only :data:`ALLOWED_TOP_LEVEL_KEYS` may
-  appear at the top level.
+  appear at the top level. This includes data-free layout keys (``columns``,
+  ``spacing``, ``padding``, ``align``, ``bounds``, ``center``) and
+  ``projection`` (a geoshape mark's map projection, used with inline
+  named-source GeoJSON rows — still no ``url``, still ``data: {"name":
+  "source"}``) — owner ruling, issue #1549 G4.
 - ``too_many_views``: at most :data:`MAX_VIEWS` views in total. A view is an
   object with ``mark`` that is not itself a composition; ``layer``/``concat``/
   ``hconcat``/``vconcat`` count their children, ``facet``/``repeat`` count
@@ -57,7 +61,7 @@ from pathlib import Path
 from typing import Any, Final
 
 #: Bumped whenever a rule below changes meaning (the TS mirror checks it).
-CHART_SPEC_RULES_VERSION: Final = 1
+CHART_SPEC_RULES_VERSION: Final = 2
 MAX_SPEC_BYTES: Final = 65_536
 MAX_VIEWS: Final = 8
 MAX_SPEC_DEPTH: Final = 64
@@ -83,6 +87,18 @@ ALLOWED_TOP_LEVEL_KEYS: Final[tuple[str, ...]] = (
     "config",
     "autosize",
     "description",
+    # Data-free layout/view keys (owner ruling, issue #1549 G4): columns wraps
+    # a facet/repeat/concat grid; spacing/align/bounds/center lay out a
+    # concat/facet composition; padding is the whole spec's outer padding;
+    # projection configures a geoshape mark's map projection. None of these
+    # carry rows -- they are chart configuration, same as the keys above.
+    "columns",
+    "spacing",
+    "padding",
+    "align",
+    "bounds",
+    "center",
+    "projection",
     # Allowed only as {"name": "source"} (the data rule); presets declare it.
     "data",
 )
