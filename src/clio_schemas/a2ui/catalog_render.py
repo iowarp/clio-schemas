@@ -114,6 +114,26 @@ def _list_bounds(field_info: FieldInfo) -> tuple[int | None, int | None]:
     return min_items, max_items
 
 
+def _number_bounds(field_info: FieldInfo) -> tuple[float | None, float | None]:
+    """Extract ``(minimum, maximum)`` from a ``Field(ge=, le=)`` numeric constraint.
+
+    Mirrors :func:`_list_bounds` for ``annotated_types.Ge``/``Le`` metadata
+    (what ``Field(ge=, le=)`` attaches) instead of ``MinLen``/``MaxLen`` --
+    G2 (#23): a bound declared this way on a plain ``int``/``float`` field
+    (e.g. ``Grid.gap``) previously rendered as an unbounded
+    ``{"type": "number"}``, accepting values the client's own catalog
+    already rejects.
+    """
+
+    minimum = maximum = None
+    for constraint in field_info.metadata:
+        if getattr(constraint, "ge", None) is not None:
+            minimum = constraint.ge
+        if getattr(constraint, "le", None) is not None:
+            maximum = constraint.le
+    return minimum, maximum
+
+
 def _render_nested_model(fields: dict[str, FieldInfo]) -> dict[str, Any]:
     """Render one small CLIO-local nested shape (option/tab/column/action)."""
 
@@ -185,6 +205,11 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
             rendered["minItems"] = min_items
         if max_items is not None:
             rendered["maxItems"] = max_items
+        minimum, maximum = _number_bounds(meta)
+        if minimum is not None:
+            rendered["minimum"] = minimum
+        if maximum is not None:
+            rendered["maximum"] = maximum
         return rendered
 
     if origin is list:
