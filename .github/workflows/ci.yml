@@ -21,7 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # version-bump check diffs against the base ref
+          fetch-depth: 0 # version-bump check diffs against the last published tag
+          fetch-tags: true
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -51,7 +52,10 @@ jobs:
           test "$PY" = "$TOML"
 
       - name: Schema change requires a version bump
-        run: uv run python scripts/check_version_bump.py --base "origin/${{ github.base_ref || 'main' }}"
+        run: |
+          BASE_TAG="$(git describe --tags --abbrev=0 --match 'v*' origin/main)"
+          echo "comparing against last published tag: $BASE_TAG"
+          uv run python scripts/check_version_bump.py --base "$BASE_TAG"
 
   roundtrip:
     runs-on: ubuntu-latest
