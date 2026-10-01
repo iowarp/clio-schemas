@@ -45,18 +45,21 @@ Guard rules, each reported with a stable ``code``:
     Reading geometry from a ``.geojson`` artifact by ``dataUri`` is a later
     slice (issue #1549 G7); today geoshape only draws from inline ``data``.
 
-    **Always set** ``projection.fit`` **to inline GeoJSON covering the rows'
-    extent** (a bounding ``Polygon``, or a ``FeatureCollection`` of the actual
-    shapes). Vega-Lite can in principle compute the fit from the bound
-    ``shape`` column itself with ``projection.fit`` omitted, but the installed
-    renderer's data-driven auto-fit does not resolve for a ``geojson``-typed
-    shape channel (every coordinate comes out ``NaN`` — verified live,
-    gact-tui #1549 G4 review); an explicit ``fit`` sidesteps that renderer gap
-    entirely and is the only reliable way to make a geoshape draw today. Still
-    no ``url`` — ``fit`` is covered by the same recursive forbidden-key/
-    data-rule walk as every other nested object, not specially restricted.
-    Longitude/latitude point maps are unaffected (their own fit mechanism
-    resolves correctly); only the geojson-shape-channel path needs this.
+    ``projection.fit`` need not be set by the agent or a preset: it is a
+    **renderer default**, the same way every other built-in affordance is
+    (owner ruling, ``feedback_affordances_are_renderer_defaults.md``). The
+    gact-tui client computes it from the geometry cells actually present in
+    the rows before embedding — it has to, since the installed Vega-Lite's
+    own data-driven auto-fit does not resolve for a ``geojson``-typed shape
+    channel (every coordinate comes out ``NaN``; verified live, #1549 G4
+    review) — so a bare ``projection: {"type": "mercator"}`` with no ``fit``
+    still draws correctly. An agent (or a preset) MAY still set ``fit``
+    explicitly to inline GeoJSON, and that value always wins over the
+    renderer's default. Still no ``url`` either way — ``fit`` is covered by
+    the same recursive forbidden-key/data-rule walk as every other nested
+    object, not specially restricted. Longitude/latitude point maps are
+    unaffected (their own fit mechanism already resolves correctly); only
+    the geojson-shape-channel path needs a renderer default.
 - ``too_many_views``: at most :data:`MAX_VIEWS` views in total. A view is an
   object with ``mark`` that is not itself a composition; ``layer``/``concat``/
   ``hconcat``/``vconcat`` count their children, ``facet``/``repeat`` count
