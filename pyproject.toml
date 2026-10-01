@@ -18,6 +18,7 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.7,<3",
+    "annotated-types>=0.6",
     "jsonschema[format]>=4.23",
     "referencing>=0.35",
 ]

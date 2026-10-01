@@ -38,6 +38,7 @@ name = "clio-schemas"
 version = "0.5.2"
 source = { editable = "." }
 dependencies = [
+    { name = "annotated-types" },
     { name = "jsonschema", extra = ["format"] },
     { name = "pydantic" },
     { name = "referencing" },
@@ -59,6 +60,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "annotated-types", specifier = ">=0.6" },
     { name = "jsonschema", extras = ["format"], specifier = ">=4.23" },
     { name = "pydantic", specifier = ">=2.7,<3" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.370" },

@@ -23,6 +23,7 @@ import types
 import typing
 from typing import Annotated, Any, Literal
 
+import annotated_types
 from pydantic import JsonValue
 from pydantic.fields import FieldInfo
 
@@ -114,24 +115,54 @@ def _list_bounds(field_info: FieldInfo) -> tuple[int | None, int | None]:
     return min_items, max_items
 
 
-def _number_bounds(field_info: FieldInfo) -> tuple[float | None, float | None]:
-    """Extract ``(minimum, maximum)`` from a ``Field(ge=, le=)`` numeric constraint.
+# annotated_types constraint type -> (rendered JSON Schema key, value attribute).
+# G2 (#23, adversarial review F7): every numeric `annotated_types` constraint
+# pydantic's `Field()` can attach is rendered here, or the field is unrecognised
+# and raises -- `gt`/`lt`/`multiple_of` must never be silently dropped the way
+# a `minimum`/`maximum`-only reader would drop them.
+_NUMBER_CONSTRAINT_RENDER: dict[type, tuple[str, str]] = {
+    annotated_types.Ge: ("minimum", "ge"),
+    annotated_types.Gt: ("exclusiveMinimum", "gt"),
+    annotated_types.Le: ("maximum", "le"),
+    annotated_types.Lt: ("exclusiveMaximum", "lt"),
+    annotated_types.MultipleOf: ("multipleOf", "multiple_of"),
+}
 
-    Mirrors :func:`_list_bounds` for ``annotated_types.Ge``/``Le`` metadata
-    (what ``Field(ge=, le=)`` attaches) instead of ``MinLen``/``MaxLen`` --
-    G2 (#23): a bound declared this way on a plain ``int``/``float`` field
-    (e.g. ``Grid.gap``) previously rendered as an unbounded
-    ``{"type": "number"}``, accepting values the client's own catalog
-    already rejects.
+
+def _number_bounds(field_info: FieldInfo) -> dict[str, float]:
+    """Extract numeric JSON Schema bounds from a ``Field(ge=, le=, gt=, lt=, multiple_of=)``.
+
+    Mirrors :func:`_list_bounds` for the ``annotated_types`` numeric
+    constraints instead of ``MinLen``/``MaxLen`` -- G2 (#23): a bound
+    declared this way on a plain ``int``/``float`` field (e.g. ``Grid.gap``)
+    previously rendered as an unbounded ``{"type": "number"}``, accepting
+    values the client's own catalog already rejects.
+
+    Adversarial review (F7): the original version of this function only
+    recognised ``Ge``/``Le`` (``ge=``/``le=``), so ``gt=``/``lt=``/
+    ``multiple_of=`` would have been silently dropped -- a numeric field
+    would render as unbounded rather than as a visibly wrong bound,
+    exactly the kind of degradation the no-silent-fallback rule forbids.
+    Every numeric constraint is now either rendered or raises.
+
+    Raises:
+        NotImplementedError: For a metadata object this canonicaliser has no
+            rendering rule for (never silently dropped).
     """
 
-    minimum = maximum = None
+    bounds: dict[str, float] = {}
     for constraint in field_info.metadata:
-        if getattr(constraint, "ge", None) is not None:
-            minimum = constraint.ge
-        if getattr(constraint, "le", None) is not None:
-            maximum = constraint.le
-    return minimum, maximum
+        render = _NUMBER_CONSTRAINT_RENDER.get(type(constraint))
+        if render is not None:
+            schema_key, value_attr = render
+            bounds[schema_key] = getattr(constraint, value_attr)
+            continue
+        if isinstance(constraint, (annotated_types.MinLen, annotated_types.MaxLen)):
+            continue  # length bounds -- rendered by `_list_bounds` instead
+        raise NotImplementedError(
+            f"no catalog rendering rule for numeric constraint {constraint!r}"
+        )
+    return bounds
 
 
 def _render_nested_model(fields: dict[str, FieldInfo]) -> dict[str, Any]:
@@ -205,11 +236,7 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
             rendered["minItems"] = min_items
         if max_items is not None:
             rendered["maxItems"] = max_items
-        minimum, maximum = _number_bounds(meta)
-        if minimum is not None:
-            rendered["minimum"] = minimum
-        if maximum is not None:
-            rendered["maximum"] = maximum
+        rendered.update(_number_bounds(meta))
         return rendered
 
     if origin is list:
