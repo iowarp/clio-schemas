@@ -10,7 +10,8 @@ arbitrary element of the host page, or grow without bound.
 
 The rules are exported as data (:data:`CHART_SPEC_RULES`, also shipped as
 ``schemas/a2ui/chart/guard_rules.json``) so a TypeScript mirror can apply the
-same limits and share the same fixtures (``tests/fixtures/chart/``).
+same limits and share the same fixtures (``schemas/a2ui/chart/fixtures/``,
+package data so a consumer's ``HASHES.json`` pin covers them too).
 
 Guard rules, each reported with a stable ``code``:
 
@@ -21,8 +22,44 @@ Guard rules, each reported with a stable ``code``:
 - ``spec_too_large``: the compact UTF-8 JSON serialisation (``separators=(",",
   ":")``, no ASCII escaping, keys in their given order — what
   ``JSON.stringify`` produces) must be at most 65536 bytes.
+- ``spec_invalid_encoding``: the spec contains a value (e.g. a lone UTF-16
+  surrogate code point, reachable via a ``\\uD800``-style JSON escape) that
+  cannot be represented as UTF-8. Reported as an ordinary violation instead of
+  letting the encode failure raise untyped out of :func:`serialized_size`.
 - ``top_level_key_not_allowed``: only :data:`ALLOWED_TOP_LEVEL_KEYS` may
-  appear at the top level.
+  appear at the top level. This includes data-free layout keys (``columns``,
+  ``spacing``, ``padding``, ``align``, ``bounds``, ``center``) and
+  ``projection`` (a geoshape or point-map projection — still no ``url``, still
+  ``data: {"name": "source"}``) — owner ruling, issue #1549 G4. A map built
+  this way works two ways over inline rows:
+
+  - longitude/latitude encodings (``encoding.longitude``/``.latitude``) over
+    ordinary scalar rows — a projected point map, no geometry needed;
+  - a ``geoshape`` mark whose ``shape``-channel field holds a GeoJSON
+    Geometry object (``Point``/``MultiPoint``/``LineString``/
+    ``MultiLineString``/``Polygon``/``MultiPolygon``/``GeometryCollection``) —
+    a cell may now hold one of these (see ``clio.chart.v1``'s ``data`` schema,
+    ``clio_schemas.a2ui.catalog_bounded``'s ``$defs/GeoJsonGeometry``, and
+    :class:`clio_schemas.a2ui.v0_9_1.bounded_components.ChartComponent`'s
+    ``ChartRowValue``), strictly shaped and never a Feature/FeatureCollection.
+    Reading geometry from a ``.geojson`` artifact by ``dataUri`` is a later
+    slice (issue #1549 G7); today geoshape only draws from inline ``data``.
+
+    ``projection.fit`` need not be set by the agent or a preset: it is a
+    **renderer default**, the same way every other built-in affordance is
+    (owner ruling, ``feedback_affordances_are_renderer_defaults.md``). The
+    gact-tui client computes it from the geometry cells actually present in
+    the rows before embedding — it has to, since the installed Vega-Lite's
+    own data-driven auto-fit does not resolve for a ``geojson``-typed shape
+    channel (every coordinate comes out ``NaN``; verified live, #1549 G4
+    review) — so a bare ``projection: {"type": "mercator"}`` with no ``fit``
+    still draws correctly. An agent (or a preset) MAY still set ``fit``
+    explicitly to inline GeoJSON, and that value always wins over the
+    renderer's default. Still no ``url`` either way — ``fit`` is covered by
+    the same recursive forbidden-key/data-rule walk as every other nested
+    object, not specially restricted. Longitude/latitude point maps are
+    unaffected (their own fit mechanism already resolves correctly); only
+    the geojson-shape-channel path needs a renderer default.
 - ``too_many_views``: at most :data:`MAX_VIEWS` views in total. A view is an
   object with ``mark`` that is not itself a composition; ``layer``/``concat``/
   ``hconcat``/``vconcat`` count their children, ``facet``/``repeat`` count
@@ -57,7 +94,7 @@ from pathlib import Path
 from typing import Any, Final
 
 #: Bumped whenever a rule below changes meaning (the TS mirror checks it).
-CHART_SPEC_RULES_VERSION: Final = 1
+CHART_SPEC_RULES_VERSION: Final = 3
 MAX_SPEC_BYTES: Final = 65_536
 MAX_VIEWS: Final = 8
 MAX_SPEC_DEPTH: Final = 64
@@ -83,6 +120,18 @@ ALLOWED_TOP_LEVEL_KEYS: Final[tuple[str, ...]] = (
     "config",
     "autosize",
     "description",
+    # Data-free layout/view keys (owner ruling, issue #1549 G4): columns wraps
+    # a facet/repeat/concat grid; spacing/align/bounds/center lay out a
+    # concat/facet composition; padding is the whole spec's outer padding;
+    # projection configures a geoshape mark's map projection. None of these
+    # carry rows -- they are chart configuration, same as the keys above.
+    "columns",
+    "spacing",
+    "padding",
+    "align",
+    "bounds",
+    "center",
+    "projection",
     # Allowed only as {"name": "source"} (the data rule); presets declare it.
     "data",
 )
@@ -90,6 +139,17 @@ FORBIDDEN_KEYS: Final[tuple[str, ...]] = ("url", "usermeta")
 COMPOSITION_ARRAY_KEYS: Final[tuple[str, ...]] = ("layer", "concat", "hconcat", "vconcat")
 
 PRESET_NAMES: Final[tuple[str, ...]] = ("trajectories", "heatmap", "spectra", "boxplot", "scatter")
+#: Shared test fixtures, ridden by both this repo's pytest suite and
+#: gact-tui's TypeScript mirror (``chart-spec-guard.test.ts`` et al.). Shipped
+#: as package data under ``a2ui/chart/fixtures/`` (not just ``tests/``) so
+#: ``HASHES.json`` covers them and a consumer can pin their exact bytes, the
+#: same guarantee the preset templates already get.
+CHART_FIXTURE_NAMES: Final[tuple[str, ...]] = (
+    "guard_cases",
+    "preset_cases",
+    "selection_state_cases",
+    "component_cases",
+)
 #: Every slot a preset template may use; all are strings.
 PRESET_SLOTS: Final[tuple[str, ...]] = (
     "xField",
@@ -134,6 +194,7 @@ CHART_SPEC_RULES: Final[dict[str, Any]] = {
         "spec_not_object",
         "spec_too_deep",
         "spec_too_large",
+        "spec_invalid_encoding",
         "top_level_key_not_allowed",
         "too_many_views",
         "data_not_named_source",
@@ -208,9 +269,28 @@ def spec_depth(spec: Any) -> int:
 
 
 def serialized_size(spec: Any) -> int:
-    """UTF-8 byte length of ``spec`` as compact JSON (the ``maxSpecBytes`` measure)."""
+    """UTF-8 byte length of ``spec`` as compact JSON (the ``maxSpecBytes`` measure).
 
-    return len(json.dumps(spec, separators=(",", ":"), ensure_ascii=False).encode("utf-8"))
+    Raises:
+        ChartSpecError: With a single ``spec_invalid_encoding`` violation if
+            ``spec`` contains a value (e.g. a lone UTF-16 surrogate code
+            point) that cannot be encoded as UTF-8 — never Python's untyped
+            ``UnicodeEncodeError``.
+    """
+
+    text = json.dumps(spec, separators=(",", ":"), ensure_ascii=False)
+    try:
+        return len(text.encode("utf-8"))
+    except UnicodeEncodeError as exc:
+        raise ChartSpecError(
+            [
+                ChartSpecViolation(
+                    "spec_invalid_encoding",
+                    "",
+                    f"spec cannot be represented as UTF-8: {exc}",
+                )
+            ]
+        ) from exc
 
 
 def count_views(spec: Any) -> int:
@@ -247,13 +327,17 @@ def check_chart_spec(spec: Any) -> list[ChartSpecViolation]:
             )
         ]
     violations: list[ChartSpecViolation] = []
-    size = serialized_size(spec)
-    if size > MAX_SPEC_BYTES:
-        violations.append(
-            ChartSpecViolation(
-                "spec_too_large", "", f"spec is {size} bytes; the limit is {MAX_SPEC_BYTES}"
+    try:
+        size = serialized_size(spec)
+    except ChartSpecError as exc:
+        violations.extend(exc.violations)
+    else:
+        if size > MAX_SPEC_BYTES:
+            violations.append(
+                ChartSpecViolation(
+                    "spec_too_large", "", f"spec is {size} bytes; the limit is {MAX_SPEC_BYTES}"
+                )
             )
-        )
     for key in spec:
         if key not in ALLOWED_TOP_LEVEL_KEYS:
             violations.append(
@@ -325,6 +409,20 @@ def preset_path(name: str) -> Path:
     """Filesystem path to one shipped preset template."""
 
     return _package_schema_root() / CHART_RESOURCE_DIR / "presets" / f"{name}.json"
+
+
+def fixture_path(name: str) -> Path:
+    """Filesystem path to one shipped shared test fixture.
+
+    Raises:
+        ValueError: If ``name`` is not one of :data:`CHART_FIXTURE_NAMES`.
+    """
+
+    if name not in CHART_FIXTURE_NAMES:
+        raise ValueError(
+            f"unknown chart fixture {name!r}; expected one of {list(CHART_FIXTURE_NAMES)}"
+        )
+    return _package_schema_root() / CHART_RESOURCE_DIR / "fixtures" / f"{name}.json"
 
 
 @functools.cache
@@ -428,9 +526,10 @@ def render_chart_resources() -> dict[str, str]:
     """Every committed ``a2ui/chart/**`` file, keyed by schema-root-relative path.
 
     ``guard_rules.json`` is rendered from :data:`CHART_SPEC_RULES`. The preset
-    templates are hand-authored package data; they are re-emitted in the
-    canonical JSON formatting so ``HASHES.json`` covers them and
-    ``--verify`` catches an edit that skipped ``--regenerate``.
+    templates and the shared test fixtures (:data:`CHART_FIXTURE_NAMES`) are
+    hand-authored package data; they are re-emitted in the canonical JSON
+    formatting so ``HASHES.json`` covers them and ``--verify`` catches an edit
+    that skipped ``--regenerate``.
     """
 
     files = {f"{CHART_RESOURCE_DIR}/guard_rules.json": _dumps(CHART_SPEC_RULES)}
@@ -439,4 +538,7 @@ def render_chart_resources() -> dict[str, str]:
         if document.get("preset") != name:
             raise ValueError(f"preset file {name}.json declares preset {document.get('preset')!r}")
         files[f"{CHART_RESOURCE_DIR}/presets/{name}.json"] = _dumps(document)
+    for name in CHART_FIXTURE_NAMES:
+        document = json.loads(fixture_path(name).read_text(encoding="utf-8"))
+        files[f"{CHART_RESOURCE_DIR}/fixtures/{name}.json"] = _dumps(document)
     return files

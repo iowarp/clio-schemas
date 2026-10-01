@@ -31,7 +31,7 @@ from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
 from clio_schemas.a2ui.catalog_export import render_workspace_catalog
-from clio_schemas.a2ui.chart_spec import MAX_INLINE_ROWS, PRESET_NAMES, load_preset
+from clio_schemas.a2ui.chart_spec import MAX_INLINE_ROWS, PRESET_NAMES, fixture_path, load_preset
 from clio_schemas.a2ui.v0_9_1.bounded_components import COMPONENT_MODELS, ChartComponent
 from clio_schemas.a2ui.v0_9_1.components import (
     SelectionState,
@@ -629,14 +629,14 @@ def test_clio_accept_case_validates_pydantic_and_catalog(payload: dict[str, Any]
 
 
 # --------------------------------------------------------------------------- #
-# clio.chart.v1 — shared fixtures (tests/fixtures/chart/, mirrored by gact-tui)
+# clio.chart.v1 — shared fixtures (a2ui/chart/fixtures/, package data shipped
+# and hashed alongside the schemas — issue #1549 G4 — mirrored by gact-tui)
 # --------------------------------------------------------------------------- #
-CHART_FIXTURES = REPO_ROOT / "tests" / "fixtures" / "chart"
 CHART_COMPONENT_CASES: list[dict[str, Any]] = json.loads(
-    (CHART_FIXTURES / "component_cases.json").read_text(encoding="utf-8")
+    fixture_path("component_cases").read_text(encoding="utf-8")
 )["cases"]
 SELECTION_STATE_CASES: list[dict[str, Any]] = json.loads(
-    (CHART_FIXTURES / "selection_state_cases.json").read_text(encoding="utf-8")
+    fixture_path("selection_state_cases").read_text(encoding="utf-8")
 )["cases"]
 _URI = "artifact://artifact_runs01"
 

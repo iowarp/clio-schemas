@@ -1,8 +1,9 @@
 """The ``clio.chart.v1`` spec guard, preset renderer, and shared fixtures.
 
-The fixtures under ``tests/fixtures/chart/`` are shared with gact-tui's
-TypeScript mirror of :mod:`clio_schemas.a2ui.chart_spec`, so both sides run
-the same cases:
+The fixtures under ``a2ui/chart/fixtures/`` (shipped package data, covered by
+``HASHES.json`` — issue #1549 G4) are shared with gact-tui's TypeScript
+mirror of :mod:`clio_schemas.a2ui.chart_spec`, so both sides run the same
+cases:
 
 - ``guard_cases.json``: specs with the expected guard verdict and error codes;
 - ``preset_cases.json``: preset fields with the expected rendered spec, plus
@@ -20,7 +21,6 @@ from __future__ import annotations
 
 import itertools
 import json
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -35,6 +35,7 @@ from clio_schemas.a2ui.chart_spec import (
     ChartSpecError,
     check_chart_spec,
     count_views,
+    fixture_path,
     load_preset,
     render_chart_resources,
     render_preset,
@@ -44,11 +45,9 @@ from clio_schemas.a2ui.chart_spec import (
 )
 from clio_schemas.export import package_schema_dir
 
-FIXTURES = Path(__file__).resolve().parent / "fixtures" / "chart"
-
 
 def _load(name: str) -> dict[str, Any]:
-    return json.loads((FIXTURES / name).read_text(encoding="utf-8"))
+    return json.loads(fixture_path(name.removesuffix(".json")).read_text(encoding="utf-8"))
 
 
 GUARD_CASES = _load("guard_cases.json")["cases"]
@@ -71,8 +70,29 @@ def test_guard_fixture(case: dict[str, Any]) -> None:
 
 
 def test_guard_fixtures_cover_every_error_code() -> None:
+    """Every rule has a shared fixture case — except ``spec_invalid_encoding``.
+
+    A lone UTF-16 surrogate is the only way to trigger it, and a lone
+    surrogate cannot itself be committed as UTF-8 package data (writing it
+    into this very fixture file breaks ``HASHES.json``'s own hashing step —
+    the identical failure mode this rule exists to catch). It gets dedicated,
+    in-memory-only coverage instead: see
+    ``test_lone_surrogate_is_a_typed_violation_not_a_raw_exception`` below.
+    """
+
     covered = {code for case in GUARD_CASES for code in case.get("codes", [])}
-    assert covered == set(CHART_SPEC_RULES["errorCodes"])
+    assert covered == set(CHART_SPEC_RULES["errorCodes"]) - {"spec_invalid_encoding"}
+
+
+def test_lone_surrogate_is_a_typed_violation_not_a_raw_exception() -> None:
+    spec = {"mark": "point", "description": "\ud800"}
+    with pytest.raises(ChartSpecError) as excinfo:
+        serialized_size(spec)
+    assert [v.code for v in excinfo.value.violations] == ["spec_invalid_encoding"]
+    assert [v.code for v in check_chart_spec(spec)] == ["spec_invalid_encoding"]
+    with pytest.raises(ChartSpecError) as excinfo:
+        validate_chart_spec(spec)
+    assert [v.code for v in excinfo.value.violations] == ["spec_invalid_encoding"]
 
 
 def test_size_limit_is_inclusive_and_measured_in_utf8_bytes() -> None:

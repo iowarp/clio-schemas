@@ -15,17 +15,27 @@ a recursive ban on ``element`` inside any ``bind`` object at any depth
 (``$defs/SpecNoBindElement`` — ``bind.element`` is a CSS selector that could
 mount a Vega input widget into any element of the host page), and the rule
 that every ``data`` key at any depth is absent or exactly ``{"name":
-"source"}`` (``$defs/SpecDataNamedSource``). Two rules are NOT expressible in
-plain JSON Schema and stay pydantic/renderer-only: the serialized-size cap
+"source"}`` (``$defs/SpecDataNamedSource``). Three rules are NOT expressible
+in plain JSON Schema and stay pydantic/renderer-only: the serialized-size cap
 (65536 UTF-8 bytes — JSON Schema has no "byte length of my own re-encoding"
-assertion) and the view-composition count (recursively counting
-mark-bearing views across ``layer``/``concat``/``facet``/``repeat`` — JSON
-Schema cannot count matches across a recursive structure). Both still run in
+assertion), the UTF-8-encodability of that same serialisation (a lone
+surrogate is a JSON Schema ``string``, just not a valid UTF-8 one), and the
+view-composition count (recursively counting mark-bearing views across
+``layer``/``concat``/``facet``/``repeat`` — JSON Schema cannot count matches
+across a recursive structure). All three still run in
 :mod:`clio_schemas.a2ui.chart_spec`, in the pydantic model and the renderer.
 These are not built through the generic canonicaliser
 (``catalog_render.py``) because ``Field(min_length=/max_length=)`` bounds and
 cross-field ``model_validator``s are pydantic *business rules*, not
 field-type shapes.
+
+``clio.chart.v1``'s ``data`` cell type IS fully expressible in JSON Schema,
+though: a cell is a scalar OR a strictly-shaped GeoJSON Geometry object
+(``$defs/GeoJsonGeometry``, a ``oneOf`` keyed on ``type``, mirroring
+``bounded_components.GeoJsonGeometry``'s discriminated pydantic union) — so a
+``geoshape`` mark can draw real shapes from inline rows (issue #1549 G4,
+owner ruling). Reading geometry from a ``.geojson`` artifact by ``dataUri``
+is a later slice (#1549 G7).
 
 Every data-carrying component here follows one contract (the
 ``a2ui-component-design`` skill's rule #1): inline values OR ``dataUri``,
@@ -168,6 +178,98 @@ _SPEC_NO_BIND_ELEMENT_DEF: dict[str, Any] = {
         "if": {"type": "array"},
         "then": {"items": {"$ref": "#/$defs/SpecNoBindElement"}},
     },
+}
+
+# --------------------------------------------------------------------------- #
+# GeoJSON geometry cells (clio.chart.v1 inline rows, issue #1549 G4 — owner
+# ruling: geoshape must actually draw over inline data). Mirrors the pydantic
+# geometry models (clio_schemas.a2ui.v0_9_1.bounded_components.GeoJsonGeometry)
+# strictly: a `oneOf` keyed on `type`, each branch closed
+# (`additionalProperties: False`) with the exact RFC 7946 §3.1 coordinate
+# nesting for that type. Never a Feature/FeatureCollection; reading geometry
+# from a `.geojson` artifact by dataUri is a later slice (#1549 G7).
+# --------------------------------------------------------------------------- #
+_GEOJSON_POSITION_DEF: dict[str, Any] = {
+    "type": "array",
+    "items": {"type": "number"},
+    "minItems": 2,
+    "maxItems": 3,
+}
+
+
+def _geojson_ring_array(min_items: int) -> dict[str, Any]:
+    return {"type": "array", "items": _GEOJSON_POSITION_DEF, "minItems": min_items}
+
+
+_GEOJSON_GEOMETRY_DEF: dict[str, Any] = {
+    "type": "object",
+    "description": (
+        "A GeoJSON Geometry object (RFC 7946 §3.1), strictly shaped: Point/MultiPoint/"
+        "LineString/MultiLineString/Polygon/MultiPolygon carry coordinates; GeometryCollection "
+        "carries geometries. Never a Feature/FeatureCollection, never a bare coordinate array."
+    ),
+    "oneOf": [
+        {
+            "type": "object",
+            "properties": {"type": {"const": "Point"}, "coordinates": _GEOJSON_POSITION_DEF},
+            "required": ["type", "coordinates"],
+            "additionalProperties": False,
+        },
+        {
+            "type": "object",
+            "properties": {
+                "type": {"const": "MultiPoint"},
+                "coordinates": {"type": "array", "items": _GEOJSON_POSITION_DEF},
+            },
+            "required": ["type", "coordinates"],
+            "additionalProperties": False,
+        },
+        {
+            "type": "object",
+            "properties": {"type": {"const": "LineString"}, "coordinates": _geojson_ring_array(2)},
+            "required": ["type", "coordinates"],
+            "additionalProperties": False,
+        },
+        {
+            "type": "object",
+            "properties": {
+                "type": {"const": "MultiLineString"},
+                "coordinates": {"type": "array", "items": _geojson_ring_array(2)},
+            },
+            "required": ["type", "coordinates"],
+            "additionalProperties": False,
+        },
+        {
+            "type": "object",
+            "properties": {
+                "type": {"const": "Polygon"},
+                "coordinates": {"type": "array", "items": _geojson_ring_array(4)},
+            },
+            "required": ["type", "coordinates"],
+            "additionalProperties": False,
+        },
+        {
+            "type": "object",
+            "properties": {
+                "type": {"const": "MultiPolygon"},
+                "coordinates": {
+                    "type": "array",
+                    "items": {"type": "array", "items": _geojson_ring_array(4)},
+                },
+            },
+            "required": ["type", "coordinates"],
+            "additionalProperties": False,
+        },
+        {
+            "type": "object",
+            "properties": {
+                "type": {"const": "GeometryCollection"},
+                "geometries": {"type": "array", "items": {"$ref": "#/$defs/GeoJsonGeometry"}},
+            },
+            "required": ["type", "geometries"],
+            "additionalProperties": False,
+        },
+    ],
 }
 
 _MAP_POINT_DEF: dict[str, Any] = {
@@ -827,14 +929,19 @@ def _chart_component_schema() -> dict[str, Any]:
                         "items": {
                             "type": "object",
                             "additionalProperties": {
-                                "type": ["string", "number", "boolean", "null"]
+                                "anyOf": [
+                                    {"type": ["string", "number", "boolean", "null"]},
+                                    {"$ref": "#/$defs/GeoJsonGeometry"},
+                                ]
                             },
                         },
                         "description": (
                             f"Inline rows (at most {MAX_INLINE_ROWS}) — this array rides the "
                             "surface's own wire message, so it is capped for transfer size; "
                             "for a larger or growing dataset use dataUri instead, unbounded "
-                            "and paged/downsampled by the viewer."
+                            "and paged/downsampled by the viewer. A cell is a scalar OR a "
+                            "strictly-shaped GeoJSON Geometry object ($defs/GeoJsonGeometry), "
+                            "so a geoshape mark can draw real shapes from inline rows."
                         ),
                     },
                     "dataUri": {
@@ -912,6 +1019,7 @@ def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
         "SpecNoForbiddenKeys": _SPEC_NO_FORBIDDEN_KEYS_DEF,
         "SpecDataNamedSource": _SPEC_DATA_NAMED_SOURCE_DEF,
         "SpecNoBindElement": _SPEC_NO_BIND_ELEMENT_DEF,
+        "GeoJsonGeometry": _GEOJSON_GEOMETRY_DEF,
         "DataQuery": _DATA_QUERY_DEF,
         "QueryFilter": _QUERY_FILTER_DEF,
         "QuerySort": _QUERY_SORT_DEF,
