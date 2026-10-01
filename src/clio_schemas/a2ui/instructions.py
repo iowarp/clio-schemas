@@ -80,6 +80,21 @@ permission gate, and `run.cancel` / `run.retry` go to the run controller
 `agent.submit` and `form.submit`, is a plain agent event now — there is no
 separate closed action vocabulary to satisfy.
 
+`approval.respond` only reaches the permission gate when its `context`
+carries a `permission_id` — that is, when the card is answering a REAL
+pending native permission (a tool call CLIO already paused on; the agent
+got the surface and its `permission_id` from that pause, not from writing
+them itself). A `clio.approval.v1` card the agent builds and shows on its
+own — asking the user a plain yes/no with no underlying paused tool call —
+carries no `permission_id` at all, so its `approval.respond` is a plain
+agent event like any other: the resolved `context` (e.g. `{"approved":
+true}`) is delivered to the agent as the next turn's input, same as
+`agent.submit`. Both are the SAME event name and the SAME component; which
+lane it takes is decided structurally by whether `permission_id` is present,
+never by wording. A `permission_id` that names no real pending permission
+(unknown, already resolved, or expired) is a typed error either way — it is
+never silently delivered to the agent instead.
+
 ## The scientific components, one example each
 
 **Status** — a single labeled state, e.g. a running step:
@@ -220,11 +235,29 @@ registered diff/patch file:
 "body": "The last run used a stale baseline.", "severity": "info", "actions": [{"label": "Rerun", \
 "action": {"event": {"name": "run.retry"}}}]}`.
 
-**Approval** — a gated decision, one to four actions:
-`{"id": "ap1", "component": "clio.approval.v1", "title": "Delete 3 stale checkpoints?", "reason": \
-"Disk pressure on the run volume.", "risk": "Checkpoints cannot be recovered once removed.", \
-"actions": [{"label": "Approve", "action": {"event": {"name": "approval.respond", "context": \
-{"approved": true}}}}]}`.
+**Approval** — a gated decision, one to four actions, in two modes (see
+Routing actions above):
+- **Standalone** — the agent's own yes/no question, with no paused tool call
+  behind it. `context` carries only the decision, and the answer comes back
+  as a plain agent turn:
+  `{"id": "ap1", "component": "clio.approval.v1", "title": "Delete 3 stale \
+checkpoints?", "reason": "Disk pressure on the run volume.", "risk": \
+"Checkpoints cannot be recovered once removed.", "actions": [{"label": \
+"Approve", "action": {"event": {"name": "approval.respond", "context": \
+{"approved": true}}}}, {"label": "Cancel", "action": {"event": {"name": \
+"approval.respond", "context": {"approved": false}}}}]}`.
+- **Bound to a pending permission** — answering a real paused tool call.
+  `context` carries the `permission_id` CLIO handed the surface plus the
+  decision as `action` (`allow` / `deny` / `allow_session` /
+  `allow_workspace`), and the answer resolves that permission instead of
+  starting a turn:
+  `{"id": "ap2", "component": "clio.approval.v1", "title": "Allow deleting \
+scratch.txt?", "reason": "The agent wants to remove a working file.", \
+"risk": "The file cannot be recovered once removed.", "actions": \
+[{"label": "Allow", "action": {"event": {"name": "approval.respond", \
+"context": {"permission_id": "perm_abc123", "action": "allow"}}}}, \
+{"label": "Deny", "action": {"event": {"name": "approval.respond", \
+"context": {"permission_id": "perm_abc123", "action": "deny"}}}}]}`.
 
 ## Accessibility
 
