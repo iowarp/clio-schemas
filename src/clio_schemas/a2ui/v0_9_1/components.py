@@ -354,7 +354,15 @@ GridComponent = _component_model(
     "Grid",
     "A fixed-column grid layout container for child components.",
     required={"children": list[ComponentId]},
-    optional={"columns": int, "gap": float},
+    # Bounds matched to gact-tui's kernel catalog (`kernel-catalog.tsx`'s
+    # `columns: z.number().int().min(1).max(12)` / `gap: z.number().min(0)
+    # .max(12)`) -- G2 (#23): this validation previously accepted any
+    # `gap`/`columns`, so a Grid the client's own catalog would reject still
+    # landed on the wire as `rendered: true`.
+    optional={
+        "columns": Annotated[int, Field(ge=1, le=12)],
+        "gap": Annotated[float, Field(ge=0, le=12)],
+    },
 )
 ListComponent = _component_model(
     "ListComponent",

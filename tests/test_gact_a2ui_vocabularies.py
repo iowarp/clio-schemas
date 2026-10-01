@@ -213,6 +213,30 @@ def test_catalog_rejects_wrong_types_and_unsupported_properties() -> None:
             model.model_validate(component)
 
 
+def test_grid_gap_and_columns_match_the_client_catalog_bounds() -> None:
+    """G2 (#23): the server must reject what the client already rejects.
+
+    gact-tui's kernel catalog (``kernel-catalog.tsx``) caps Grid at
+    ``columns: z.number().int().min(1).max(12)`` and
+    ``gap: z.number().min(0).max(12)``. Before this bound existed here, the
+    producer accepted any ``columns``/``gap`` and returned ``rendered: true``
+    for a Grid the client's own catalog validation then threw on, stranding
+    the surface in a permanent failure (the schema-drift half of #23).
+    """
+
+    base = {"id": "grid_1", "component": "Grid", "children": ["text_1"]}
+    GridComponent.model_validate({**base, "columns": 1, "gap": 0})
+    GridComponent.model_validate({**base, "columns": 12, "gap": 12})
+    for bad in (
+        {"columns": 0},
+        {"columns": 13},
+        {"gap": -1},
+        {"gap": 13},
+    ):
+        with pytest.raises(ValidationError):
+            GridComponent.model_validate({**base, **bad})
+
+
 def test_catalog_accepts_official_dynamic_bindings_and_actions() -> None:
     """Official bindings and event actions remain valid after closing property types."""
 

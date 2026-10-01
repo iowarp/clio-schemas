@@ -251,6 +251,12 @@ CLIO_ACCEPT_CASES: list[Any] = [
         },
         id="Slider-fractional-step",
     ),
+    pytest.param(
+        # G2 adversarial review (F6): the UPPER bound is inclusive, matching
+        # gact-tui's `z.number().int().min(1).max(12)` / `.min(0).max(12)`.
+        {"id": "grid_1", "component": "Grid", "children": ["text_1"], "columns": 12, "gap": 12},
+        id="Grid-columns-gap-at-the-inclusive-max",
+    ),
 ]
 
 
@@ -264,6 +270,28 @@ CLIO_REJECT_CASES: list[Any] = [
     pytest.param(
         {"id": "grid_1", "component": "Grid", "children": ["text_1"], "columns": "two"},
         id="Grid-wrong-type",
+    ),
+    pytest.param(
+        # G2 adversarial review (F6): this is what #23 actually let through --
+        # the JSON Schema the server validates `updateComponents` against
+        # (``jsonschema`` Draft 2020-12, compiled from THIS catalog file,
+        # ``gact/a2ui_catalogs/registry.py``/``validation.py`` in clio-agent)
+        # previously accepted any `gap`, not just the pydantic producer
+        # boundary a hand-authored agent tool never goes through.
+        {"id": "grid_1", "component": "Grid", "children": ["text_1"], "gap": 13},
+        id="Grid-gap-exceeds-the-client-cap",
+    ),
+    pytest.param(
+        {"id": "grid_1", "component": "Grid", "children": ["text_1"], "columns": 13},
+        id="Grid-columns-exceeds-the-client-cap",
+    ),
+    pytest.param(
+        {"id": "grid_1", "component": "Grid", "children": ["text_1"], "gap": -1},
+        id="Grid-gap-below-zero",
+    ),
+    pytest.param(
+        {"id": "grid_1", "component": "Grid", "children": ["text_1"], "columns": 0},
+        id="Grid-columns-below-one",
     ),
     pytest.param(
         {
@@ -445,6 +473,30 @@ CLIO_ACCEPT_CASES.extend(
 @pytest.mark.parametrize("payload", CLIO_REJECT_CASES)
 def test_clio_workspace_reject_case_fails(payload: dict[str, Any]) -> None:
     assert not WORKSPACE_VALIDATORS[payload["component"]].is_valid(payload)
+
+
+def test_grid_rendered_schema_carries_the_bound_not_just_the_pydantic_model() -> None:
+    """G2 (#23, adversarial review F6): clio-agent validates `updateComponents`
+    against the JSON Schema Draft202012Validator compiled from THIS rendered
+    catalog file (``gact/a2ui_catalogs/registry.py``/``validation.py``) --
+    never against ``GridComponent`` directly, which an agent tool call never
+    goes through. `test_grid_gap_and_columns_match_the_client_catalog_bounds`
+    (`test_gact_a2ui_vocabularies.py`) proves the pydantic producer boundary;
+    this proves the bound actually reached the rendered artifact, and that
+    the SAME validator clio-agent compiles rejects what it is meant to.
+    """
+
+    grid_properties = WORKSPACE_CATALOG["components"]["Grid"]["allOf"][-1]["properties"]
+    assert grid_properties["columns"]["minimum"] == 1
+    assert grid_properties["columns"]["maximum"] == 12
+    assert grid_properties["gap"]["minimum"] == 0
+    assert grid_properties["gap"]["maximum"] == 12
+
+    validator = WORKSPACE_VALIDATORS["Grid"]
+    base = {"id": "grid_1", "component": "Grid", "children": ["text_1"]}
+    assert not validator.is_valid({**base, "gap": 13})
+    assert not validator.is_valid({**base, "columns": 13})
+    validator.validate({**base, "gap": 12, "columns": 12})
 
 
 def test_clio_workspace_catalog_is_closed() -> None:
