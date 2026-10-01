@@ -1,9 +1,14 @@
 # Producing CLIO workspace surfaces
 
-The `clio-workspace` catalog covers layout, input, and the CLIO scientific
-components (`clio.*`). Every property shape is defined in `catalog.json` —
-this page is about *when* and *how* to reach for each piece, not what its
-fields are.
+Charts, maps, and tables built from the components below render inline in
+the chat as interactive views — hoverable, clickable, linkable to each
+other — the moment a surface carries one. Saving the same data as a `.json`
+or image file through the artifact tools instead produces a file in the
+workspace, not a rendered chart; the user sees a file attachment, never the
+chart itself, unless a surface also exists. The `clio-workspace` catalog
+covers layout, input, and the CLIO scientific components (`clio.*`). Every
+property shape is defined in `catalog.json` — this page is about *when* and
+*how* to reach for each piece, not what its fields are.
 
 ## The component tree
 
@@ -12,7 +17,11 @@ A surface is a flat array of components, each with a stable `id`. Containers
 children by id rather than nesting them inline — this keeps individual
 components independently addressable for later `updateComponents` calls.
 Exactly one component in the array must carry the id `root`; that is the
-surface's mount point.
+surface's mount point. A surface made of just one component — a single
+chart or map with no surrounding container — still needs that rule: give
+the lone component id `root` itself. The short ids in the one-component
+examples below (`ch1`, `map1`, `t1`, ...) are naming the component's own
+shape for this page's purposes, not a complete surface.
 
 ## Binding values
 
@@ -163,7 +172,29 @@ each entity's shape with `per_entity_lttb`:
 `"dataQuery": {"columns": ["t", "disp_mm", "station"], "filter": [{"column": "network", "op": "eq", "value": "CI"}], "downsample": {"mode": "per_entity_lttb", "entityColumn": "station", "x": "t", "y": "disp_mm", "maxPerEntity": 500}}`.
 When no preset fits, a hand-written `spec` must leave `data` out (or
 use exactly `{"name": "source"}`), must not contain `url`, and stays small
-(64 KB, at most 8 views):
+(64 KB, at most 8 views). Its top level takes the usual Vega-Lite grammar
+(`mark`, `encoding`, `layer`, `facet`, `hconcat`, `vconcat`, `concat`,
+`repeat`, `spec`, `transform`, `params`, `width`, `height`, `title`,
+`resolve`, `config`, `autosize`, `description`, `$schema`, `data`), plus
+the data-free layout keys `columns` (wraps a facet/repeat/concat grid),
+`spacing`, `padding`, `align`, `bounds`, `center`, and `projection` (a
+geoshape or point-map projection) — never `url`, anywhere. A wrapped
+facet, three columns per row:
+`{"facet": {"field": "category", "type": "nominal"}, "columns": 3, "spec": {"mark": "point", "encoding": {"x": {"field": "t", "type": "quantitative"}, "y": {"field": "v", "type": "quantitative"}}}}`.
+
+A row cell can also hold a GeoJSON Geometry object (`Point`, `MultiPoint`,
+`LineString`, `MultiLineString`, `Polygon`, `MultiPolygon`, or
+`GeometryCollection`) instead of a scalar — enough for a real choropleth
+over rows the agent already holds, no artifact needed: a `geoshape` mark
+reads a `shape` encoding typed `geojson`, with `projection` for the map
+projection:
+`"data": [{"geometry": {"type": "Polygon", "coordinates": [[[-100.0, 40.0], [-99.0, 40.0], [-99.0, 41.0], [-100.0, 41.0], [-100.0, 40.0]]]}, "value": 12}]` with spec `{"mark": "geoshape", "encoding": {"shape": {"field": "geometry", "type": "geojson"}, "color": {"field": "value", "type": "quantitative"}}, "projection": {"type": "mercator"}}` — no
+`projection.fit` needed; the renderer fits the map to the geometry
+present in the rows. A lon/lat point map needs no geometry cells, just
+`latitude`/`longitude` encodings plus `projection`:
+`{"mark": "circle", "encoding": {"latitude": {"field": "lat", "type": "quantitative"}, "longitude": {"field": "lon", "type": "quantitative"}, "size": {"field": "value", "type": "quantitative"}}, "projection": {"type": "equirectangular"}}`.
+
+A complete preset-based component, for comparison:
 `{"id": "ch1", "component": "clio.chart.v1", "title": "Displacement", "preset": "trajectories", "xField": "t", "xType": "temporal", "yField": "disp_mm", "entityField": "station", "dataUri": "artifact://artifact_abc123", "selection": {"path": "/selection/stations"}}`.
 
 **Shared selection** — `clio.chart.v1`, `clio.data-table.v1`, and
