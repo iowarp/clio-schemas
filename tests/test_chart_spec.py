@@ -43,6 +43,7 @@ from clio_schemas.a2ui.chart_spec import (
     spec_depth,
     validate_chart_spec,
 )
+from clio_schemas.a2ui.instructions import WORKSPACE_INSTRUCTIONS_MD
 from clio_schemas.export import package_schema_dir
 
 
@@ -158,6 +159,19 @@ def test_rules_as_data_match_the_module_constants_and_the_shipped_file() -> None
     assert CHART_SPEC_RULES["requiredDataObject"] == {"name": "source"}
     shipped = package_schema_dir() / "a2ui" / "chart" / "guard_rules.json"
     assert json.loads(shipped.read_text(encoding="utf-8")) == CHART_SPEC_RULES
+
+
+def test_instructions_mention_every_guard_allowed_top_level_key() -> None:
+    """The hand-written-spec guidance can't silently drift from the guard's allow-list.
+
+    Issue #1549 G13/G4: the agent-facing catalog text is grounding, not a
+    restatement of the guard, but it does need to name every key the guard
+    actually allows (a key the guard accepts that the text never mentions is
+    a key the agent has no reason to try).
+    """
+
+    missing = [key for key in ALLOWED_TOP_LEVEL_KEYS if f"`{key}`" not in WORKSPACE_INSTRUCTIONS_MD]
+    assert not missing, f"instructions.py never mentions guard-allowed key(s): {missing}"
 
 
 def test_every_preset_is_shipped_and_committed_canonically() -> None:
