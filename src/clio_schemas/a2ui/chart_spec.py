@@ -10,7 +10,8 @@ arbitrary element of the host page, or grow without bound.
 
 The rules are exported as data (:data:`CHART_SPEC_RULES`, also shipped as
 ``schemas/a2ui/chart/guard_rules.json``) so a TypeScript mirror can apply the
-same limits and share the same fixtures (``tests/fixtures/chart/``).
+same limits and share the same fixtures (``schemas/a2ui/chart/fixtures/``,
+package data so a consumer's ``HASHES.json`` pin covers them too).
 
 Guard rules, each reported with a stable ``code``:
 
@@ -43,10 +44,19 @@ Guard rules, each reported with a stable ``code``:
     ``ChartRowValue``), strictly shaped and never a Feature/FeatureCollection.
     Reading geometry from a ``.geojson`` artifact by ``dataUri`` is a later
     slice (issue #1549 G7); today geoshape only draws from inline ``data``.
-  - ``projection.fit`` (Vega-Lite's "fit the projection to this geometry/
-    these features" option) may itself hold inline GeoJSON — still no
-    ``url``; it is covered by the same recursive forbidden-key/data-rule walk
-    as every other nested object, not specially restricted.
+
+    **Always set** ``projection.fit`` **to inline GeoJSON covering the rows'
+    extent** (a bounding ``Polygon``, or a ``FeatureCollection`` of the actual
+    shapes). Vega-Lite can in principle compute the fit from the bound
+    ``shape`` column itself with ``projection.fit`` omitted, but the installed
+    renderer's data-driven auto-fit does not resolve for a ``geojson``-typed
+    shape channel (every coordinate comes out ``NaN`` — verified live,
+    gact-tui #1549 G4 review); an explicit ``fit`` sidesteps that renderer gap
+    entirely and is the only reliable way to make a geoshape draw today. Still
+    no ``url`` — ``fit`` is covered by the same recursive forbidden-key/
+    data-rule walk as every other nested object, not specially restricted.
+    Longitude/latitude point maps are unaffected (their own fit mechanism
+    resolves correctly); only the geojson-shape-channel path needs this.
 - ``too_many_views``: at most :data:`MAX_VIEWS` views in total. A view is an
   object with ``mark`` that is not itself a composition; ``layer``/``concat``/
   ``hconcat``/``vconcat`` count their children, ``facet``/``repeat`` count
