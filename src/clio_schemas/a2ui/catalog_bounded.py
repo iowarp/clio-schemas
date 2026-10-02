@@ -370,6 +370,21 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
                         "positions along each trajectory."
                     ),
                 },
+                "filterFields": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 12,
+                    "uniqueItems": True,
+                    "items": {"$ref": "#/$defs/FieldName"},
+                    "description": (
+                        "With dataUri, columns worth filtering while exploring this map. "
+                        "Choose one or more real columns from the task and dataset, such as a "
+                        "category, magnitude, or time column. Use a registered table even for "
+                        "small maps when these native filters matter. The viewer creates typed "
+                        "controls and applies them to "
+                        "the map and Reference this; omit for the viewer's default fields."
+                    ),
+                },
                 "detailField": {
                     "$ref": "#/$defs/FieldName",
                     "description": "Dataset column holding each point's detail text.",
@@ -416,6 +431,7 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
                 "dataQuery": ["dataUri"],
                 "trackField": ["dataUri", "orderField"],
                 "orderField": ["trackField"],
+                "filterFields": ["dataUri"],
             },
         },
         {

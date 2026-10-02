@@ -88,6 +88,24 @@ vice versa, with no agent turn in between. Use an explicit `selection` path
 and `selectionField` when views of different artifacts share a concept such
 as the same station name.
 
+## Choosing filters for exploratory views
+
+Start with the scientific question and inspect the dataset's fields, units,
+distinct values, and range. Offer a small number of dimensions that let a
+reader isolate a phenomenon, compare groups, or inspect outliers. Row IDs and
+nearly unique labels seldom help; spatial position, a measurement, or time
+may help when the question calls for that kind of range. Match temporal
+precision to the data and question rather than assuming every time field
+should become a year filter.
+
+Keep each chosen field in the registered artifact and the view's projected
+`dataQuery.columns`. Maps can name useful columns with `filterFields`;
+charts expose native filters for encoded fields, and tables for displayed
+columns. The renderer owns the filter controls, so do not create buttons or
+actions for them. Use `dataQuery.filter` for the initial scientific slice;
+the reader's later filters narrow that slice. Check that the visible data,
+counts, and `Reference this` agree after filtering.
+
 ## Routing actions
 
 `Button`, checks, and several scientific components accept an `action`. Most
@@ -155,10 +173,20 @@ scale (with optional `valueLabel` and `valueUnit`), and is bounded by
 The renderer supplies the corresponding legend; inline points may carry a
 numeric `value` for the same continuous scale. Keep measured magnitudes numeric
 in `value`/`valueField` rather than making each distinct number a category.
+For exploratory maps, `filterFields` names columns worth narrowing; omit it
+for the default map fields. A map needing filters on measured columns should
+use a registered table even when only a few rows are shown: inline points do
+not retain arbitrary measurement columns.
 For time-ordered paths such as storm tracks, give `trackField` (the track ID)
-and `orderField` (a timestamp or numeric sequence) with a `dataUri` map.
+and `orderField` (an ISO-8601 timestamp or numeric sequence) with a `dataUri` map.
 The renderer joins positions within each track, keeps the observations
 selectable, and colours paths by track when no other colour field is set.
+For a large track archive, choose a meaningful period or named subset with
+`dataQuery` so people can distinguish paths. Keep the full file as an artifact;
+an arbitrary row limit can cut a track in half.
+Check a few parsed coordinates against the source before registering a path
+dataset. A swapped or repeated latitude/longitude column produces a plausible
+looking file but a misleading map.
 For a registered GeoJSON FeatureCollection of points, lines, or polygons,
 use `geojsonUri` and optionally name feature-property fields with `labelField`,
 `detailField`, `categoryField`, or `valueField`. The renderer fits the geometry,
