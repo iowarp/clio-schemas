@@ -47,12 +47,15 @@ data-by-reference and selection work this skill exists to keep in one place.
 
 ## 3. Linking views: shared selection
 
-Components that show the same entities from different angles (a chart, a map, a table) bind their
-`selection` property to the same `/selection/<key>` data-model path. The value there is a
-`SelectionState` (`{field, values[], source?}`, one shared `$defs/SelectionState`). Clicking an
-entity in one view writes the shared path; every other component bound to it follows, with no
-agent turn in between — the marimo-style reactive goal. Give every linked, data-carrying component
-a `selection` property when you add one; do not invent a second selection mechanism.
+Components that show the same rows from different angles should share selection as a normal
+renderer behavior. Views using one `dataUri` link through the dataset's stable `__row` key.
+Inline chart, map and table views also link when they contain the same unique entity values,
+regardless of row order. The person does not need to ask for this, and the producer does not add
+a selection control or path for ordinary same-dataset views. Preserve a stable entity key when
+transforming rows for another view. Only use an explicit `/selection/<key>` path and matching
+`selectionField` values when different datasets share a conceptual entity. The value at that
+path is `SelectionState` (`{field, values[], source?}`, one shared `$defs/SelectionState`).
+Do not invent a second selection mechanism.
 
 ## 4. Document in the catalog, not beside it
 
