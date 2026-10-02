@@ -234,8 +234,8 @@ def test_message_block_union_rejects_unknown_types_and_properties() -> None:
         )
 
 
-def test_catalog_declares_thirty_two_components_and_preserves_checkbox_spelling() -> None:
-    """The 32 CLIO catalog components (25 factory-built + 7 bounded) are closed and correct."""
+def test_catalog_declares_current_components_and_preserves_checkbox_spelling() -> None:
+    """The 37 CLIO components include the new widgets and retain canonical names."""
 
     factory_names = set(COMPONENT_SPECS)
     bounded_names = {
@@ -248,9 +248,10 @@ def test_catalog_declares_thirty_two_components_and_preserves_checkbox_spelling(
         "clio.chart.v1",
     }
     names = factory_names | bounded_names
-    assert len(names) == 32
+    assert len(names) == 37
     assert factory_names.isdisjoint(bounded_names)
     assert "CheckBox" in names
+    assert {"DateTimeInput", "clio.message-draft.v1", "clio.weather.v1", "clio.steps.v1"} <= names
     assert "Checkbox" not in names
     assert "clio.time-series.v1" not in names
 

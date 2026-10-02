@@ -255,6 +255,78 @@ class _CardAction(_ClosedModel):
     tone: Literal["default", "destructive"] | None = None
 
 
+class _MessageDraftVersion(_ClosedModel):
+    """One labelled alternative in a message draft."""
+
+    label: str
+    body: str
+    subject: str | None = None
+    to: list[str] | None = None
+    cc: list[str] | None = None
+
+
+_WEATHER_TIMESTAMP_PATTERN = (
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$"
+)
+WeatherTimestamp = Annotated[
+    str,
+    Field(
+        pattern=_WEATHER_TIMESTAMP_PATTERN,
+        description="ISO 8601 local date-time with an explicit UTC offset or Z.",
+    ),
+]
+
+
+class _WeatherHour(_ClosedModel):
+    """An hourly forecast at a local ISO-8601 time."""
+
+    time: WeatherTimestamp
+    condition: str
+    temperature: float
+    precipitationChance: float | None = Field(default=None, ge=0, le=100)
+
+
+class _WeatherDay(_ClosedModel):
+    """A daily forecast at a local ISO date."""
+
+    date: str
+    condition: str
+    high: float
+    low: float
+    precipitationChance: float | None = Field(default=None, ge=0, le=100)
+
+
+class _GuideStep(_ClosedModel):
+    """A step in a rescalable procedure."""
+
+    id: str
+    title: str
+    detail: str | None = Field(
+        default=None,
+        description=(
+            "Instruction that stays true at any scale. State fixed per-unit amounts here "
+            "when needed; do not repeat the starting total or count."
+        ),
+    )
+    durationSeconds: int | None = Field(default=None, ge=1)
+    quantity: float | None = Field(
+        default=None,
+        ge=0,
+        description="Amount for the guide's baseAmount; the viewer rescales it with the control.",
+    )
+    quantityUnit: str | None = Field(
+        default=None,
+        description="Unit beside the scaled amount at quantity 1; use a singular countable label.",
+    )
+    quantityUnitPlural: str | None = Field(
+        default=None,
+        description=(
+            "Optional label at other quantities, such as eggs or tubes; omit for invariant units."
+        ),
+    )
+    warning: str | None = None
+
+
 class _ComponentBase(_ClosedModel):
     """Fields shared by every trusted catalog component."""
 
@@ -431,7 +503,7 @@ TextFieldComponent = _component_model(
 ChoicePickerComponent = _component_model(
     "ChoicePickerComponent",
     "ChoicePicker",
-    "A single- or multiple-selection picker over a fixed option list.",
+    "A single- or multiple-selection picker; bind value to the path an action reads.",
     required={"options": list[_ChoiceOption], "value": DynamicStringList},
     optional={
         "label": DynamicString,
@@ -447,6 +519,20 @@ SliderComponent = _component_model(
     "A whole-number range control (see clio.slider.v1 for fractional steps).",
     required={"max": float, "value": DynamicNumber},
     optional={"label": DynamicString, "min": float, "checks": Checks},
+)
+DateTimeInputComponent = _component_model(
+    "DateTimeInputComponent",
+    "DateTimeInput",
+    "A date, time, or date-time input with an ISO 8601 value; enable the needed parts.",
+    required={"value": DynamicString},
+    optional={
+        "label": DynamicString,
+        "enableDate": bool,
+        "enableTime": bool,
+        "min": DynamicString,
+        "max": DynamicString,
+        "checks": Checks,
+    },
 )
 StatusComponent = _component_model(
     "StatusComponent",
@@ -513,16 +599,26 @@ ApprovalComponent = _component_model(
 NumberSliderComponent = _component_model(
     "NumberSliderComponent",
     "clio.slider.v1",
-    "A fractional-step numeric control for a physical parameter, with a typed value box.",
-    required={"label": DynamicString, "value": DynamicNumber, "min": float, "max": float},
-    optional={"step": float, "unit": str},
+    "A fractional-step numeric control, or a two-value range, with typed value boxes.",
+    required={
+        "label": DynamicString,
+        "value": DynamicNumber | Annotated[list[float], Field(min_length=2, max_length=2)],
+        "min": float,
+        "max": float,
+    },
+    optional={"step": float, "unit": str, "range": bool},
 )
 MeshViewportComponent = _component_model(
     "MeshViewportComponent",
     "clio.mesh-viewport.v1",
-    "An orbitable 3D view of one registered mesh artifact, colored by a field.",
+    (
+        "An orbitable 3D view of a registered standard mesh or a CLIO FEA mesh "
+        "with optional result fields."
+    ),
     required={"meshUri": ArtifactUri},
     optional={
+        "format": Literal["glb", "gltf", "obj", "stl", "ply", "fbx", "3mf", "vtk", "vtp", "drc"],
+        "materialUri": ArtifactUri,
         "title": DynamicString,
         "field": DynamicString,
         "showField": DynamicBoolean,
@@ -533,6 +629,70 @@ MeshViewportComponent = _component_model(
         "camera": DynamicValue,
         "syncGroup": SyncGroup,
         "upAxis": Literal["x", "y", "z"],
+    },
+)
+
+RasterViewportComponent = _component_model(
+    "RasterViewportComponent",
+    "clio.raster-viewport.v1",
+    (
+        "An interactive viewport for a registered two-dimensional grid, "
+        "with sampled values, colour scale, and region reference."
+    ),
+    required={"rasterUri": ArtifactUri},
+    optional={
+        "title": DynamicString,
+        "variable": str,
+        "band": Annotated[int, Field(ge=1)],
+        "colormap": Literal["viridis", "magma", "plasma", "cividis", "turbo", "grayscale"],
+        "unit": str,
+    },
+)
+
+MessageDraftComponent = _component_model(
+    "MessageDraftComponent",
+    "clio.message-draft.v1",
+    "Editable alternatives for an email, chat message, or text, with copy and open actions.",
+    required={
+        "kind": Literal["email", "slack", "text"],
+        "versions": Annotated[list[_MessageDraftVersion], Field(min_length=1, max_length=8)],
+    },
+    optional={"title": str},
+)
+
+WeatherComponent = _component_model(
+    "WeatherComponent",
+    "clio.weather.v1",
+    "Current weather and hourly or daily forecasts for a field site or location.",
+    required={
+        "location": str,
+        "timeZone": str,
+        "observedAt": WeatherTimestamp,
+        "condition": str,
+        "temperature": float,
+        "temperatureUnit": Literal["C", "F"],
+        "source": str,
+    },
+    optional={
+        "windSpeed": float,
+        "windUnit": str,
+        "hourly": Annotated[list[_WeatherHour], Field(max_length=240)],
+        "daily": Annotated[list[_WeatherDay], Field(max_length=45)],
+    },
+)
+
+StepsComponent = _component_model(
+    "StepsComponent",
+    "clio.steps.v1",
+    "An interactive protocol or recipe with checkable steps, timers, and scaled quantities.",
+    required={
+        "title": str,
+        "steps": Annotated[list[_GuideStep], Field(min_length=1, max_length=100)],
+    },
+    optional={
+        "scaleLabel": str,
+        "baseAmount": Annotated[float, Field(gt=0)],
+        "progress": DynamicValue,
     },
 )
 

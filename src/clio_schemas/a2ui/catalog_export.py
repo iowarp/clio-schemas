@@ -148,7 +148,7 @@ def render_workspace_catalog() -> dict[str, Any]:
         "$id": WORKSPACE_CATALOG_ID,
         "title": "CLIO Workspace Catalog",
         "description": (
-            "The 32 CLIO scientific-agent A2UI 0.9.1 components, in official catalog-file style."
+            "CLIO scientific-agent A2UI components, including interactive data views and widgets."
         ),
         "catalogId": WORKSPACE_CATALOG_ID,
         "components": components,
