@@ -70,7 +70,13 @@ to the control's data-model path, for example `{"column": "depth", "op":
 two-value range before rendering. The renderer resolves changes into a fresh
 data query; the bound value must satisfy the chosen filter operator.
 
-For views meant to link, give every component including the table the same `dataUri`; copying artifact rows inline loses the shared row identity. Prefer one shared artifact even for a small dataset when clicking an item should identify it in another view. Separate inline arrays do not link automatically; bind an explicit shared selection when they must stay inline, or present them as independent views. Components pointing at the same artifact automatically share row selection
+For views meant to link, give every component including the table the same
+`dataUri`; copying artifact rows inline loses the shared row identity. Prefer
+one shared artifact even for a small dataset when clicking an item should
+identify it in another view. Separate inline arrays do not link automatically;
+bind an explicit shared selection when they must stay inline, or present them
+as independent views. Components pointing at the same artifact automatically
+share row selection
 through the renderer's stable `__row` key. For example, a script writes `stations.csv`
 (columns `station`, `lat`, `lon`, `displacement_mm`), registered as
 `artifact://artifact_stations01`; a `clio.chart.v1` `scatter` preset
@@ -182,8 +188,9 @@ for an email, Slack message, or text when the person asks for wording they can
 review or adapt. Supply one to eight versions with distinct labels and bodies;
 email versions can include recipients and subjects. The viewer can edit the
 displayed draft directly, switch between alternatives without losing those
-edits, copy it, open an email in the local mail application, or put the edited
-version into the composer. None of those actions sends the message from CLIO.
+edits, copy it, choose a mail destination for an email draft, or put the edited
+version into the composer. The mail links carry recipients, subject, and body,
+but not file attachments. None of those actions sends the message from CLIO.
 
 **Weather** — `clio.weather.v1` presents observed conditions and hourly or
 daily forecasts for a location, including field sites. Supply the source,
@@ -200,6 +207,11 @@ the person will work through several actions. Supply numbered steps, optional
 warnings, durations, and scalable quantities. Bind `progress` to a data-model
 path when progress should remain part of the surface's state; the renderer
 handles checkboxes, timers, and rescaling without another agent turn.
+For a recipe, put measured materials in `ingredients` and cooking actions in
+`steps`. Ingredients scale with servings but do not count toward completed
+steps. Keep the title independent of the starting servings, since that value
+can change in the viewer. A protocol without a separate materials list can keep quantities on
+the steps that consume them.
 Put variable amounts in `quantity` and `quantityUnit`; keep `detail` valid
 after the person changes the scale. For four samples at 2 mL each, use
 `baseAmount: 4`, `quantity: 8`, and detail “Add 2 mL to each tube.” A detail

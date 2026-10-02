@@ -327,6 +327,16 @@ class _GuideStep(_ClosedModel):
     warning: str | None = None
 
 
+class _GuideIngredient(_ClosedModel):
+    """A scalable recipe ingredient, separate from completed actions."""
+
+    name: str
+    quantity: float = Field(ge=0, description="Amount for baseAmount servings.")
+    unit: str | None = None
+    unitPlural: str | None = None
+    note: str | None = None
+
+
 class _ComponentBase(_ClosedModel):
     """Fields shared by every trusted catalog component."""
 
@@ -684,12 +694,14 @@ WeatherComponent = _component_model(
 StepsComponent = _component_model(
     "StepsComponent",
     "clio.steps.v1",
-    "An interactive protocol or recipe with checkable steps, timers, and scaled quantities.",
+    "An interactive protocol or recipe with checkable actions, timers, "
+    "and separately scaled ingredients.",
     required={
         "title": str,
         "steps": Annotated[list[_GuideStep], Field(min_length=1, max_length=100)],
     },
     optional={
+        "ingredients": Annotated[list[_GuideIngredient], Field(max_length=100)],
         "scaleLabel": str,
         "baseAmount": Annotated[float, Field(gt=0)],
         "progress": DynamicValue,
