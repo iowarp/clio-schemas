@@ -267,6 +267,32 @@ def test_catalog_accepts_official_dynamic_bindings_and_actions() -> None:
     assert button.model_dump()["component"] == "Button"
 
 
+def test_map_filter_fields_require_referenced_data_and_distinct_columns() -> None:
+    """A map can name useful native filters without defining their controls."""
+
+    base = {
+        "id": "map_1",
+        "component": "clio.map.v1",
+        "dataUri": "artifact://artifact_observations",
+        "latitudeField": "latitude",
+        "longitudeField": "longitude",
+        "labelField": "site",
+    }
+    valid = MapComponent.model_validate({**base, "filterFields": ["campaign", "temperature"]})
+    assert valid.filterFields == ["campaign", "temperature"]
+    with pytest.raises(ValidationError):
+        MapComponent.model_validate({**base, "filterFields": ["campaign", "campaign"]})
+    with pytest.raises(ValidationError):
+        MapComponent.model_validate(
+            {
+                "id": "map_1",
+                "component": "clio.map.v1",
+                "points": [{"id": "p", "label": "Point", "latitude": 1, "longitude": 2}],
+                "filterFields": ["campaign"],
+            }
+        )
+
+
 def test_catalog_enforces_map_and_workflow_limits() -> None:
     """Renderer resource bounds are part of the cross-repository contract."""
 
