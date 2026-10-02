@@ -58,7 +58,7 @@ to the control's data-model path, for example `{"column": "depth", "op":
 two-value range before rendering. The renderer resolves changes into a fresh
 data query; the bound value must satisfy the chosen filter operator.
 
-For views meant to link, give every component including the table the same `dataUri`; copying artifact rows inline loses the shared row identity. Components pointing at the same artifact automatically share row selection
+For views meant to link, give every component including the table the same `dataUri`; copying artifact rows inline loses the shared row identity. Prefer one shared artifact even for a small dataset when clicking an item should identify it in another view. Separate inline arrays do not link automatically; bind an explicit shared selection when they must stay inline, or present them as independent views. Components pointing at the same artifact automatically share row selection
 through the renderer's stable `__row` key. For example, a script writes `stations.csv`
 (columns `station`, `lat`, `lon`, `displacement_mm`), registered as
 `artifact://artifact_stations01`; a `clio.chart.v1` `scatter` preset
