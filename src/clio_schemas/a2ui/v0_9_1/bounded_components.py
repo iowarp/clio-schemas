@@ -421,6 +421,7 @@ class MapComponent(_ComponentBase):
     idField: FieldName | None = None
     trackField: FieldName | None = None
     orderField: FieldName | None = None
+    filterFields: list[FieldName] | None = Field(default=None, min_length=1, max_length=12)
     detailField: FieldName | None = None
     categoryField: FieldName | None = None
     valueField: FieldName | None = None
@@ -452,6 +453,11 @@ class MapComponent(_ComponentBase):
             raise ValueError("trackField requires orderField")
         if self.orderField is not None and self.trackField is None:
             raise ValueError("orderField requires trackField")
+        if self.filterFields is not None:
+            if self.dataUri is None:
+                raise ValueError("filterFields requires dataUri")
+            if len(set(self.filterFields)) != len(self.filterFields):
+                raise ValueError("filterFields must be distinct")
         if self.categoryField is not None and self.valueField is not None:
             raise ValueError("categoryField and valueField cannot be combined")
         if isinstance(self.selection, _DataBinding | _FunctionCall) and self.selectionField is None:
