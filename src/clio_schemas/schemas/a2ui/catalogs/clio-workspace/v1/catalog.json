@@ -2302,7 +2302,8 @@
               "description": "Bind to /selection/<key>; the bound value is a SelectionState ({field, values[], source?}, see $defs/SelectionState). Components bound to the same path share one selection."
             },
             "selectionField": {
-              "$ref": "#/$defs/FieldName"
+              "$ref": "#/$defs/FieldName",
+              "description": "Column used for an explicit selection binding. Ordinary views of one dataUri link by __row without this property; trajectory and spectra points select exact rows while entityField groups each curve."
             },
             "selectionParam": {
               "default": "sel",

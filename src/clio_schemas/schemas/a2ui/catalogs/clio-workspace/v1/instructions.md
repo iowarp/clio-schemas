@@ -51,7 +51,9 @@ The three tabular components — `clio.chart.v1`, `clio.map.v1`,
 (never with inline values): one shared shape (`$defs/DataQuery`) that
 filters, aggregates, downsamples, and limits the referenced table
 server-side before it reaches the component. Their `dataUri` names a registered
-CSV or Parquet table, not a source JSON file. Preserve numeric columns as
+CSV or Parquet table, not a source JSON file. Check relevant workspace
+artifacts before seeking a new external source; reuse a suitable table when
+its provenance and columns answer the question. Preserve numeric columns as
 numbers and timestamps as ISO-8601 strings with an offset when converting
 source data; inspect the registered table's schema and a sample row before
 building a view so a locale-formatted timestamp does not become a text
@@ -146,8 +148,9 @@ rather than reaching for an aggregate shape:
 a dataset above); give a title via a sibling `Text`, not a property on the
 table itself. Inline rows require `columns`; a `dataUri` table takes
 `columns` from the dataset when omitted:
-`{"id": "t1", "component": "clio.data-table.v1", "columns": ["station", "displacement_mm"], "rows": [{"station": "GNSS01", "displacement_mm": 3.1}]}`, or `{"id": "t1", "component": "clio.data-table.v1", "dataUri": "artifact://artifact_stations01", "dataQuery": {"limit": 500}}`. Bind `selection` (with a matching `selectionField`, required whenever `selection`
-is bound) to share selected rows with charts and maps (see Shared selection below).
+`{"id": "t1", "component": "clio.data-table.v1", "columns": ["station", "displacement_mm"], "rows": [{"station": "GNSS01", "displacement_mm": 3.1}]}`, or `{"id": "t1", "component": "clio.data-table.v1", "dataUri": "artifact://artifact_stations01", "dataQuery": {"limit": 500}}`. Views over the same artifact link selected rows automatically. Use
+`selection` with a matching `selectionField` for an explicit cross-artifact
+link (see Shared selection below).
 
 **Mermaid** — declarative diagram source only; no init directives or click
 handlers. Inline `source`, or `dataUri` to a registered `.mmd`/text file:
@@ -181,9 +184,9 @@ For a registered GeoJSON FeatureCollection of points, lines, or polygons,
 use `geojsonUri` and optionally name feature-property fields with `labelField`,
 `detailField`, `categoryField`, or `valueField`. The renderer fits the geometry,
 colours it, and provides feature selection. Do not also pass `points` or `dataUri`.
-`{"id": "map1", "component": "clio.map.v1", "points": [{"id": "s1", "label": "GNSS01", "latitude": 34.1, "longitude": -118.3}]}`, or `{"id": "map1", "component": "clio.map.v1", "dataUri": "artifact://artifact_stations01", "latitudeField": "lat", "longitudeField": "lon", "labelField": "station"}`. `selected` still marks one point by id; bind `selection` (with
-a matching `selectionField`, required whenever `selection` is bound) instead to share a
-selection with charts and tables.
+`{"id": "map1", "component": "clio.map.v1", "points": [{"id": "s1", "label": "GNSS01", "latitude": 34.1, "longitude": -118.3}]}`, or `{"id": "map1", "component": "clio.map.v1", "dataUri": "artifact://artifact_stations01", "latitudeField": "lat", "longitudeField": "lon", "labelField": "station"}`. `selected` still marks one point by id. Views over
+the same artifact link selected rows automatically; bind `selection` with a
+matching `selectionField` for an explicit cross-artifact link.
 
 **Workflow** — a bounded node/edge graph, useful for showing a multi-step
 plan's progress. Inline `nodes` and `edges` together, or `dataUri` to a
@@ -276,9 +279,16 @@ as a point), and `heatmap` (grid colored by a value). Fill a preset by naming
 columns: `xField`, `yField`, `entityField` (what one line, point, or cell
 belongs to — a run, a sample, a station), and optionally `colorField` (a
 group), `facetField` (small multiples), and `xType` (`temporal`,
-`quantitative`, `ordinal`). Every preset already highlights the clicked
-entity and dims the rest. The rows come only from `data` (small inline
-rows) or `dataUri` (a registered table artifact, optionally narrowed with
+`quantitative`, `ordinal`). The renderer highlights selected data and dims
+the rest. For trajectories and spectra, a dot selects one observation;
+Ctrl-click selects the whole curve; Shift adds or removes at either level.
+When comparing series from different
+calendar periods, an elapsed-time or sample-index `xField` from each series'
+own start makes their shapes comparable. Keep absolute timestamps in the
+dataset for map, table, and hover context. If a few series are requested
+without names, choose a representative subset, state the criterion, and let
+the reader refine it. The rows come only from `data`
+(small inline rows) or `dataUri` (a registered table artifact, optionally narrowed with
 `dataQuery`) — never from the spec. `dataQuery` is the server's table query:
 `columns`, `filter` (`{column, op, value}` with `op` one of `eq`, `in`,
 `range`, `isnull`), `aggregate` (`groupBy` plus `metrics` of `{column, fn}`),
@@ -318,13 +328,14 @@ A complete preset-based component, for comparison:
 one surface. The renderer uses the server's stable `__row` key. For links
 across different artifacts, bind `selection` to `/selection/<key>`; the value
 there is `{"field": "<column>", "values": [...], "source": "<component id>"}`.
-Every component bound to the same path follows it: clicking a line in a
-chart highlights the same stations in the table and on the map, with no
+Every component bound to the same path follows it: clicking a point in a
+chart highlights the same observation in the table and on the map, with no
 agent turn in between. Seed an explicit selection with `updateDataModel` at that path,
 and read the current one from the data model (or a `Button` whose event
 context binds the path) when the scientist asks about "the selected" items.
-A chart's selection covers `selectionField` (by default the preset's
-`entityField`); `clio.map.v1` and `clio.data-table.v1` have no such default,
+A chart's selection covers `selectionField`; trajectory and spectra presets
+default to `__row` for exact point selection while retaining `entityField`
+for line geometry. `clio.map.v1` and `clio.data-table.v1` have no such default,
 so `selectionField` is required on either whenever `selection` is bound to
 a path — name the same dataset column every linked component uses, or the
 values on each side won't actually match up. To set a selection from an
