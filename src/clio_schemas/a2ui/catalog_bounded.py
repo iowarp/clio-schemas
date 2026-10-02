@@ -1047,7 +1047,15 @@ def _chart_component_schema() -> dict[str, Any]:
                         "pattern": SELECTION_PARAM_PATTERN,
                         "default": DEFAULT_SELECTION_PARAM,
                     },
-                    "selectionField": {"$ref": "#/$defs/FieldName"},
+                    "selectionField": {
+                        "$ref": "#/$defs/FieldName",
+                        "description": (
+                            "Column used for an explicit selection binding. Ordinary views "
+                            "of one dataUri link by __row without this property; trajectory "
+                            "and spectra points select exact rows while entityField groups "
+                            "each curve."
+                        ),
+                    },
                     "title": {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString"},
                     "height": {
                         "type": "number",
