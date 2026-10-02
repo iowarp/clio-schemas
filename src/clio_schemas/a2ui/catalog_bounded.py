@@ -296,7 +296,7 @@ _MAP_POINT_DEF: dict[str, Any] = {
 
 _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "description": "Points on an interactive map (stations, sites, epicenters).",
+    "description": "Interactive points, ordered trajectories, or GeoJSON geometry on a map.",
     "allOf": [
         {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
         {"$ref": "#/$defs/CatalogComponentCommon"},
@@ -356,6 +356,20 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
                     "$ref": "#/$defs/FieldName",
                     "description": "Dataset column holding each point's stable id.",
                 },
+                "trackField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": (
+                        "With dataUri, column identifying each trajectory (for example "
+                        "storm_id). Rows with the same value form one path."
+                    ),
+                },
+                "orderField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": (
+                        "With trackField, time or numeric sequence column ordering "
+                        "positions along each trajectory."
+                    ),
+                },
                 "detailField": {
                     "$ref": "#/$defs/FieldName",
                     "description": "Dataset column holding each point's detail text.",
@@ -398,7 +412,11 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
                 "actionLabel": {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString"},
             },
             "required": ["component"],
-            "dependentRequired": {"dataQuery": ["dataUri"]},
+            "dependentRequired": {
+                "dataQuery": ["dataUri"],
+                "trackField": ["dataUri", "orderField"],
+                "orderField": ["trackField"],
+            },
         },
         {
             "description": "Exactly one of points, dataUri, or geojsonUri is required.",

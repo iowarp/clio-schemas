@@ -137,7 +137,11 @@ scale (with optional `valueLabel` and `valueUnit`), and is bounded by
 `dataQuery`/`limit` instead.
 The renderer supplies the corresponding legend; inline points may carry a
 numeric `value` for the same continuous scale. Keep measured magnitudes numeric
-in `value`/`valueField` rather than making each distinct number a category:
+in `value`/`valueField` rather than making each distinct number a category.
+For time-ordered paths such as storm tracks, give `trackField` (the track ID)
+and `orderField` (a timestamp or numeric sequence) with a `dataUri` map.
+The renderer joins positions within each track, keeps the observations
+selectable, and colours paths by track when no other colour field is set.
 For a registered GeoJSON FeatureCollection of points, lines, or polygons,
 use `geojsonUri` and optionally name feature-property fields with `labelField`,
 `detailField`, `categoryField`, or `valueField`. The renderer fits the geometry,
