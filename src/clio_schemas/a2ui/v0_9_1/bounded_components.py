@@ -51,6 +51,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     CheckBoxComponent,
     ChoicePickerComponent,
     ColumnComponent,
+    DateTimeInputComponent,
     DividerComponent,
     DynamicString,
     DynamicValue,
@@ -60,16 +61,20 @@ from clio_schemas.a2ui.v0_9_1.components import (
     ImageComponent,
     ListComponent,
     MeshViewportComponent,
+    MessageDraftComponent,
     MetricComponent,
     ModalComponent,
     NumberSliderComponent,
     ProgressComponent,
+    RasterViewportComponent,
     RowComponent,
     SliderComponent,
     StatusComponent,
+    StepsComponent,
     TabsComponent,
     TextComponent,
     TextFieldComponent,
+    WeatherComponent,
     _ClosedModel,
     _ComponentBase,
     _DataBinding,
@@ -87,6 +92,7 @@ class MapPoint(_ClosedModel):
     longitude: float = Field(ge=-180, le=180, allow_inf_nan=False)
     detail: str | None = Field(default=None, max_length=2_000)
     category: str | None = Field(default=None, max_length=120)
+    value: float | None = Field(default=None, allow_inf_nan=False)
 
 
 #: Bounds shared by every ``*Field``/``dataQuery`` column name across map,
@@ -258,6 +264,16 @@ class QueryFilter(_ClosedModel):
     @model_validator(mode="after")
     def _check_value(self) -> QueryFilter:
         value = self.value
+        if isinstance(value, dict):
+            if (
+                set(value) != {"path"}
+                or not isinstance(value["path"], str)
+                or not value["path"].startswith("/")
+            ):
+                raise ValueError(
+                    "filter binding requires an absolute {path: '/...'} data-model path"
+                )
+            return self
         if self.op == "eq":
             if not _is_query_scalar(value):
                 raise ValueError("eq filter requires a non-null scalar value")
@@ -391,12 +407,13 @@ class DataQuery(_ClosedModel):
 
 
 class MapComponent(_ComponentBase):
-    """Interactive bounded geospatial component: inline points or a referenced dataset."""
+    """Interactive geospatial component: inline points, tabular rows, or GeoJSON."""
 
     component: Literal["clio.map.v1"] = "clio.map.v1"
     title: DynamicString | None = None
     points: list[MapPoint] | None = Field(default=None, min_length=1, max_length=MAX_MAP_POINTS)
     dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    geojsonUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
     dataQuery: DataQuery | None = None
     latitudeField: FieldName | None = None
     longitudeField: FieldName | None = None
@@ -404,6 +421,8 @@ class MapComponent(_ComponentBase):
     idField: FieldName | None = None
     detailField: FieldName | None = None
     categoryField: FieldName | None = None
+    valueField: FieldName | None = None
+    valueUnit: str | None = Field(default=None, max_length=40)
     selected: str | None = Field(default=None, max_length=128)
     selection: DynamicValue | None = None
     selectionField: FieldName | None = None
@@ -412,8 +431,8 @@ class MapComponent(_ComponentBase):
 
     @model_validator(mode="after")
     def _validate_data_source(self) -> MapComponent:
-        if (self.points is None) == (self.dataUri is None):
-            raise ValueError("exactly one of points or dataUri is required")
+        if sum(source is not None for source in (self.points, self.dataUri, self.geojsonUri)) != 1:
+            raise ValueError("exactly one of points, dataUri, or geojsonUri is required")
         if self.dataUri is not None:
             missing = [
                 name
@@ -424,6 +443,8 @@ class MapComponent(_ComponentBase):
                 raise ValueError(f"dataUri requires field(s) {missing}")
         elif self.dataQuery is not None:
             raise ValueError("dataQuery applies only to dataUri")
+        if self.categoryField is not None and self.valueField is not None:
+            raise ValueError("categoryField and valueField cannot be combined")
         if isinstance(self.selection, _DataBinding | _FunctionCall) and self.selectionField is None:
             raise ValueError("selectionField is required when selection is bound")
         return self
@@ -469,7 +490,7 @@ class WorkflowComponent(_ComponentBase):
 
 
 class DataTableComponent(_ComponentBase):
-    """Tabular rows, inline or from a referenced dataset."""
+    """Tabular rows, inline or by dataUri; use the same dataUri as linked charts and maps."""
 
     component: Literal["clio.data-table.v1"] = "clio.data-table.v1"
     columns: list[str | _DataTableColumn] | None = None
@@ -616,6 +637,7 @@ COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     TextFieldComponent,
     ChoicePickerComponent,
     SliderComponent,
+    DateTimeInputComponent,
     StatusComponent,
     MetricComponent,
     ProgressComponent,
@@ -630,6 +652,10 @@ COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     ActionCardComponent,
     ApprovalComponent,
     MeshViewportComponent,
+    RasterViewportComponent,
     NumberSliderComponent,
     ChartComponent,
+    MessageDraftComponent,
+    WeatherComponent,
+    StepsComponent,
 )

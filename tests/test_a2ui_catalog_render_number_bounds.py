@@ -19,6 +19,7 @@ from typing import Annotated
 import pytest
 from pydantic import Field
 
+from clio_schemas.a2ui.catalog_export import render_workspace_catalog
 from clio_schemas.a2ui.catalog_render import _number_bounds, render_type
 
 
@@ -67,3 +68,9 @@ def test_number_bounds_raises_on_an_unrecognised_constraint() -> None:
     field_info.metadata.append(object())
     with pytest.raises(NotImplementedError):
         _number_bounds(field_info)
+
+
+def test_nested_step_guidance_reaches_agent_catalog() -> None:
+    properties = render_workspace_catalog()["$defs"]["GuideStep"]["properties"]
+    assert "any scale" in properties["detail"]["description"]
+    assert "rescales" in properties["quantity"]["description"]
