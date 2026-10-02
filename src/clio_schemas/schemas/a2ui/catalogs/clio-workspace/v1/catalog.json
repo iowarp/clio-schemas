@@ -2861,6 +2861,13 @@
           "dependentRequired": {
             "dataQuery": [
               "dataUri"
+            ],
+            "orderField": [
+              "trackField"
+            ],
+            "trackField": [
+              "dataUri",
+              "orderField"
             ]
           },
           "properties": {
@@ -2916,6 +2923,10 @@
               "$ref": "#/$defs/FieldName",
               "description": "Dataset column holding longitude (required with dataUri)."
             },
+            "orderField": {
+              "$ref": "#/$defs/FieldName",
+              "description": "With trackField, time or numeric sequence column ordering positions along each trajectory."
+            },
             "points": {
               "description": "Inline points (at most 500) — this array rides the surface's own wire message, so it is capped for transfer size; for a larger dataset use dataUri instead, unbounded and paged/downsampled by the viewer.",
               "items": {
@@ -2939,6 +2950,10 @@
             },
             "title": {
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"
+            },
+            "trackField": {
+              "$ref": "#/$defs/FieldName",
+              "description": "With dataUri, column identifying each trajectory (for example storm_id). Rows with the same value form one path."
             },
             "valueField": {
               "$ref": "#/$defs/FieldName",
@@ -3064,7 +3079,7 @@
           }
         }
       ],
-      "description": "Points on an interactive map (stations, sites, epicenters).",
+      "description": "Interactive points, ordered trajectories, or GeoJSON geometry on a map.",
       "type": "object",
       "unevaluatedProperties": false
     },
