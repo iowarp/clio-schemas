@@ -280,8 +280,18 @@ _MAP_POINT_DEF: dict[str, Any] = {
         "latitude": {"type": "number", "minimum": -90, "maximum": 90},
         "longitude": {"type": "number", "minimum": -180, "maximum": 180},
         "detail": {"type": "string", "maxLength": 2000},
-        "category": {"type": "string", "maxLength": 120},
-        "value": {"type": "number", "description": "Optional numeric value for continuous colour."},
+        "category": {
+            "type": "string",
+            "maxLength": 120,
+            "description": (
+                "Optional nominal group, such as station type. "
+                "Use value for a measured number."
+            ),
+        },
+        "value": {
+            "type": "number",
+            "description": "Optional measured magnitude for a continuous colour scale and legend.",
+        },
     },
     "required": ["id", "label", "latitude", "longitude"],
     "additionalProperties": False,

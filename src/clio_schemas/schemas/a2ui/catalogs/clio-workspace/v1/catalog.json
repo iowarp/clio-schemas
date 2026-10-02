@@ -445,6 +445,7 @@
       "additionalProperties": false,
       "properties": {
         "category": {
+          "description": "Optional nominal group, such as station type. Use value for a measured number.",
           "maxLength": 120,
           "type": "string"
         },
@@ -473,7 +474,7 @@
           "type": "number"
         },
         "value": {
-          "description": "Optional numeric value for continuous colour.",
+          "description": "Optional measured magnitude for a continuous colour scale and legend.",
           "type": "number"
         }
       },
