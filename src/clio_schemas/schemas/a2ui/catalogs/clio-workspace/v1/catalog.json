@@ -362,6 +362,33 @@
       ],
       "type": "object"
     },
+    "GuideIngredient": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "quantity": {
+          "description": "Amount for baseAmount servings.",
+          "minimum": 0,
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "unitPlural": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "quantity"
+      ],
+      "type": "object"
+    },
     "GuideStep": {
       "additionalProperties": false,
       "properties": {
@@ -3478,6 +3505,13 @@
             "component": {
               "const": "clio.steps.v1"
             },
+            "ingredients": {
+              "items": {
+                "$ref": "#/$defs/GuideIngredient"
+              },
+              "maxItems": 100,
+              "type": "array"
+            },
             "progress": {
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicValue"
             },
@@ -3504,7 +3538,7 @@
           "type": "object"
         }
       ],
-      "description": "An interactive protocol or recipe with checkable steps, timers, and scaled quantities.",
+      "description": "An interactive protocol or recipe with checkable actions, timers, and separately scaled ingredients.",
       "type": "object",
       "unevaluatedProperties": false
     },
