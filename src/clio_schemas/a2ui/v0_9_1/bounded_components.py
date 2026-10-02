@@ -419,6 +419,8 @@ class MapComponent(_ComponentBase):
     longitudeField: FieldName | None = None
     labelField: FieldName | None = None
     idField: FieldName | None = None
+    trackField: FieldName | None = None
+    orderField: FieldName | None = None
     detailField: FieldName | None = None
     categoryField: FieldName | None = None
     valueField: FieldName | None = None
@@ -444,6 +446,12 @@ class MapComponent(_ComponentBase):
                 raise ValueError(f"dataUri requires field(s) {missing}")
         elif self.dataQuery is not None:
             raise ValueError("dataQuery applies only to dataUri")
+        if self.trackField is not None and self.dataUri is None:
+            raise ValueError("trackField requires dataUri")
+        if self.trackField is not None and self.orderField is None:
+            raise ValueError("trackField requires orderField")
+        if self.orderField is not None and self.trackField is None:
+            raise ValueError("orderField requires trackField")
         if self.categoryField is not None and self.valueField is not None:
             raise ValueError("categoryField and valueField cannot be combined")
         if isinstance(self.selection, _DataBinding | _FunctionCall) and self.selectionField is None:
