@@ -52,19 +52,23 @@ dataset it names columns with `*Field` properties (`xField`,
 `latitudeField`, `entityField`, ...) instead of assuming a shape; the
 validator checks these names against the dataset's real columns, so a wrong
 one is a typed error, not a blank view.
+For a control that updates a view locally, bind a filter's complete `value`
+to the control's data-model path, for example `{"column": "depth", "op":
+"range", "value": {"path": "/controls/depth"}}`. Initialize the path to a
+two-value range before rendering. The renderer resolves changes into a fresh
+data query; the bound value must satisfy the chosen filter operator.
 
-Link components by pointing more than one at the same dataset, binding them
-to the same `selection` path, and naming the same column as `selectionField`
-(see Shared selection below) — without a matching column name on both sides
-nothing actually links. For example, a script writes `stations.csv`
+For views meant to link, give every component including the table the same `dataUri`; copying artifact rows inline loses the shared row identity. Components pointing at the same artifact automatically share row selection
+through the renderer's stable `__row` key. For example, a script writes `stations.csv`
 (columns `station`, `lat`, `lon`, `displacement_mm`), registered as
 `artifact://artifact_stations01`; a `clio.chart.v1` `scatter` preset
 (`"entityField": "station"`) and a `clio.map.v1`
 (`"latitudeField": "lat"`, `"longitudeField": "lon"`, `"labelField":
-"station"`) both set `"dataUri": "artifact://artifact_stations01"`, bind
-`"selection": {"path": "/selection/stations"}`, and set `"selectionField":
-"station"` — clicking a point on the map highlights the matching row in the
-chart, and vice versa, with no agent turn in between.
+"station"`) both set `"dataUri": "artifact://artifact_stations01"` —
+clicking a point on the map highlights the matching row in the chart, and
+vice versa, with no agent turn in between. Use an explicit `selection` path
+and `selectionField` when views of different artifacts share a concept such
+as the same station name.
 
 ## Routing actions
 
@@ -118,11 +122,18 @@ is bound) to share selected rows with charts and maps (see Shared selection belo
 handlers. Inline `source`, or `dataUri` to a registered `.mmd`/text file:
 `{"id": "d1", "component": "clio.mermaid.v1", "source": "graph TD; A-->B;"}`.
 
-**Map** — labeled points, inline or from a dataset; the renderer owns the
+**Map** — labeled points or GeoJSON geometry; the renderer owns the
 basemap, so never pass tile/style URLs. Inline points are capped at 500; a
 `dataUri` map names its columns with `latitudeField`/`longitudeField`/
 `labelField` (required) and optionally `idField`/`detailField`/
-`categoryField`, and is bounded by `dataQuery`/`limit` instead:
+`categoryField` for categorical colours or `valueField` for a numeric colour
+scale (with optional `valueUnit`), and is bounded by `dataQuery`/`limit` instead.
+The renderer supplies the corresponding legend; inline points may carry a
+numeric `value` for the same continuous scale:
+For a registered GeoJSON FeatureCollection of points, lines, or polygons,
+use `geojsonUri` and optionally name feature-property fields with `labelField`,
+`detailField`, `categoryField`, or `valueField`. The renderer fits the geometry,
+colours it, and provides feature selection. Do not also pass `points` or `dataUri`.
 `{"id": "map1", "component": "clio.map.v1", "points": [{"id": "s1", "label": "GNSS01", "latitude": 34.1, "longitude": -118.3}]}`, or `{"id": "map1", "component": "clio.map.v1", "dataUri": "artifact://artifact_stations01", "latitudeField": "lat", "longitudeField": "lon", "labelField": "station"}`. `selected` still marks one point by id; bind `selection` (with
 a matching `selectionField`, required whenever `selection` is bound) instead to share a
 selection with charts and tables.
@@ -135,22 +146,74 @@ never neither):
 
 **Slider** — `clio.slider.v1` is a numeric control for a physical
 parameter: it keeps a `step` (for example `0.01`), shows `unit`, and has a
-number box so an exact value can be typed. The Basic `Slider` moves in whole
-numbers only; use this one for thresholds, scale factors, or any fraction:
+number box so an exact value can be typed. Set `range: true` with a pair of
+values for a lower and upper bound. The Basic `Slider` moves in whole
+numbers only; use this one for thresholds, scale factors, intervals, or any fraction:
 `{"id": "iso", "component": "clio.slider.v1", "label": "Density threshold", "min": 0, "max": 1, "step": 0.01, "value": {"path": "/iso"}}`.
 
-**MeshViewport** — an orbitable 3D view of one registered mesh (`.glb`,
-results stored as node or cell fields). The mesh always comes from an
-artifact, never inline. `field` names the field to color by and `showField`
-toggles it; `frame` picks the frame of a field that changes over time
-(increments, design cycles); `thresholdField` with `thresholdMin`/
-`thresholdMax` shows only the cells whose value is in range, like a
-Threshold filter. Bind the dynamic ones to the data model and drive them
-from a `Slider`, `CheckBox`, or `ChoicePicker`. Bind `camera` to a path and
-the view keeps the current camera there (and follows it when it changes),
-so a `Button` can send the scientist's chosen angle to the agent. Viewports
-that share a `syncGroup` move one camera and one color range together:
+**Date and time** — `DateTimeInput` accepts an ISO 8601 string (or a bound
+string path). Set `enableDate` and/or `enableTime` for the parts the person
+needs to edit; optional `min` and `max` constrain the allowed value.
+
+**Message drafts** — `clio.message-draft.v1` presents labelled alternatives
+for an email, Slack message, or text when the person asks for wording they can
+review or adapt. Supply one to eight versions with distinct labels and bodies;
+email versions can include recipients and subjects. The viewer can edit the
+displayed draft directly, switch between alternatives without losing those
+edits, copy it, open an email in the local mail application, or put the edited
+version into the composer. None of those actions sends the message from CLIO.
+
+**Weather** — `clio.weather.v1` presents observed conditions and hourly or
+daily forecasts for a location, including field sites. Supply the source,
+observation time, IANA time zone, units, and structured forecast values from
+the evidence already gathered. Longer hourly and daily series remain browsable
+in the viewer; the renderer makes no weather request. An
+ordinary weather question may benefit from this compact view alongside a
+short answer to the person's actual decision.
+Use an explicit UTC offset or Z in `observedAt` and every hourly `time`
+(for example `2026-10-03T08:00:00-07:00`); daily `date` is `YYYY-MM-DD`.
+
+**Steps** — `clio.steps.v1` presents a protocol, setup guide, or recipe when
+the person will work through several actions. Supply numbered steps, optional
+warnings, durations, and scalable quantities. Bind `progress` to a data-model
+path when progress should remain part of the surface's state; the renderer
+handles checkboxes, timers, and rescaling without another agent turn.
+Put variable amounts in `quantity` and `quantityUnit`; keep `detail` valid
+after the person changes the scale. For four samples at 2 mL each, use
+`baseAmount: 4`, `quantity: 8`, and detail “Add 2 mL to each tube.” A detail
+saying “8 mL total for 4 samples” becomes false when scaled; omitting the
+2 mL per-tube instruction leaves the procedure ambiguous.
+For countable items, set `quantityUnit` to the singular label and
+`quantityUnitPlural` to the plural label so 1 egg and 2 eggs both read well.
+For recipes, do not repeat starting cup, tablespoon, or egg amounts in `detail`
+beside a scaled gram or count quantity; those fixed equivalents become false
+when servings change. Keep checkboxes for actions the person performs, and
+combine closely related preparation where that makes the guide easier to scan.
+
+**MeshViewport** — an orbitable 3D view of one registered triangle mesh.
+It reads GLB/glTF, OBJ (optionally with `materialUri` for an MTL artifact),
+STL, PLY, FBX, 3MF, VTK, VTP, and Draco. Put the file in an artifact and
+set `meshUri`; set `format` when the file cannot be recognized from its
+bytes, especially 3MF or binary STL. Parsing failures name the format and
+the missing or invalid shape. Generic files show geometry and material
+colours; texture images are reported as unavailable. A CLIO FEA GLB can
+also carry node or cell results: `field` colors by one result, `frame`
+chooses a result frame, and `thresholdField` with `thresholdMin`/
+`thresholdMax` shows cells in range. Bind those values to controls when
+the person should explore them. Bind `camera` to a path when a later action
+should retain the chosen angle. Viewports with a `syncGroup` share camera
+and color range:
 `{"id": "vp1", "component": "clio.mesh-viewport.v1", "title": "Design", "meshUri": "artifact://artifact_abc123", "field": "DENSITY", "frame": {"path": "/cycle"}, "thresholdField": "DENSITY", "thresholdMin": {"path": "/iso"}, "thresholdMax": 1}`.
+
+**RasterViewport** — `clio.raster-viewport.v1` presents a registered
+two-dimensional NPY, numeric CSV grid, GeoTIFF, NetCDF, or zipped Zarr
+artifact. Set `rasterUri`; for a NetCDF or Zarr file with several arrays,
+set `variable`, or `band` for a multiband GeoTIFF. Optionally set `unit`
+and a `colormap`. The viewer queries a bounded sample for its visible
+extent and supplies hover values, a colour legend, pan, zoom, region
+selection, export, and Reference this without renderer actions in the spec.
+Use this when the spatial pattern or grid cells matter more than a table
+of sampled values.
 
 **Chart** — `clio.chart.v1` draws any Vega-Lite chart over tabular rows.
 Prefer a `preset` over writing a `spec`: `trajectories` (one line per entity
@@ -195,14 +258,16 @@ present in the rows. A lon/lat point map needs no geometry cells, just
 `{"mark": "circle", "encoding": {"latitude": {"field": "lat", "type": "quantitative"}, "longitude": {"field": "lon", "type": "quantitative"}, "size": {"field": "value", "type": "quantitative"}}, "projection": {"type": "equirectangular"}}`.
 
 A complete preset-based component, for comparison:
-`{"id": "ch1", "component": "clio.chart.v1", "title": "Displacement", "preset": "trajectories", "xField": "t", "xType": "temporal", "yField": "disp_mm", "entityField": "station", "dataUri": "artifact://artifact_abc123", "selection": {"path": "/selection/stations"}}`.
+`{"id": "ch1", "component": "clio.chart.v1", "title": "Displacement", "preset": "trajectories", "xField": "t", "xType": "temporal", "yField": "disp_mm", "entityField": "station", "dataUri": "artifact://artifact_abc123"}`.
 
 **Shared selection** — `clio.chart.v1`, `clio.data-table.v1`, and
-`clio.map.v1` accept `selection`. Bind it to `/selection/<key>`; the value
+`clio.map.v1` automatically link rows when they read the same `dataUri` on
+one surface. The renderer uses the server's stable `__row` key. For links
+across different artifacts, bind `selection` to `/selection/<key>`; the value
 there is `{"field": "<column>", "values": [...], "source": "<component id>"}`.
 Every component bound to the same path follows it: clicking a line in a
 chart highlights the same stations in the table and on the map, with no
-agent turn in between. Seed a selection with `updateDataModel` at that path,
+agent turn in between. Seed an explicit selection with `updateDataModel` at that path,
 and read the current one from the data model (or a `Button` whose event
 context binds the path) when the scientist asks about "the selected" items.
 A chart's selection covers `selectionField` (by default the preset's

@@ -281,6 +281,7 @@ _MAP_POINT_DEF: dict[str, Any] = {
         "longitude": {"type": "number", "minimum": -180, "maximum": 180},
         "detail": {"type": "string", "maxLength": 2000},
         "category": {"type": "string", "maxLength": 120},
+        "value": {"type": "number", "description": "Optional numeric value for continuous colour."},
     },
     "required": ["id", "label", "latitude", "longitude"],
     "additionalProperties": False,
@@ -319,6 +320,16 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
                         "not the inline point cap."
                     ),
                 },
+                "geojsonUri": {
+                    "type": "string",
+                    "pattern": ARTIFACT_URI_PATTERN,
+                    "not": {"pattern": r"\s"},
+                    "description": (
+                        "Artifact URI of a GeoJSON FeatureCollection. Geometry is read by "
+                        "reference and drawn as points, lines, and polygons; feature properties "
+                        "supply labelField, categoryField, or valueField when named."
+                    ),
+                },
                 "dataQuery": _DATA_QUERY_REF,
                 "latitudeField": {
                     "$ref": "#/$defs/FieldName",
@@ -346,6 +357,17 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
                     "$ref": "#/$defs/FieldName",
                     "description": "Dataset column grouping points into categories.",
                 },
+                "valueField": {
+                    "$ref": "#/$defs/FieldName",
+                    "description": (
+                        "Numeric dataset column used for a continuous colour scale and legend."
+                    ),
+                },
+                "valueUnit": {
+                    "type": "string",
+                    "maxLength": 40,
+                    "description": "Unit shown beside a continuous-colour legend's values.",
+                },
                 "selected": {"type": "string", "maxLength": 128},
                 "selection": {
                     "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicValue",
@@ -365,10 +387,20 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
             "dependentRequired": {"dataQuery": ["dataUri"]},
         },
         {
-            "description": "Exactly one of points or dataUri is required.",
+            "description": "Exactly one of points, dataUri, or geojsonUri is required.",
             "oneOf": [
-                {"required": ["points"], "not": {"required": ["dataUri"]}},
-                {"required": ["dataUri"], "not": {"required": ["points"]}},
+                {
+                    "required": ["points"],
+                    "not": {"anyOf": [{"required": ["dataUri"]}, {"required": ["geojsonUri"]}]},
+                },
+                {
+                    "required": ["dataUri"],
+                    "not": {"anyOf": [{"required": ["points"]}, {"required": ["geojsonUri"]}]},
+                },
+                {
+                    "required": ["geojsonUri"],
+                    "not": {"anyOf": [{"required": ["points"]}, {"required": ["dataUri"]}]},
+                },
             ],
         },
         {
@@ -376,6 +408,7 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
             "if": {"required": ["dataUri"]},
             "then": {"required": ["latitudeField", "longitudeField", "labelField"]},
         },
+        {"not": {"required": ["categoryField", "valueField"]}},
         _SELECTION_FIELD_REQUIRED_WHEN_BOUND_RULE,
     ],
     "unevaluatedProperties": False,
@@ -672,7 +705,13 @@ _QUERY_SCALAR: dict[str, Any] = {"type": ["string", "number", "boolean"]}
 
 
 def _filter_op_rule(op: str, value: dict[str, Any], *, required: bool) -> dict[str, Any]:
-    then: dict[str, Any] = {"properties": {"value": value}}
+    binding = {
+        "type": "object",
+        "properties": {"path": {"type": "string", "pattern": "^/"}},
+        "required": ["path"],
+        "additionalProperties": False,
+    }
+    then: dict[str, Any] = {"properties": {"value": {"anyOf": [value, binding]}}}
     if required:
         then["required"] = ["value"]
     return {"if": {"properties": {"op": {"const": op}}}, "then": then}

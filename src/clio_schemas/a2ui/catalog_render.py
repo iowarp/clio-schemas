@@ -45,6 +45,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     SyncGroup,
     _CardAction,
     _ChoiceOption,
+    _ClosedModel,
     _TabDefinition,
 )
 
@@ -165,6 +166,23 @@ def _number_bounds(field_info: FieldInfo) -> dict[str, float]:
     return bounds
 
 
+def _string_constraints(field_info: FieldInfo) -> dict[str, str]:
+    """Carry declared string patterns into the generated catalog."""
+
+    constraints: dict[str, str] = {}
+    for constraint in field_info.metadata:
+        pattern = getattr(constraint, "pattern", None)
+        if isinstance(pattern, str):
+            constraints["pattern"] = pattern
+            continue
+        if isinstance(constraint, str) and constraint.startswith("a2ui:"):
+            continue  # A2UI marker already rendered through the field's declared type.
+        raise NotImplementedError(f"no catalog rendering rule for string constraint {constraint!r}")
+    if field_info.description:
+        constraints["description"] = field_info.description
+    return constraints
+
+
 def _render_nested_model(fields: dict[str, FieldInfo]) -> dict[str, Any]:
     """Render one small CLIO-local nested shape (option/tab/column/action)."""
 
@@ -172,9 +190,22 @@ def _render_nested_model(fields: dict[str, FieldInfo]) -> dict[str, Any]:
     required: list[str] = []
     scratch_defs: dict[str, Any] = {}
     for name, field_info in fields.items():
-        rendered = render_type(_strip_optional(field_info.annotation), name, scratch_defs)
+        field_type = _strip_optional(field_info.annotation)
+        rendered = render_type(field_type, name, scratch_defs)
         if rendered is None:
             continue
+        if typing.get_origin(field_type) is list:
+            min_items, max_items = _list_bounds(field_info)
+            if min_items is not None:
+                rendered["minItems"] = min_items
+            if max_items is not None:
+                rendered["maxItems"] = max_items
+        elif field_type in (int, float):
+            rendered.update(_number_bounds(field_info))
+        elif field_type is str and field_info.metadata:
+            rendered.update(_string_constraints(field_info))
+        if field_info.description:
+            rendered["description"] = field_info.description
         properties[name] = rendered
         if field_info.is_required():
             required.append(name)
@@ -226,6 +257,22 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
 
     origin = typing.get_origin(t)
 
+    if origin in (typing.Union, types.UnionType):
+        options = typing.get_args(t)
+        dynamic_number_options = typing.get_args(DynamicNumber)
+        range_options = [option for option in options if typing.get_origin(option) is Annotated]
+        if (
+            len(range_options) == 1
+            and len(options) == len(dynamic_number_options) + 1
+            and all(option in options for option in dynamic_number_options)
+        ):
+            return {
+                "oneOf": [
+                    {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicNumber"},
+                    render_type(range_options[0], field_name, local_defs),
+                ]
+            }
+
     if origin is Annotated:
         inner, meta = typing.get_args(t)
         rendered = render_type(inner, field_name, local_defs)
@@ -236,7 +283,10 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
             rendered["minItems"] = min_items
         if max_items is not None:
             rendered["maxItems"] = max_items
-        rendered.update(_number_bounds(meta))
+        if rendered.get("type") == "string":
+            rendered.update(_string_constraints(meta))
+        else:
+            rendered.update(_number_bounds(meta))
         return rendered
 
     if origin is list:
@@ -254,10 +304,17 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
         if item_type == _CardAction:
             local_defs.setdefault("CardAction", _render_nested_model(_CardAction.model_fields))
             return {"type": "array", "items": {"$ref": "#/$defs/CardAction"}}
+        if isinstance(item_type, type) and issubclass(item_type, _ClosedModel):
+            local_defs.setdefault(
+                item_type.__name__.lstrip("_"), _render_nested_model(item_type.model_fields)
+            )
+            return {"type": "array", "items": {"$ref": f"#/$defs/{item_type.__name__.lstrip('_')}"}}
         if item_type == dict[str, JsonValue]:
             return {"type": "array", "items": {"type": "object"}}
         if item_type is str:
             return {"type": "array", "items": {"type": "string"}}
+        if item_type is float:
+            return {"type": "array", "items": {"type": "number"}}
         raise NotImplementedError(
             f"no catalog rendering rule for list item type {item_type!r} (field {field_name!r})"
         )
