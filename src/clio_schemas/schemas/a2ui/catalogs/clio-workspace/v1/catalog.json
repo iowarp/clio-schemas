@@ -445,7 +445,7 @@
       "additionalProperties": false,
       "properties": {
         "category": {
-          "description": "Optional nominal group, such as station type. Use value for a measured number.",
+          "description": "Nominal group, such as station type. Use value for measured numbers.",
           "maxLength": 120,
           "type": "string"
         },
@@ -2943,6 +2943,11 @@
             "valueField": {
               "$ref": "#/$defs/FieldName",
               "description": "Numeric dataset column used for a continuous colour scale and legend."
+            },
+            "valueLabel": {
+              "description": "Human-readable name for the numeric map legend, such as Displacement.",
+              "maxLength": 80,
+              "type": "string"
             },
             "valueUnit": {
               "description": "Unit shown beside a continuous-colour legend's values.",

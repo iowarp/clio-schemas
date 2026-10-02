@@ -422,6 +422,7 @@ class MapComponent(_ComponentBase):
     detailField: FieldName | None = None
     categoryField: FieldName | None = None
     valueField: FieldName | None = None
+    valueLabel: str | None = Field(default=None, max_length=80)
     valueUnit: str | None = Field(default=None, max_length=40)
     selected: str | None = Field(default=None, max_length=128)
     selection: DynamicValue | None = None
