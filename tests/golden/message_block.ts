@@ -16,6 +16,7 @@ export type {
   ErrorMessageBlock,
   InjectionMessageBlock,
   MessageBlock,
+  NoticeMessageBlock,
   PlanMessageBlock,
   ReasoningMessageBlock,
   RoutingMessageBlock,

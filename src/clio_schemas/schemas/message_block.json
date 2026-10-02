@@ -596,7 +596,7 @@
     },
     "InjectionMessageBlock": {
       "additionalProperties": false,
-      "description": "Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path\nsuggestion, a saved oversize result, a hook's effect. ``source`` names what it is;\n``text`` is exactly what the agent got; ``call_id`` ties a note to its tool call.",
+      "description": "Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path\nsuggestion, a saved oversize result, a hook's effect. ``source`` names what it is;\n``text`` is exactly what the agent got; ``call_id`` ties a note to its tool call.\n\n``source: \"summarization\"`` is a compaction's record: ``text`` is the summary the\nagent continues from, ``trigger`` says who asked for it (``auto`` or ``manual``)\nand ``compaction_id`` names that compaction. ``variants_id`` / ``try_index`` mean\nthe block belongs to that variant try's tab (e.g. Refine advice given inside a try).",
       "properties": {
         "agent_id": {
           "anyOf": [
@@ -633,6 +633,18 @@
           ],
           "default": null,
           "title": "Channel"
+        },
+        "compaction_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Compaction Id"
         },
         "id": {
           "title": "Id",
@@ -671,8 +683,169 @@
           "title": "Text",
           "type": "string"
         },
+        "trigger": {
+          "anyOf": [
+            {
+              "enum": [
+                "auto",
+                "manual"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trigger"
+        },
+        "try_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Try Index"
+        },
         "type": {
           "const": "injection",
+          "title": "Type",
+          "type": "string"
+        },
+        "variants_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variants Id"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "source",
+        "text"
+      ],
+      "title": "InjectionMessageBlock",
+      "type": "object"
+    },
+    "NoticeMessageBlock": {
+      "additionalProperties": false,
+      "description": "A service notice recorded in the transcript, e.g. a failed compaction\n(``source: \"compaction_failed\"``). It is never shown to the model. ``code`` is the\ntyped reason; ``trigger`` / ``compaction_id`` tie a compaction notice to its run.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code"
+        },
+        "compaction_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Compaction Id"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "trigger": {
+          "anyOf": [
+            {
+              "enum": [
+                "auto",
+                "manual"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trigger"
+        },
+        "type": {
+          "const": "notice",
           "title": "Type",
           "type": "string"
         }
@@ -683,7 +856,7 @@
         "source",
         "text"
       ],
-      "title": "InjectionMessageBlock",
+      "title": "NoticeMessageBlock",
       "type": "object"
     },
     "PlanMessageBlock": {
@@ -1308,7 +1481,7 @@
       "type": "object"
     }
   },
-  "description": "Closed discriminated union of the 14 GACT 0.3 message-block types.",
+  "description": "Closed discriminated union of the 15 GACT 0.3 message-block types.",
   "discriminator": {
     "mapping": {
       "a2ui": "#/$defs/A2UIMessageBlock",
@@ -1318,6 +1491,7 @@
       "diff": "#/$defs/DiffMessageBlock",
       "error": "#/$defs/ErrorMessageBlock",
       "injection": "#/$defs/InjectionMessageBlock",
+      "notice": "#/$defs/NoticeMessageBlock",
       "plan": "#/$defs/PlanMessageBlock",
       "reasoning": "#/$defs/ReasoningMessageBlock",
       "routing": "#/$defs/RoutingMessageBlock",
@@ -1370,6 +1544,9 @@
     },
     {
       "$ref": "#/$defs/InjectionMessageBlock"
+    },
+    {
+      "$ref": "#/$defs/NoticeMessageBlock"
     }
   ],
   "title": "MessageBlock"
