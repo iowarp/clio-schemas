@@ -135,7 +135,8 @@ basemap, so never pass tile/style URLs. Inline points are capped at 500; a
 `categoryField` for categorical colours or `valueField` for a numeric colour
 scale (with optional `valueUnit`), and is bounded by `dataQuery`/`limit` instead.
 The renderer supplies the corresponding legend; inline points may carry a
-numeric `value` for the same continuous scale:
+numeric `value` for the same continuous scale. Keep measured magnitudes numeric
+in `value`/`valueField` rather than making each distinct number a category:
 For a registered GeoJSON FeatureCollection of points, lines, or polygons,
 use `geojsonUri` and optionally name feature-property fields with `labelField`,
 `detailField`, `categoryField`, or `valueField`. The renderer fits the geometry,
