@@ -59,8 +59,12 @@ The three tabular components — `clio.chart.v1`, `clio.map.v1`,
 `clio.data-table.v1` — additionally accept `dataQuery` alongside `dataUri`
 (never with inline values): one shared shape (`$defs/DataQuery`) that
 filters, aggregates, downsamples, and limits the referenced table
-server-side before it reaches the component. When a component reads a
-dataset it names columns with `*Field` properties (`xField`,
+server-side before it reaches the component. Their `dataUri` names a registered
+CSV or Parquet table, not a source JSON file. Preserve numeric columns as
+numbers and timestamps as ISO-8601 strings with an offset when converting
+source data; inspect the registered table's schema and a sample row before
+building a view so a locale-formatted timestamp does not become a text
+filter. When a component reads a dataset, it names columns with `*Field` properties (`xField`,
 `latitudeField`, `entityField`, ...) instead of assuming a shape; the
 validator checks these names against the dataset's real columns, so a wrong
 one is a typed error, not a blank view.
