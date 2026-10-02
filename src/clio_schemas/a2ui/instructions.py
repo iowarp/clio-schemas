@@ -34,6 +34,9 @@ chart or map with no surrounding container — still needs that rule: give
 the lone component id `root` itself. The short ids in the one-component
 examples below (`ch1`, `map1`, `t1`, ...) are naming the component's own
 shape for this page's purposes, not a complete surface.
+For several views, make `root` a layout component and reference every view
+from its child tree. A component that is not connected to `root` cannot
+appear in the rendered surface; the producer rejects it with the missing ids.
 
 ## Binding values
 
