@@ -133,7 +133,8 @@ basemap, so never pass tile/style URLs. Inline points are capped at 500; a
 `dataUri` map names its columns with `latitudeField`/`longitudeField`/
 `labelField` (required) and optionally `idField`/`detailField`/
 `categoryField` for categorical colours or `valueField` for a numeric colour
-scale (with optional `valueUnit`), and is bounded by `dataQuery`/`limit` instead.
+scale (with optional `valueLabel` and `valueUnit`), and is bounded by
+`dataQuery`/`limit` instead.
 The renderer supplies the corresponding legend; inline points may carry a
 numeric `value` for the same continuous scale. Keep measured magnitudes numeric
 in `value`/`valueField` rather than making each distinct number a category:
