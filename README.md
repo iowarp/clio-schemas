@@ -13,8 +13,8 @@ types from the JSON Schema shipped inside the package. Nobody hand-writes a
 shared shape again.
 
 > **Status: canonical records, live UI vocabularies, and A2UI 0.9.1 catalog
-> files, model-capability tags, model facts and accepted parameters (version 0.5.1).**
-> `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 13 GACT 0.3
+> files, model-capability tags, model facts and accepted parameters (version 0.5.2).**
+> `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 15 GACT 0.3
 > message blocks, the official A2UI 0.9.1 envelope/capability/catalog-file models, and
 > the two builtin catalog files (`clio-workspace`'s 32 CLIO components, the vendored
 > `basic` catalog) are canonical. `ModelCapabilityTags`

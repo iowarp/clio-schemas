@@ -148,6 +148,40 @@ class RoutingMessageBlock(_ClosedBlock):
     detail: str | None = None
 
 
+class InjectionMessageBlock(_ClosedBlock):
+    """Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path
+    suggestion, a saved oversize result, a hook's effect. ``source`` names what it is;
+    ``text`` is exactly what the agent got; ``call_id`` ties a note to its tool call.
+
+    ``source: "summarization"`` is a compaction's record: ``text`` is the summary the
+    agent continues from, ``trigger`` says who asked for it (``auto`` or ``manual``)
+    and ``compaction_id`` names that compaction. ``variants_id`` / ``try_index`` mean
+    the block belongs to that variant try's tab (e.g. Refine advice given inside a try).
+    """
+
+    type: Literal["injection"]
+    source: str
+    text: str
+    call_id: str | None = None
+    trigger: Literal["auto", "manual"] | None = None
+    compaction_id: str | None = None
+    variants_id: str | None = None
+    try_index: int | None = Field(default=None, ge=0)
+
+
+class NoticeMessageBlock(_ClosedBlock):
+    """A service notice recorded in the transcript, e.g. a failed compaction
+    (``source: "compaction_failed"``). It is never shown to the model. ``code`` is the
+    typed reason; ``trigger`` / ``compaction_id`` tie a compaction notice to its run."""
+
+    type: Literal["notice"]
+    source: str
+    text: str
+    code: str | None = None
+    trigger: Literal["auto", "manual"] | None = None
+    compaction_id: str | None = None
+
+
 MessageBlockValue = Annotated[
     TextMessageBlock
     | ReasoningMessageBlock
@@ -161,10 +195,12 @@ MessageBlockValue = Annotated[
     | CitationMessageBlock
     | DiffMessageBlock
     | ErrorMessageBlock
-    | RoutingMessageBlock,
+    | RoutingMessageBlock
+    | InjectionMessageBlock
+    | NoticeMessageBlock,
     Field(discriminator="type"),
 ]
 
 
 class MessageBlock(RootModel[MessageBlockValue]):
-    """Closed discriminated union of the 13 GACT 0.3 message-block types."""
+    """Closed discriminated union of the 15 GACT 0.3 message-block types."""

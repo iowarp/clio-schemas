@@ -13,8 +13,10 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import pytest
+from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
 from clio_schemas.a2ui.v0_9_1.bounded_components import (
@@ -58,7 +60,7 @@ from clio_schemas.a2ui.v0_9_1.messages import (
     A2UIServerMessage,
 )
 from clio_schemas.a2ui.validation import message_validator
-from clio_schemas.gact_v3 import MessageBlock
+from clio_schemas.gact_v3 import InjectionMessageBlock, MessageBlock, NoticeMessageBlock
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BASIC_CATALOG_PATH = (
@@ -103,9 +105,12 @@ BASIC_CATALOG = json.loads(BASIC_CATALOG_PATH.read_text(encoding="utf-8"))
         ("diff", {"path": "file.py", "unified_diff": "@@"}),
         ("error", {"code": "failed", "message": "Failed", "recoverable": False}),
         ("routing", {"label": "Compacted"}),
+        ("injection", {"source": "todos", "text": "- [ ] load the data"}),
+        ("injection", {"source": "path_hint", "text": "did you mean a.csv?", "call_id": "c1"}),
+        ("notice", {"source": "compaction_failed", "text": "Compaction failed."}),
     ],
 )
-def test_message_block_union_accepts_exactly_the_thirteen_v3_types(
+def test_message_block_union_accepts_exactly_the_fifteen_v3_types(
     block_type: str,
     payload: dict[str, object],
 ) -> None:
@@ -113,6 +118,109 @@ def test_message_block_union_accepts_exactly_the_thirteen_v3_types(
 
     block = MessageBlock.model_validate({"id": "block_1", "type": block_type, **payload})
     assert block.root.type == block_type
+
+
+def test_an_injection_names_its_source_and_carries_the_exact_text() -> None:
+    """What the harness gave the agent, shown to the user as exactly what it got."""
+
+    with pytest.raises(ValidationError):
+        MessageBlock.model_validate({"id": "b", "type": "injection", "text": "no source"})
+    block = MessageBlock.model_validate(
+        {"id": "b", "type": "injection", "source": "plan_mode", "text": "Plan mode is on."}
+    )
+    assert isinstance(block.root, InjectionMessageBlock)
+    assert (block.root.source, block.root.call_id) == ("plan_mode", None)
+
+
+_SUMMARIZATION_INJECTION: dict[str, object] = {
+    "id": "b",
+    "type": "injection",
+    "source": "summarization",
+    "text": "Summary of the earlier conversation.",
+    "call_id": "",
+    "trigger": "auto",
+    "compaction_id": "cmp_1",
+    "sequence": 3,
+}
+_VARIANT_INJECTION: dict[str, object] = {
+    "id": "b",
+    "type": "injection",
+    "source": "refine_advice",
+    "text": "Tighten the axis labels.",
+    "variants_id": "var_1",
+    "try_index": 2,
+}
+_FAILED_COMPACTION_NOTICE: dict[str, object] = {
+    "id": "n",
+    "type": "notice",
+    "source": "compaction_failed",
+    "text": "Compaction failed: the provider timed out.",
+    "code": "provider_timeout",
+    "trigger": "manual",
+    "compaction_id": "cmp_2",
+}
+MESSAGE_BLOCK_SCHEMA = json.loads(
+    (REPO_ROOT / "src" / "clio_schemas" / "schemas" / "message_block.json").read_text(
+        encoding="utf-8"
+    )
+)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [_SUMMARIZATION_INJECTION, _VARIANT_INJECTION, _FAILED_COMPACTION_NOTICE],
+    ids=["summarization-injection", "variant-try-injection", "failed-compaction-notice"],
+)
+def test_compaction_and_variant_blocks_round_trip(payload: dict[str, object]) -> None:
+    """The blocks clio-agent emits for compactions and variant tries survive a round trip,
+    through both the pydantic model and the committed JSON Schema."""
+
+    block = MessageBlock.model_validate(payload)
+    assert block.model_dump(mode="json", exclude_none=True) == payload
+    assert MessageBlock.model_validate_json(block.model_dump_json()) == block
+    Draft202012Validator(MESSAGE_BLOCK_SCHEMA).validate(payload)
+
+
+def test_a_notice_names_its_source_and_has_only_optional_compaction_fields() -> None:
+    """A notice needs a source and text; code/trigger/compaction_id are optional."""
+
+    block = MessageBlock.model_validate(
+        {"id": "n", "type": "notice", "source": "compaction_failed", "text": "failed"}
+    )
+    assert isinstance(block.root, NoticeMessageBlock)
+    assert (block.root.code, block.root.trigger, block.root.compaction_id) == (None, None, None)
+    with pytest.raises(ValidationError):
+        MessageBlock.model_validate({"id": "n", "type": "notice", "text": "no source"})
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {**_SUMMARIZATION_INJECTION, "trigger": "scheduled"},
+        {**_VARIANT_INJECTION, "try_index": -1},
+        {**_VARIANT_INJECTION, "try_index": "2"},
+        {**_FAILED_COMPACTION_NOTICE, "trigger": "sometimes"},
+        {**_SUMMARIZATION_INJECTION, "invented": True},
+        {**_FAILED_COMPACTION_NOTICE, "invented": True},
+        {**_FAILED_COMPACTION_NOTICE, "variants_id": "var_1"},
+    ],
+    ids=[
+        "injection-bad-trigger",
+        "injection-negative-try",
+        "injection-string-try",
+        "notice-bad-trigger",
+        "injection-unknown-field",
+        "notice-unknown-field",
+        "notice-has-no-variant-fields",
+    ],
+)
+def test_injection_and_notice_blocks_are_closed_and_typed(payload: dict[str, Any]) -> None:
+    """Both blocks reject unknown fields, invalid triggers and bad try indexes,
+    in the pydantic model and the committed JSON Schema alike."""
+
+    with pytest.raises(ValidationError):
+        MessageBlock.model_validate(payload)
+    assert not Draft202012Validator(MESSAGE_BLOCK_SCHEMA).is_valid(payload)
 
 
 def test_message_block_union_rejects_unknown_types_and_properties() -> None:
