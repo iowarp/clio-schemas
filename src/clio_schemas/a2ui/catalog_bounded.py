@@ -283,10 +283,7 @@ _MAP_POINT_DEF: dict[str, Any] = {
         "category": {
             "type": "string",
             "maxLength": 120,
-            "description": (
-                "Optional nominal group, such as station type. "
-                "Use value for a measured number."
-            ),
+            "description": "Nominal group, such as station type. Use value for measured numbers.",
         },
         "value": {
             "type": "number",
@@ -371,6 +368,13 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
                     "$ref": "#/$defs/FieldName",
                     "description": (
                         "Numeric dataset column used for a continuous colour scale and legend."
+                    ),
+                },
+                "valueLabel": {
+                    "type": "string",
+                    "maxLength": 80,
+                    "description": (
+                        "Human-readable name for the numeric map legend, such as Displacement."
                     ),
                 },
                 "valueUnit": {
