@@ -166,11 +166,17 @@ def _number_bounds(field_info: FieldInfo) -> dict[str, float]:
     return bounds
 
 
-def _string_constraints(field_info: FieldInfo) -> dict[str, str]:
-    """Carry declared string patterns into the generated catalog."""
+def _string_constraints(field_info: FieldInfo) -> dict[str, str | int]:
+    """Carry declared string length and pattern constraints into the catalog."""
 
-    constraints: dict[str, str] = {}
+    constraints: dict[str, str | int] = {}
     for constraint in field_info.metadata:
+        if isinstance(constraint, annotated_types.MinLen):
+            constraints["minLength"] = constraint.min_length
+            continue
+        if isinstance(constraint, annotated_types.MaxLen):
+            constraints["maxLength"] = constraint.max_length
+            continue
         pattern = getattr(constraint, "pattern", None)
         if isinstance(pattern, str):
             constraints["pattern"] = pattern
@@ -278,11 +284,12 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
         rendered = render_type(inner, field_name, local_defs)
         if rendered is None:
             return None
-        min_items, max_items = _list_bounds(meta)
-        if min_items is not None:
-            rendered["minItems"] = min_items
-        if max_items is not None:
-            rendered["maxItems"] = max_items
+        if rendered.get("type") == "array":
+            min_items, max_items = _list_bounds(meta)
+            if min_items is not None:
+                rendered["minItems"] = min_items
+            if max_items is not None:
+                rendered["maxItems"] = max_items
         if rendered.get("type") == "string":
             rendered.update(_string_constraints(meta))
         else:
