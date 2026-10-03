@@ -74,3 +74,16 @@ def test_nested_step_guidance_reaches_agent_catalog() -> None:
     properties = render_workspace_catalog()["$defs"]["GuideStep"]["properties"]
     assert "any scale" in properties["detail"]["description"]
     assert "rescales" in properties["quantity"]["description"]
+
+
+def test_render_type_renders_string_length_bounds() -> None:
+    rendered = render_type(Annotated[str, Field(min_length=1, max_length=80)], "title", {})
+    assert rendered == {"type": "string", "minLength": 1, "maxLength": 80}
+
+
+def test_widget_string_bounds_reach_nested_and_top_level_catalog_fields() -> None:
+    catalog = render_workspace_catalog()
+    assert catalog["$defs"]["MessageDraftVersion"]["properties"]["label"]["minLength"] == 1
+    assert catalog["$defs"]["GuideStep"]["properties"]["id"]["minLength"] == 1
+    weather_properties = catalog["components"]["clio.weather.v1"]["allOf"][-1]["properties"]
+    assert weather_properties["location"]["minLength"] == 1

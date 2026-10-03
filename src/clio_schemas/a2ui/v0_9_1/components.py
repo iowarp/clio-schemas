@@ -258,7 +258,7 @@ class _CardAction(_ClosedModel):
 class _MessageDraftVersion(_ClosedModel):
     """One labelled alternative in a message draft."""
 
-    label: str
+    label: Annotated[str, Field(min_length=1)]
     body: str
     subject: str | None = None
     to: list[str] | None = None
@@ -299,8 +299,8 @@ class _WeatherDay(_ClosedModel):
 class _GuideStep(_ClosedModel):
     """A step in a rescalable procedure."""
 
-    id: str
-    title: str
+    id: Annotated[str, Field(min_length=1)]
+    title: Annotated[str, Field(min_length=1)]
     detail: str | None = Field(
         default=None,
         description=(
@@ -330,7 +330,7 @@ class _GuideStep(_ClosedModel):
 class _GuideIngredient(_ClosedModel):
     """A scalable recipe ingredient, separate from completed actions."""
 
-    name: str
+    name: Annotated[str, Field(min_length=1)]
     quantity: float = Field(ge=0, description="Amount for baseAmount servings.")
     unit: str | None = None
     unitPlural: str | None = None
@@ -675,13 +675,13 @@ WeatherComponent = _component_model(
     "clio.weather.v1",
     "Current weather and hourly or daily forecasts for a field site or location.",
     required={
-        "location": str,
-        "timeZone": str,
+        "location": Annotated[str, Field(min_length=1)],
+        "timeZone": Annotated[str, Field(min_length=1)],
         "observedAt": WeatherTimestamp,
         "condition": str,
         "temperature": float,
         "temperatureUnit": Literal["C", "F"],
-        "source": str,
+        "source": Annotated[str, Field(min_length=1)],
     },
     optional={
         "windSpeed": float,
@@ -697,7 +697,7 @@ StepsComponent = _component_model(
     "An interactive protocol or recipe with checkable actions, timers, "
     "and separately scaled ingredients.",
     required={
-        "title": str,
+        "title": Annotated[str, Field(min_length=1)],
         "steps": Annotated[list[_GuideStep], Field(min_length=1, max_length=100)],
     },
     optional={
