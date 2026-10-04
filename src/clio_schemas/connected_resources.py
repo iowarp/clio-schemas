@@ -154,6 +154,7 @@ class ContentSelection(ResourceContract):
     session_id: str = Field(min_length=1)
     message_id: str = Field(min_length=1)
     part_id: str = Field(min_length=1)
+    field: Literal["text", "thought", "input", "result", "content"] = "text"
     content_revision: str = Field(min_length=1)
     call_id: str | None = None
     artifact_ref: str | None = None

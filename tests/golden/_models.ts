@@ -205,6 +205,7 @@ export type WorkspaceId1 = string | null;
 export type ArtifactRef = string | null;
 export type CallId = string | null;
 export type ContentRevision = string;
+export type Field = "text" | "thought" | "input" | "result" | "content";
 export type MessageId = string;
 export type PartId = string;
 export type SchemaVersion2 = 1;
@@ -1095,6 +1096,7 @@ export interface ContentSelection {
   artifact_ref?: ArtifactRef;
   call_id?: CallId;
   content_revision: ContentRevision;
+  field?: Field;
   message_id: MessageId;
   part_id: PartId;
   schema_version?: SchemaVersion2;

@@ -50,6 +50,11 @@ def test_selection_roundtrip_and_bounds() -> None:
         }
     )
     assert ContentSelection.model_validate_json(selection.model_dump_json()) == selection
+    assert selection.field == "text"
+    thought = ContentSelection.model_validate({**selection.model_dump(), "field": "thought"})
+    assert thought.field != selection.field
+    with pytest.raises(ValidationError):
+        ContentSelection.model_validate({**selection.model_dump(), "field": "made-up"})
     with pytest.raises(ValidationError):
         ImageSelection(x=0.9, y=0, width=0.2, height=0.1)
     with pytest.raises(ValidationError):

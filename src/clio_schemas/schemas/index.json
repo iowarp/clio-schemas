@@ -1368,6 +1368,18 @@
           "title": "Content Revision",
           "type": "string"
         },
+        "field": {
+          "default": "text",
+          "enum": [
+            "text",
+            "thought",
+            "input",
+            "result",
+            "content"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
         "message_id": {
           "minLength": 1,
           "title": "Message Id",
