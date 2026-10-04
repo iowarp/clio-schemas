@@ -9,6 +9,7 @@ from clio_schemas.connected_resources import (
     HostStorageLocations,
     ImageSelection,
     SourceCapabilities,
+    SurfaceSelectionIdentity,
 )
 
 
@@ -68,3 +69,27 @@ def test_selection_roundtrip_and_bounds() -> None:
                 },
             }
         )
+
+
+def test_surface_selection_retains_revision_and_definition_digest() -> None:
+    identity = SurfaceSelectionIdentity(
+        surface_id="chart", component_id="table", revision=2, sha256="a" * 64
+    )
+    ref = ContentSelection(
+        session_id="s",
+        message_id="m",
+        part_id="p",
+        content_revision="part-digest",
+        field="content",
+        surface=identity,
+        selection={
+            "kind": "structured",
+            "surface_id": "chart",
+            "component_id": "table",
+            "source_ref": "artifact://rows",
+            "keys": ['["id","a"]'],
+        },
+    )
+    assert ContentSelection.model_validate_json(ref.model_dump_json()) == ref
+    with pytest.raises(ValidationError):
+        SurfaceSelectionIdentity(surface_id="chart", component_id="table", revision=-1, sha256="x")

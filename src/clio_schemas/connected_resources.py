@@ -147,6 +147,15 @@ class StructuredSelection(ResourceContract):
     keys: list[str] = Field(min_length=1)
 
 
+class SurfaceSelectionIdentity(ResourceContract):
+    """The exact displayed A2UI revision, in addition to its transcript origin."""
+
+    surface_id: str = Field(min_length=1, max_length=256)
+    component_id: str = Field(min_length=1, max_length=256)
+    revision: int = Field(ge=0)
+    sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
 class ContentSelection(ResourceContract):
     """An inspectable transcript reference with revision-bound selection coordinates."""
 
@@ -158,6 +167,7 @@ class ContentSelection(ResourceContract):
     content_revision: str = Field(min_length=1)
     call_id: str | None = None
     artifact_ref: str | None = None
+    surface: SurfaceSelectionIdentity | None = None
     selection: Annotated[
         TextSelection | WholeSelection | ImageSelection | StructuredSelection,
         Field(discriminator="kind"),
