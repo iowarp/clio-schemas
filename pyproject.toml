@@ -32,6 +32,7 @@ clio-schemas-export = "clio_schemas.export:main"
 
 [project.optional-dependencies]
 dev = [
+    "packaging>=24.2",
     "pytest>=8",
     "ruff>=0.6",
     "pyright>=1.1.370",

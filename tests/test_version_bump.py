@@ -40,6 +40,13 @@ def test_downgrade_is_not_an_increment() -> None:
         ("0.1.0", "1.0.0", True),
         ("0.1.0", "0.1.0", False),
         ("0.2.0", "0.1.9", False),
+        ("0.5.3", "0.6.0b3", True),
+        ("0.6.0b2", "0.6.0b3", True),
+        ("0.6.0b3", "0.6.0b3", False),
+        ("0.6.0b3", "0.6.0b2", False),
+        ("0.6.0", "0.6.0b3", False),
+        ("0.6.0b3", "0.6.0rc1", True),
+        ("0.6.0rc1", "0.6.0", True),
     ],
 )
 def test_is_increment(old: str, new: str, expected: bool) -> None:

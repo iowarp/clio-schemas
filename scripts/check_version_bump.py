@@ -20,21 +20,19 @@ import argparse
 import subprocess
 import sys
 
+from packaging.version import Version
+
 HASHES_PATH = "src/clio_schemas/schemas/HASHES.json"
 INIT_PATH = "src/clio_schemas/__init__.py"
 
 
-def parse_version(text: str) -> tuple[int, int, int]:
-    """Parse a ``MAJOR.MINOR.PATCH`` string into a comparable tuple."""
-
-    parts = text.strip().split(".")
-    if len(parts) != 3:
-        raise ValueError(f"not a MAJOR.MINOR.PATCH version: {text!r}")
-    return (int(parts[0]), int(parts[1]), int(parts[2]))
+def parse_version(text: str) -> Version:
+    """Parse the package's PEP 440 version, including ordered beta/RC revisions."""
+    return Version(text.strip())
 
 
 def is_increment(old: str, new: str) -> bool:
-    """True if ``new`` is a strictly greater semantic version than ``old``."""
+    """True if ``new`` is strictly greater under Python package version ordering."""
 
     return parse_version(new) > parse_version(old)
 
