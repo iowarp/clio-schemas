@@ -24,6 +24,9 @@ from clio_schemas.a2ui.v0_9_1.capabilities import A2UIAgentCapabilities, A2UICli
 from clio_schemas.a2ui.v0_9_1.catalog_file import CatalogFile
 from clio_schemas.a2ui.v0_9_1.data_model import A2UIClientDataModel
 from clio_schemas.a2ui.v0_9_1.messages import A2UIClientMessage, A2UIServerMessage
+from clio_schemas.attention import AttentionProfile
+from clio_schemas.attention_evidence import AttentionEvidenceInspection
+from clio_schemas.connected_resources import ConnectedSource, ContentSelection, HostStorageLocations
 from clio_schemas.gact_v3 import MessageBlock
 from clio_schemas.model_capabilities import ModelCapabilityTags
 from clio_schemas.model_facts import ModelFacts
@@ -476,7 +479,12 @@ EXPORTED_MODELS: tuple[type[BaseModel], ...] = (
     ArtifactVersion,
     CatalogFile,
     CatalogSidecar,
+    ConnectedSource,
+    ContentSelection,
+    AttentionProfile,
+    AttentionEvidenceInspection,
     EnvironmentRecord,
+    HostStorageLocations,
     IdentityEvidence,
     Instrument,
     MessageBlock,

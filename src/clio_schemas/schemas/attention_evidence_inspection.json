@@ -1,0 +1,436 @@
+{
+  "$defs": {
+    "AttentionProfile": {
+      "additionalProperties": false,
+      "description": "Resolved, immutable assumptions for one selected item's heat display.",
+      "properties": {
+        "block_reduction": {
+          "default": "sum",
+          "enum": [
+            "sum",
+            "mean",
+            "max"
+          ],
+          "title": "Block Reduction",
+          "type": "string"
+        },
+        "content_steps": {
+          "const": "all_selected_captured_steps",
+          "default": "all_selected_captured_steps",
+          "title": "Content Steps",
+          "type": "string"
+        },
+        "decay_base": {
+          "default": 0.5,
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Decay Base",
+          "type": "number"
+        },
+        "direction": {
+          "default": "forward",
+          "enum": [
+            "forward",
+            "reverse"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "display_scaling": {
+          "default": "max",
+          "enum": [
+            "max",
+            "none"
+          ],
+          "title": "Display Scaling",
+          "type": "string"
+        },
+        "metric": {
+          "default": "mean",
+          "enum": [
+            "mean",
+            "max"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "name": {
+          "default": "uniform-mean",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "version": {
+          "const": 1,
+          "default": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "weight_normalization": {
+          "default": "sum",
+          "enum": [
+            "sum",
+            "none"
+          ],
+          "title": "Weight Normalization",
+          "type": "string"
+        },
+        "weighting": {
+          "default": "uniform",
+          "enum": [
+            "uniform",
+            "exponential"
+          ],
+          "title": "Weighting",
+          "type": "string"
+        }
+      },
+      "title": "AttentionProfile",
+      "type": "object"
+    },
+    "ContentSelection": {
+      "additionalProperties": false,
+      "description": "An inspectable transcript reference with revision-bound selection coordinates.",
+      "properties": {
+        "artifact_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Ref"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "content_revision": {
+          "minLength": 1,
+          "title": "Content Revision",
+          "type": "string"
+        },
+        "field": {
+          "default": "text",
+          "enum": [
+            "text",
+            "thought",
+            "input",
+            "result",
+            "content"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "message_id": {
+          "minLength": 1,
+          "title": "Message Id",
+          "type": "string"
+        },
+        "part_id": {
+          "minLength": 1,
+          "title": "Part Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "selection": {
+          "discriminator": {
+            "mapping": {
+              "image_region": "#/$defs/ImageSelection",
+              "structured": "#/$defs/StructuredSelection",
+              "text": "#/$defs/TextSelection",
+              "whole": "#/$defs/WholeSelection"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/TextSelection"
+            },
+            {
+              "$ref": "#/$defs/WholeSelection"
+            },
+            {
+              "$ref": "#/$defs/ImageSelection"
+            },
+            {
+              "$ref": "#/$defs/StructuredSelection"
+            }
+          ],
+          "title": "Selection"
+        },
+        "session_id": {
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "surface": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SurfaceSelectionIdentity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "session_id",
+        "message_id",
+        "part_id",
+        "content_revision",
+        "selection"
+      ],
+      "title": "ContentSelection",
+      "type": "object"
+    },
+    "ImageSelection": {
+      "additionalProperties": false,
+      "description": "Normalized image coordinates, independent of display size.",
+      "properties": {
+        "height": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Height",
+          "type": "number"
+        },
+        "kind": {
+          "const": "image_region",
+          "default": "image_region",
+          "title": "Kind",
+          "type": "string"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Width",
+          "type": "number"
+        },
+        "x": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "title": "ImageSelection",
+      "type": "object"
+    },
+    "StructuredSelection": {
+      "additionalProperties": false,
+      "description": "Stable A2UI component and source keys, never inferred from display order.",
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "keys": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Keys",
+          "type": "array"
+        },
+        "kind": {
+          "const": "structured",
+          "default": "structured",
+          "title": "Kind",
+          "type": "string"
+        },
+        "source_ref": {
+          "minLength": 1,
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "surface_id": {
+          "minLength": 1,
+          "title": "Surface Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "surface_id",
+        "component_id",
+        "source_ref",
+        "keys"
+      ],
+      "title": "StructuredSelection",
+      "type": "object"
+    },
+    "SurfaceSelectionIdentity": {
+      "additionalProperties": false,
+      "description": "The exact displayed A2UI revision, in addition to its transcript origin.",
+      "properties": {
+        "component_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "surface_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Surface Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "surface_id",
+        "component_id",
+        "revision",
+        "sha256"
+      ],
+      "title": "SurfaceSelectionIdentity",
+      "type": "object"
+    },
+    "TextSelection": {
+      "additionalProperties": false,
+      "description": "Character offsets within an identified content part, using Unicode code points.",
+      "properties": {
+        "end": {
+          "exclusiveMinimum": 0,
+          "title": "End",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "text",
+          "default": "text",
+          "title": "Kind",
+          "type": "string"
+        },
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "title": "TextSelection",
+      "type": "object"
+    },
+    "WholeSelection": {
+      "additionalProperties": false,
+      "description": "The whole identified block or artifact.",
+      "properties": {
+        "kind": {
+          "const": "whole",
+          "default": "whole",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "WholeSelection",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "An exact inspection to revalidate against the owning session's capture.",
+  "properties": {
+    "capture_sha256": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Capture Sha256",
+      "type": "string"
+    },
+    "direction": {
+      "enum": [
+        "generated_to_source",
+        "source_to_generation"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "lm_call_id": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Lm Call Id",
+      "type": "string"
+    },
+    "profile": {
+      "$ref": "#/$defs/AttentionProfile"
+    },
+    "profile_revision": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Profile Revision",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selections": {
+      "items": {
+        "$ref": "#/$defs/ContentSelection"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Selections",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "selections",
+    "direction",
+    "profile",
+    "profile_revision",
+    "lm_call_id",
+    "capture_sha256"
+  ],
+  "title": "AttentionEvidenceInspection",
+  "type": "object"
+}

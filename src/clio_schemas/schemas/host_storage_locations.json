@@ -1,0 +1,33 @@
+{
+  "additionalProperties": false,
+  "description": "Persistent paths on one host; empty overrides inherit the root's subfolders.",
+  "properties": {
+    "captures": {
+      "default": "",
+      "title": "Captures",
+      "type": "string"
+    },
+    "models": {
+      "default": "",
+      "title": "Models",
+      "type": "string"
+    },
+    "root": {
+      "default": "",
+      "title": "Root",
+      "type": "string"
+    },
+    "service_data": {
+      "default": "",
+      "title": "Service Data",
+      "type": "string"
+    },
+    "temporary": {
+      "default": "",
+      "title": "Temporary",
+      "type": "string"
+    }
+  },
+  "title": "HostStorageLocations",
+  "type": "object"
+}
