@@ -30,6 +30,7 @@ class SourceCapabilities(ResourceContract):
     browse: bool = True
     search: bool = False
     download: bool = True
+    link_folder: bool = False
     native_transfer: bool = False
     revision_check: bool = False
     conditional_write: bool = False
@@ -54,7 +55,7 @@ class ConnectedSource(ResourceContract):
     schema_version: Literal[1] = 1
     id: str = Field(min_length=1)
     owner: ResourceOwner
-    provider: Literal["local", "sftp", "google_drive", "globus"]
+    provider: Literal["local", "sftp", "google_drive", "globus", "github"]
     label: str = Field(min_length=1)
     root: str = Field(min_length=1)
     mode: AccessMode = "read_only"

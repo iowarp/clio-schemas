@@ -26,6 +26,20 @@ def test_storage_preserves_remote_paths() -> None:
     assert HostStorageLocations(models="D:\\Models").models == "D:\\Models"
 
 
+def test_github_can_link_without_a_download_backend() -> None:
+    source = ConnectedSource(
+        id="repository",
+        owner=ResourceOwner(clio_id="c", host_id="local"),
+        provider="github",
+        label="Public repository",
+        root="https://github.com/fsspec/filesystem_spec",
+        capabilities=SourceCapabilities(link_folder=True, download=False),
+    )
+    assert source.capabilities.link_folder
+    assert not source.capabilities.download
+    assert not source.capabilities.read_only_mount
+
+
 def test_mode_cannot_claim_mount_or_conflict_support() -> None:
     for mode in ("write_enabled", "working_copy"):
         with pytest.raises(ValidationError):
