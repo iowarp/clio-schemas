@@ -898,6 +898,66 @@
       "title": "ArtifactVersion",
       "type": "object"
     },
+    "AttentionEvidenceInspection": {
+      "additionalProperties": false,
+      "description": "An exact inspection to revalidate against the owning session's capture.",
+      "properties": {
+        "capture_sha256": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Capture Sha256",
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "generated_to_source",
+            "source_to_generation"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "lm_call_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Lm Call Id",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/AttentionProfile"
+        },
+        "profile_revision": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Profile Revision",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "selections": {
+          "items": {
+            "$ref": "#/$defs/ContentSelection"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Selections",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "selections",
+        "direction",
+        "profile",
+        "profile_revision",
+        "lm_call_id",
+        "capture_sha256"
+      ],
+      "title": "AttentionEvidenceInspection",
+      "type": "object"
+    },
     "AttentionProfile": {
       "additionalProperties": false,
       "description": "Resolved, immutable assumptions for one selected item's heat display.",
@@ -4493,6 +4553,9 @@
     },
     "ArtifactVersion": {
       "$ref": "#/$defs/ArtifactVersion"
+    },
+    "AttentionEvidenceInspection": {
+      "$ref": "#/$defs/AttentionEvidenceInspection"
     },
     "AttentionProfile": {
       "$ref": "#/$defs/AttentionProfile"
