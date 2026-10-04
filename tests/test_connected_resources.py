@@ -8,7 +8,9 @@ from clio_schemas.connected_resources import (
     ContentSelection,
     HostStorageLocations,
     ImageSelection,
+    ResourceOwner,
     SourceCapabilities,
+    StructuredSelection,
     SurfaceSelectionIdentity,
 )
 
@@ -31,7 +33,7 @@ def test_mode_cannot_claim_mount_or_conflict_support() -> None:
     with pytest.raises(ValidationError):
         ConnectedSource(
             id="drive-input",
-            owner={"clio_id": "delta", "host_id": "local"},
+            owner=ResourceOwner(clio_id="delta", host_id="local"),
             provider="google_drive",
             label="OPAL",
             root="folder-id",
@@ -82,13 +84,12 @@ def test_surface_selection_retains_revision_and_definition_digest() -> None:
         content_revision="part-digest",
         field="content",
         surface=identity,
-        selection={
-            "kind": "structured",
-            "surface_id": "chart",
-            "component_id": "table",
-            "source_ref": "artifact://rows",
-            "keys": ['["id","a"]'],
-        },
+        selection=StructuredSelection(
+            surface_id="chart",
+            component_id="table",
+            source_ref="artifact://rows",
+            keys=['["id","a"]'],
+        ),
     )
     assert ContentSelection.model_validate_json(ref.model_dump_json()) == ref
     with pytest.raises(ValidationError):
