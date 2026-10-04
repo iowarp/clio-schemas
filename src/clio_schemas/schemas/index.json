@@ -898,6 +898,101 @@
       "title": "ArtifactVersion",
       "type": "object"
     },
+    "AttentionProfile": {
+      "additionalProperties": false,
+      "description": "Resolved, immutable assumptions for one selected item's heat display.",
+      "properties": {
+        "block_reduction": {
+          "default": "sum",
+          "enum": [
+            "sum",
+            "mean",
+            "max"
+          ],
+          "title": "Block Reduction",
+          "type": "string"
+        },
+        "content_steps": {
+          "const": "all_selected_captured_steps",
+          "default": "all_selected_captured_steps",
+          "title": "Content Steps",
+          "type": "string"
+        },
+        "decay_base": {
+          "default": 0.5,
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Decay Base",
+          "type": "number"
+        },
+        "direction": {
+          "default": "forward",
+          "enum": [
+            "forward",
+            "reverse"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "display_scaling": {
+          "default": "max",
+          "enum": [
+            "max",
+            "none"
+          ],
+          "title": "Display Scaling",
+          "type": "string"
+        },
+        "metric": {
+          "default": "mean",
+          "enum": [
+            "mean",
+            "max"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "name": {
+          "default": "uniform-mean",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "version": {
+          "const": 1,
+          "default": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "weight_normalization": {
+          "default": "sum",
+          "enum": [
+            "sum",
+            "none"
+          ],
+          "title": "Weight Normalization",
+          "type": "string"
+        },
+        "weighting": {
+          "default": "uniform",
+          "enum": [
+            "uniform",
+            "exponential"
+          ],
+          "title": "Weighting",
+          "type": "string"
+        }
+      },
+      "title": "AttentionProfile",
+      "type": "object"
+    },
     "CapabilityTag": {
       "additionalProperties": false,
       "description": "A capability the model has.",
@@ -4386,6 +4481,9 @@
     },
     "ArtifactVersion": {
       "$ref": "#/$defs/ArtifactVersion"
+    },
+    "AttentionProfile": {
+      "$ref": "#/$defs/AttentionProfile"
     },
     "CatalogFile": {
       "$ref": "#/$defs/CatalogFile"
