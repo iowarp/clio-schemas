@@ -1117,6 +1117,220 @@
       "title": "CitationMessageBlock",
       "type": "object"
     },
+    "ConnectedSource": {
+      "additionalProperties": false,
+      "description": "Approved source identity without credentials or authorization codes.",
+      "properties": {
+        "capabilities": {
+          "$ref": "#/$defs/SourceCapabilities"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "local_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Local Path"
+        },
+        "materialization": {
+          "default": "not_materialized",
+          "enum": [
+            "not_materialized",
+            "transferring",
+            "ready",
+            "stale",
+            "failed"
+          ],
+          "title": "Materialization",
+          "type": "string"
+        },
+        "mode": {
+          "default": "read_only",
+          "enum": [
+            "read_only",
+            "working_copy",
+            "write_enabled"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "operation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation Id"
+        },
+        "owner": {
+          "$ref": "#/$defs/ResourceOwner"
+        },
+        "provider": {
+          "enum": [
+            "local",
+            "sftp",
+            "google_drive",
+            "globus"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "root": {
+          "minLength": 1,
+          "title": "Root",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "id",
+        "owner",
+        "provider",
+        "label",
+        "root",
+        "capabilities"
+      ],
+      "title": "ConnectedSource",
+      "type": "object"
+    },
+    "ContentSelection": {
+      "additionalProperties": false,
+      "description": "An inspectable transcript reference with revision-bound selection coordinates.",
+      "properties": {
+        "artifact_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Ref"
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "content_revision": {
+          "minLength": 1,
+          "title": "Content Revision",
+          "type": "string"
+        },
+        "message_id": {
+          "minLength": 1,
+          "title": "Message Id",
+          "type": "string"
+        },
+        "part_id": {
+          "minLength": 1,
+          "title": "Part Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "selection": {
+          "discriminator": {
+            "mapping": {
+              "image_region": "#/$defs/ImageSelection",
+              "structured": "#/$defs/StructuredSelection",
+              "text": "#/$defs/TextSelection",
+              "whole": "#/$defs/WholeSelection"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/TextSelection"
+            },
+            {
+              "$ref": "#/$defs/WholeSelection"
+            },
+            {
+              "$ref": "#/$defs/ImageSelection"
+            },
+            {
+              "$ref": "#/$defs/StructuredSelection"
+            }
+          ],
+          "title": "Selection"
+        },
+        "session_id": {
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "session_id",
+        "message_id",
+        "part_id",
+        "content_revision",
+        "selection"
+      ],
+      "title": "ContentSelection",
+      "type": "object"
+    },
     "CreateSurfacePayload": {
       "additionalProperties": false,
       "description": "``createSurface``: begin rendering a new surface against one catalog.",
@@ -1658,6 +1872,39 @@
       "title": "FunctionDefinition",
       "type": "object"
     },
+    "HostStorageLocations": {
+      "additionalProperties": false,
+      "description": "Persistent paths on one host; empty overrides inherit the root's subfolders.",
+      "properties": {
+        "captures": {
+          "default": "",
+          "title": "Captures",
+          "type": "string"
+        },
+        "models": {
+          "default": "",
+          "title": "Models",
+          "type": "string"
+        },
+        "root": {
+          "default": "",
+          "title": "Root",
+          "type": "string"
+        },
+        "service_data": {
+          "default": "",
+          "title": "Service Data",
+          "type": "string"
+        },
+        "temporary": {
+          "default": "",
+          "title": "Temporary",
+          "type": "string"
+        }
+      },
+      "title": "HostStorageLocations",
+      "type": "object"
+    },
     "IdentityEvidence": {
       "description": "The evidence basis on which an artifact's content is pinned.",
       "properties": {
@@ -1710,6 +1957,50 @@
         "evidence_class"
       ],
       "title": "IdentityEvidence",
+      "type": "object"
+    },
+    "ImageSelection": {
+      "additionalProperties": false,
+      "description": "Normalized image coordinates, independent of display size.",
+      "properties": {
+        "height": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Height",
+          "type": "number"
+        },
+        "kind": {
+          "const": "image_region",
+          "default": "image_region",
+          "title": "Kind",
+          "type": "string"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Width",
+          "type": "number"
+        },
+        "x": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "title": "ImageSelection",
       "type": "object"
     },
     "InjectionMessageBlock": {
@@ -3033,6 +3324,28 @@
       "title": "ReplayContract",
       "type": "string"
     },
+    "ResourceOwner": {
+      "additionalProperties": false,
+      "description": "The connected CLIO and execution host that own a resource or operation.",
+      "properties": {
+        "clio_id": {
+          "minLength": 1,
+          "title": "Clio Id",
+          "type": "string"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "clio_id",
+        "host_id"
+      ],
+      "title": "ResourceOwner",
+      "type": "object"
+    },
     "RoleTag": {
       "additionalProperties": false,
       "description": "Whether the model holds a conversation (general) or does one task (surrogate).",
@@ -3147,6 +3460,123 @@
         "label"
       ],
       "title": "RoutingMessageBlock",
+      "type": "object"
+    },
+    "SourceCapabilities": {
+      "additionalProperties": false,
+      "description": "Observed provider/node capabilities; file access does not imply an OS mount.",
+      "properties": {
+        "browse": {
+          "default": true,
+          "title": "Browse",
+          "type": "boolean"
+        },
+        "conditional_write": {
+          "default": false,
+          "title": "Conditional Write",
+          "type": "boolean"
+        },
+        "download": {
+          "default": true,
+          "title": "Download",
+          "type": "boolean"
+        },
+        "native_transfer": {
+          "default": false,
+          "title": "Native Transfer",
+          "type": "boolean"
+        },
+        "read_only_mount": {
+          "default": false,
+          "title": "Read Only Mount",
+          "type": "boolean"
+        },
+        "revision_check": {
+          "default": false,
+          "title": "Revision Check",
+          "type": "boolean"
+        },
+        "search": {
+          "default": false,
+          "title": "Search",
+          "type": "boolean"
+        },
+        "supported_modes": {
+          "items": {
+            "enum": [
+              "read_only",
+              "working_copy",
+              "write_enabled"
+            ],
+            "type": "string"
+          },
+          "title": "Supported Modes",
+          "type": "array"
+        },
+        "unavailable_reasons": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "read_only",
+              "working_copy",
+              "write_enabled"
+            ]
+          },
+          "title": "Unavailable Reasons",
+          "type": "object"
+        },
+        "writable_folder": {
+          "default": false,
+          "title": "Writable Folder",
+          "type": "boolean"
+        }
+      },
+      "title": "SourceCapabilities",
+      "type": "object"
+    },
+    "StructuredSelection": {
+      "additionalProperties": false,
+      "description": "Stable A2UI component and source keys, never inferred from display order.",
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "keys": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Keys",
+          "type": "array"
+        },
+        "kind": {
+          "const": "structured",
+          "default": "structured",
+          "title": "Kind",
+          "type": "string"
+        },
+        "source_ref": {
+          "minLength": 1,
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "surface_id": {
+          "minLength": 1,
+          "title": "Surface Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "surface_id",
+        "component_id",
+        "source_ref",
+        "keys"
+      ],
+      "title": "StructuredSelection",
       "type": "object"
     },
     "SubagentMessageBlock": {
@@ -3453,6 +3883,34 @@
       "title": "TextMessageBlock",
       "type": "object"
     },
+    "TextSelection": {
+      "additionalProperties": false,
+      "description": "Character offsets within an identified content part, using Unicode code points.",
+      "properties": {
+        "end": {
+          "exclusiveMinimum": 0,
+          "title": "End",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "text",
+          "default": "text",
+          "title": "Kind",
+          "type": "string"
+        },
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "title": "TextSelection",
+      "type": "object"
+    },
     "ToolMessageBlock": {
       "additionalProperties": false,
       "description": "Reference to one tool invocation.",
@@ -3726,6 +4184,20 @@
       "title": "UpdateDataModelPayload",
       "type": "object"
     },
+    "WholeSelection": {
+      "additionalProperties": false,
+      "description": "The whole identified block or artifact.",
+      "properties": {
+        "kind": {
+          "const": "whole",
+          "default": "whole",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "WholeSelection",
+      "type": "object"
+    },
     "_AgentCapabilitiesV09": {
       "additionalProperties": true,
       "properties": {
@@ -3921,8 +4393,17 @@
     "CatalogSidecar": {
       "$ref": "#/$defs/CatalogSidecar"
     },
+    "ConnectedSource": {
+      "$ref": "#/$defs/ConnectedSource"
+    },
+    "ContentSelection": {
+      "$ref": "#/$defs/ContentSelection"
+    },
     "EnvironmentRecord": {
       "$ref": "#/$defs/EnvironmentRecord"
+    },
+    "HostStorageLocations": {
+      "$ref": "#/$defs/HostStorageLocations"
     },
     "IdentityEvidence": {
       "$ref": "#/$defs/IdentityEvidence"

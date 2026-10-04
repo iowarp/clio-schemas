@@ -1,0 +1,221 @@
+{
+  "$defs": {
+    "ResourceOwner": {
+      "additionalProperties": false,
+      "description": "The connected CLIO and execution host that own a resource or operation.",
+      "properties": {
+        "clio_id": {
+          "minLength": 1,
+          "title": "Clio Id",
+          "type": "string"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "clio_id",
+        "host_id"
+      ],
+      "title": "ResourceOwner",
+      "type": "object"
+    },
+    "SourceCapabilities": {
+      "additionalProperties": false,
+      "description": "Observed provider/node capabilities; file access does not imply an OS mount.",
+      "properties": {
+        "browse": {
+          "default": true,
+          "title": "Browse",
+          "type": "boolean"
+        },
+        "conditional_write": {
+          "default": false,
+          "title": "Conditional Write",
+          "type": "boolean"
+        },
+        "download": {
+          "default": true,
+          "title": "Download",
+          "type": "boolean"
+        },
+        "native_transfer": {
+          "default": false,
+          "title": "Native Transfer",
+          "type": "boolean"
+        },
+        "read_only_mount": {
+          "default": false,
+          "title": "Read Only Mount",
+          "type": "boolean"
+        },
+        "revision_check": {
+          "default": false,
+          "title": "Revision Check",
+          "type": "boolean"
+        },
+        "search": {
+          "default": false,
+          "title": "Search",
+          "type": "boolean"
+        },
+        "supported_modes": {
+          "items": {
+            "enum": [
+              "read_only",
+              "working_copy",
+              "write_enabled"
+            ],
+            "type": "string"
+          },
+          "title": "Supported Modes",
+          "type": "array"
+        },
+        "unavailable_reasons": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "read_only",
+              "working_copy",
+              "write_enabled"
+            ]
+          },
+          "title": "Unavailable Reasons",
+          "type": "object"
+        },
+        "writable_folder": {
+          "default": false,
+          "title": "Writable Folder",
+          "type": "boolean"
+        }
+      },
+      "title": "SourceCapabilities",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Approved source identity without credentials or authorization codes.",
+  "properties": {
+    "capabilities": {
+      "$ref": "#/$defs/SourceCapabilities"
+    },
+    "id": {
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "label": {
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+    },
+    "local_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Local Path"
+    },
+    "materialization": {
+      "default": "not_materialized",
+      "enum": [
+        "not_materialized",
+        "transferring",
+        "ready",
+        "stale",
+        "failed"
+      ],
+      "title": "Materialization",
+      "type": "string"
+    },
+    "mode": {
+      "default": "read_only",
+      "enum": [
+        "read_only",
+        "working_copy",
+        "write_enabled"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "operation_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Operation Id"
+    },
+    "owner": {
+      "$ref": "#/$defs/ResourceOwner"
+    },
+    "provider": {
+      "enum": [
+        "local",
+        "sftp",
+        "google_drive",
+        "globus"
+      ],
+      "title": "Provider",
+      "type": "string"
+    },
+    "revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revision"
+    },
+    "root": {
+      "minLength": 1,
+      "title": "Root",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Workspace Id"
+    }
+  },
+  "required": [
+    "id",
+    "owner",
+    "provider",
+    "label",
+    "root",
+    "capabilities"
+  ],
+  "title": "ConnectedSource",
+  "type": "object"
+}
