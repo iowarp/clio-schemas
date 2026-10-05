@@ -1343,7 +1343,8 @@
             "local",
             "sftp",
             "google_drive",
-            "globus"
+            "globus",
+            "github"
           ],
           "title": "Provider",
           "type": "string"
@@ -3657,6 +3658,11 @@
         "download": {
           "default": true,
           "title": "Download",
+          "type": "boolean"
+        },
+        "link_folder": {
+          "default": false,
+          "title": "Link Folder",
           "type": "boolean"
         },
         "native_transfer": {
