@@ -4491,7 +4491,8 @@
           "enum": [
             "agent",
             "permission",
-            "run"
+            "run",
+            "client"
           ],
           "title": "Destination",
           "type": "string"

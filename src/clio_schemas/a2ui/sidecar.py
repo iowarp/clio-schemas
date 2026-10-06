@@ -42,7 +42,7 @@ class _EventRoute(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    destination: Literal["agent", "permission", "run"] = "agent"
+    destination: Literal["agent", "permission", "run", "client"] = "agent"
     context_schema: dict[str, object] | None = None
     operation: Literal["cancel", "retry"] | None = None
     # Human-readable template describing WHAT this event means, rendered against

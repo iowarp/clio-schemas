@@ -187,6 +187,22 @@ def render_workspace_sidecar() -> dict[str, Any]:
             "approval.respond": {"destination": "permission"},
             "run.cancel": {"destination": "run", "operation": "cancel"},
             "run.retry": {"destination": "run", "operation": "retry"},
+            **{
+                f"data_source/login/{provider}": {
+                    "destination": "client",
+                    "narration": f"Open private {provider} sign-in on this CLIO.",
+                    "context_schema": {
+                        "type": "object",
+                        "properties": {
+                            "clio_id": {"type": "string", "minLength": 1},
+                            "workspace_id": {"type": "string", "minLength": 1},
+                        },
+                        "required": ["clio_id", "workspace_id"],
+                        "additionalProperties": False,
+                    },
+                }
+                for provider in ("github", "google_drive", "globus")
+            },
         },
         "instructions": "instructions.md",
     }
