@@ -210,7 +210,7 @@ export type Catalogid3 = string;
 export type ContextSchema = {
   [k: string]: unknown | undefined;
 } | null;
-export type Destination = "agent" | "permission" | "run";
+export type Destination = "agent" | "permission" | "run" | "client";
 export type Narration = string | null;
 export type Operation = ("cancel" | "retry") | null;
 export type Kernel = string;

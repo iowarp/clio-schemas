@@ -114,6 +114,18 @@ permission gate, and `run.cancel` / `run.retry` go to the run controller
 `agent.submit` and `form.submit`, is a plain agent event now — there is no
 separate closed action vocabulary to satisfy.
 
+When CLIO reports that a needed provider account is signed out, explain the
+need in your answer and show an ordinary `Button` with the returned
+`login_action` as its event. The declared `data_source/login/github`,
+`data_source/login/google_drive` and `data_source/login/globus` events open
+CLIO's private account UI on the client. Their context must contain the exact
+`clio_id` and `workspace_id` returned by source status. Sign-in is performed
+by the user; credentials never enter the surface or the agent's context.
+Show the button in the answer, not only inside Activity. A click requests the
+sign-in UI; it does not establish that sign-in or source connection succeeded.
+Read source status after the user returns. Existing workspace files need no
+remote source connection. Unsupported clients and offline archives cannot sign in.
+
 `approval.respond` only reaches the permission gate when its `context`
 carries a `permission_id` — that is, when the card is answering a REAL
 pending native permission (a tool call CLIO already paused on; the agent

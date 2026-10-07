@@ -134,11 +134,19 @@ class TestCommittedWorkspaceSidecar:
     def test_approval_respond_has_no_operation(self, payload: dict[str, Any]) -> None:
         assert payload["events"]["approval.respond"] == {"destination": "permission"}
 
-    def test_no_event_declares_narration(self, payload: dict[str, Any]) -> None:
-        """No declared meaning for builtin events yet — only the schema changes (0.3.2)."""
-
-        for route in payload["events"].values():
-            assert "narration" not in route
+    def test_private_login_routes_have_scoped_client_destinations(
+        self, payload: dict[str, Any]
+    ) -> None:
+        """Account sign-in is a scoped client interaction, never an agent turn."""
+        for name in ("run.cancel", "run.retry", "approval.respond"):
+            assert "narration" not in payload["events"][name]
+        for provider in ("github", "google_drive", "globus"):
+            route = payload["events"][f"data_source/login/{provider}"]
+            assert route["destination"] == "client"
+            assert "private" in route["narration"]
+            assert route["context_schema"]["additionalProperties"] is False
+            assert set(route["context_schema"]["required"]) == {"clio_id", "workspace_id"}
+            assert set(route["context_schema"]["properties"]) == {"clio_id", "workspace_id"}
 
 
 class TestNarrationPlaceholderValidation:
