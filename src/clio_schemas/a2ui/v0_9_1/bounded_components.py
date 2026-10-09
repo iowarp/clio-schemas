@@ -406,11 +406,22 @@ class DataQuery(_ClosedModel):
         return self
 
 
+class MapCamera(_ClosedModel):
+    """Declared geospatial camera; a bound value uses this same literal shape."""
+
+    longitude: float = Field(ge=-180, le=180, allow_inf_nan=False)
+    latitude: float = Field(ge=-85, le=85, allow_inf_nan=False)
+    zoom: float = Field(ge=1, le=16, allow_inf_nan=False)
+    bearing: float = Field(default=0, ge=-180, le=180, allow_inf_nan=False)
+    pitch: float = Field(default=0, ge=0, le=60, allow_inf_nan=False)
+
+
 class MapComponent(_ComponentBase):
     """Interactive geospatial component: inline points, tabular rows, or GeoJSON."""
 
     component: Literal["clio.map.v1"] = "clio.map.v1"
     title: DynamicString | None = None
+    camera: MapCamera | _DataBinding | None = None
     points: list[MapPoint] | None = Field(default=None, min_length=1, max_length=MAX_MAP_POINTS)
     dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
     geojsonUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)

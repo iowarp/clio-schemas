@@ -304,6 +304,18 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
             "type": "object",
             "properties": {
                 "component": {"const": "clio.map.v1"},
+                "camera": {
+                    "description": (
+                        "Camera literal or data-model binding. longitude/latitude/zoom are "
+                        "required; bearing and pitch default to zero. Bound cameras are shared "
+                        "and updated by human navigation. Use update_a2ui_data_model on the "
+                        "declared path to pan, zoom or rotate, then capture the resulting view."
+                    ),
+                    "oneOf": [
+                        {"$ref": "#/$defs/MapCamera"},
+                        {"$ref": f"{COMMON_TYPES_ID}#/$defs/DataBinding"},
+                    ],
+                },
                 "title": {"$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString"},
                 "points": {
                     "type": "array",
@@ -1108,6 +1120,18 @@ def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
     defs = {
         "FieldName": _FIELD_NAME_DEF,
         "MapPoint": _MAP_POINT_DEF,
+        "MapCamera": {
+            "type": "object",
+            "properties": {
+                "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+                "latitude": {"type": "number", "minimum": -85, "maximum": 85},
+                "zoom": {"type": "number", "minimum": 1, "maximum": 16},
+                "bearing": {"type": "number", "minimum": -180, "maximum": 180, "default": 0},
+                "pitch": {"type": "number", "minimum": 0, "maximum": 60, "default": 0},
+            },
+            "required": ["longitude", "latitude", "zoom"],
+            "additionalProperties": False,
+        },
         "WorkflowNode": _WORKFLOW_NODE_DEF,
         "WorkflowEdge": _WORKFLOW_EDGE_DEF,
         "DataTableColumn": _DATA_TABLE_COLUMN_DEF,

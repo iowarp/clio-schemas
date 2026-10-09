@@ -40,6 +40,13 @@ appear in the rendered surface; the producer rejects it with the missing ids.
 
 ## Binding values
 
+For a report with several views, bind `Tabs.activeTab` when the agent should
+review each tab or a shared control should navigate it. The value names the
+tab's child id. A map's declared `camera` binding moves its real view and is
+also updated by human navigation. Keep shared cameras and filters on shared
+paths; do not infer control from arbitrary unbound paths. After a complex
+change, use the available capture tool to inspect actual rendered pixels.
+
 A property that accepts a dynamic value (most `label`/`text`/`value` fields)
 can be a literal, or `{"path": "/some/pointer"}` to bind it to the surface's
 data model. Prefer literals for anything static (titles, fixed labels) and
