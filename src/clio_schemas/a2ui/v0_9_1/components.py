@@ -468,6 +468,17 @@ TabsComponent = _component_model(
     "Tabs",
     "A tabbed switcher between named child components.",
     required={"tabs": Annotated[list[_TabDefinition], Field(min_length=1)]},
+    optional={
+        "activeTab": Annotated[
+            DynamicString,
+            Field(
+                description=(
+                    "Child id of the displayed tab, optionally bound to a data-model path. "
+                    "Bind it for agent-driven tab review and shared dashboard navigation."
+                )
+            ),
+        ]
+    },
 )
 ModalComponent = _component_model(
     "ModalComponent",
