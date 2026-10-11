@@ -36,6 +36,10 @@ class SourceCapabilities(ResourceContract):
     conditional_write: bool = False
     writable_folder: bool = False
     read_only_mount: bool = False
+    note_read: bool = False
+    note_search: bool = False
+    note_relations: bool = False
+    note_write: bool = False
     supported_modes: list[AccessMode] = Field(default_factory=lambda: ["read_only"])
     unavailable_reasons: dict[AccessMode, str] = Field(default_factory=dict)
 
@@ -55,7 +59,9 @@ class ConnectedSource(ResourceContract):
     schema_version: Literal[1] = 1
     id: str = Field(min_length=1)
     owner: ResourceOwner
-    provider: Literal["local", "sftp", "google_drive", "globus", "github"]
+    provider: Literal["local", "sftp", "google_drive", "globus", "github", "obsidian"]
+    source_kind: Literal["files", "knowledge"] = "files"
+    connection: Literal["provider", "local_vault", "headless_sync"] = "provider"
     label: str = Field(min_length=1)
     root: str = Field(min_length=1)
     mode: AccessMode = "read_only"
@@ -73,6 +79,12 @@ class ConnectedSource(ResourceContract):
         """Reject modes the selected provider/node cannot implement."""
         if self.mode not in self.capabilities.supported_modes:
             raise ValueError("The source does not support the selected access mode")
+        if self.provider == "obsidian" and (
+            self.source_kind != "knowledge" or self.connection == "provider"
+        ):
+            raise ValueError("Obsidian requires a knowledge source and a vault connection")
+        if self.capabilities.note_write and not self.capabilities.conditional_write:
+            raise ValueError("Knowledge writes require conditional write support")
         return self
 
 

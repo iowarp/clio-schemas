@@ -28,6 +28,7 @@ from clio_schemas.attention import AttentionProfile
 from clio_schemas.attention_evidence import AttentionEvidenceInspection
 from clio_schemas.connected_resources import ConnectedSource, ContentSelection, HostStorageLocations
 from clio_schemas.gact_v3 import MessageBlock
+from clio_schemas.knowledge import KnowledgeLink, KnowledgeNote, KnowledgeSnapshot
 from clio_schemas.model_capabilities import ModelCapabilityTags
 from clio_schemas.model_facts import ModelFacts
 from clio_schemas.model_parameters import AcceptedParameter
@@ -487,6 +488,9 @@ EXPORTED_MODELS: tuple[type[BaseModel], ...] = (
     HostStorageLocations,
     IdentityEvidence,
     Instrument,
+    KnowledgeLink,
+    KnowledgeNote,
+    KnowledgeSnapshot,
     MessageBlock,
     ModelCapabilityTags,
     ModelFacts,
