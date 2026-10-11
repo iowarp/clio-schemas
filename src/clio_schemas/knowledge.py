@@ -46,3 +46,10 @@ class KnowledgeSnapshot(ResourceContract):
     truncated: bool = False
     relationships_truncated: bool = False
     warnings: list[str] = Field(default_factory=list)
+
+
+class KnowledgeGraphSnapshot(KnowledgeSnapshot):
+    """A whole-source topology overview, independent of paginated file/search reads."""
+
+    notes: list[KnowledgeNote] = Field(max_length=5000)
+    links: list[KnowledgeLink] = Field(max_length=20000)

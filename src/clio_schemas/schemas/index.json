@@ -2432,6 +2432,95 @@
       "type": "object"
     },
     "JsonValue": {},
+    "KnowledgeGraphSnapshot": {
+      "additionalProperties": false,
+      "description": "A whole-source topology overview, independent of paginated file/search reads.",
+      "properties": {
+        "links": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeLink"
+          },
+          "maxItems": 20000,
+          "title": "Links",
+          "type": "array"
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next Offset"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeNote"
+          },
+          "maxItems": 5000,
+          "title": "Notes",
+          "type": "array"
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "relationships_truncated": {
+          "default": false,
+          "title": "Relationships Truncated",
+          "type": "boolean"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "state": {
+          "default": "ready",
+          "enum": [
+            "ready",
+            "indexing",
+            "failed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "truncated": {
+          "default": false,
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_id",
+        "revision",
+        "notes",
+        "links",
+        "total"
+      ],
+      "title": "KnowledgeGraphSnapshot",
+      "type": "object"
+    },
     "KnowledgeLink": {
       "additionalProperties": false,
       "description": "An explicit link or embed; unresolved and ambiguous targets stay explicit.",
@@ -4886,6 +4975,9 @@
     },
     "Instrument": {
       "$ref": "#/$defs/Instrument"
+    },
+    "KnowledgeGraphSnapshot": {
+      "$ref": "#/$defs/KnowledgeGraphSnapshot"
     },
     "KnowledgeLink": {
       "$ref": "#/$defs/KnowledgeLink"
