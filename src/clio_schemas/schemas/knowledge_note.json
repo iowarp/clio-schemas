@@ -1,0 +1,68 @@
+{
+  "additionalProperties": false,
+  "description": "A source-relative note or attachment, with the indexed content revision.",
+  "properties": {
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Aliases",
+      "type": "array"
+    },
+    "blocks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blocks",
+      "type": "array"
+    },
+    "excerpt": {
+      "default": "",
+      "title": "Excerpt",
+      "type": "string"
+    },
+    "headings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Headings",
+      "type": "array"
+    },
+    "kind": {
+      "default": "note",
+      "enum": [
+        "note",
+        "attachment"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "path": {
+      "minLength": 1,
+      "title": "Path",
+      "type": "string"
+    },
+    "revision": {
+      "title": "Revision",
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "path",
+    "title",
+    "revision"
+  ],
+  "title": "KnowledgeNote",
+  "type": "object"
+}

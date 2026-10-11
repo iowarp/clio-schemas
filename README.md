@@ -53,6 +53,13 @@ committed artifacts can only change deliberately, in this repo.
 
 ## What's in the box
 
+Knowledge-source contracts in `clio_schemas.knowledge` define `KnowledgeNote`,
+`KnowledgeLink`, and bounded `KnowledgeSnapshot` views. `ConnectedSource`
+distinguishes knowledge sources from file sources, local vaults from Headless
+Sync copies, and note read/search/relationship/write capabilities. Graphs and
+lists share source-relative paths and content revisions; ambiguous and missing
+links stay explicit. Generated JSON Schema and TypeScript accompany these models.
+
 ```
 clio-schemas/
 ├── pyproject.toml                     # uv-compatible, py>=3.12, pydantic v2, hatchling
