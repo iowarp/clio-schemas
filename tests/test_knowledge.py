@@ -4,7 +4,12 @@ import pytest
 from pydantic import ValidationError
 
 from clio_schemas.connected_resources import ConnectedSource, ResourceOwner, SourceCapabilities
-from clio_schemas.knowledge import KnowledgeLink, KnowledgeNote, KnowledgeSnapshot
+from clio_schemas.knowledge import (
+    KnowledgeGraphSnapshot,
+    KnowledgeLink,
+    KnowledgeNote,
+    KnowledgeSnapshot,
+)
 
 
 def test_obsidian_requires_vault_knowledge_semantics() -> None:
@@ -52,4 +57,19 @@ def test_bounded_snapshot_rejects_invalid_offsets_and_extra_fields() -> None:
             notes=[],
             links=[KnowledgeLink(source="a.md", target="b.md")] * 2001,
             total=0,
+        )
+
+
+def test_graph_overview_has_separate_bounded_capacity() -> None:
+    """A full graph fits across file pages without widening agent search results."""
+    note = KnowledgeNote(path="a.md", title="A", revision="h")
+    graph = KnowledgeGraphSnapshot(
+        source_id="s", revision="r", notes=[note] * 1961, links=[], total=1961
+    )
+    assert len(graph.notes) == 1961
+    with pytest.raises(ValidationError, match="5000"):
+        KnowledgeGraphSnapshot.model_validate({**graph.model_dump(), "notes": [note] * 5001})
+    with pytest.raises(ValidationError, match="20000"):
+        KnowledgeGraphSnapshot.model_validate(
+            {**graph.model_dump(), "links": [KnowledgeLink(source="a.md", target="b.md")] * 20001}
         )
