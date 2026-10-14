@@ -25,7 +25,7 @@ property shape is defined in `catalog.json` — this page is about *when* and
 ## The component tree
 
 A surface is a flat array of components, each with a stable `id`. Containers
-(`Row`, `Column`, `List`, `Frame`, `Tabs`, `Modal`, `Grid`) reference their
+(`Row`, `Column`, `List`, `Frame`, `Tabs`, `Carousel`, `Modal`, `Grid`) reference their
 children by id rather than nesting them inline — this keeps individual
 components independently addressable for later `updateComponents` calls.
 Exactly one component in the array must carry the id `root`; that is the
@@ -39,6 +39,22 @@ from its child tree. A component that is not connected to `root` cannot
 appear in the rendered surface; the producer rejects it with the missing ids.
 
 ## Binding values
+
+**Carousel** displays one child view at a time, with previous/next controls and
+a position count. Use it for a sequence of figures, comparisons, or illustrated
+instructions. Compose each captioned slide as a `Column` containing `Image`
+and `Text`; other child views, including `Video`, work in the same container.
+Images keep their enlarge/download controls. Only the selected slide is mounted,
+so changing slides stops its media and does not load every figure at once.
+Bind `Carousel.activeChild` when navigation should be retained in the data model
+or driven by another control. Navigation is a viewing action, not task completion.
+
+**Video** uses the same registered-file resolver as `Image`, with ordinary
+playback controls. Use actual saved footage and give it an accessible label.
+For a documentation walkthrough, read the guide and use its real image/video
+URLs; obtain those files and reference their registered artifacts. Keep captions
+with their matching steps and link the source guide. Do not invent screenshots
+or assume a remote URL will play inline; see the media-source guidance.
 
 For a report with several views, bind `Tabs.activeTab` when the agent should
 review each tab or a shared control should navigate it. The value names the

@@ -1193,6 +1193,9 @@
           "$ref": "#/components/Button"
         },
         {
+          "$ref": "#/components/Carousel"
+        },
+        {
           "$ref": "#/components/CheckBox"
         },
         {
@@ -1239,6 +1242,9 @@
         },
         {
           "$ref": "#/components/TextField"
+        },
+        {
+          "$ref": "#/components/Video"
         },
         {
           "$ref": "#/components/clio.action-card.v1"
@@ -1422,6 +1428,41 @@
         }
       ],
       "description": "A clickable control wrapping one child, firing an action.",
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "Carousel": {
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "properties": {
+            "activeChild": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"
+            },
+            "children": {
+              "items": {
+                "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentId"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "component": {
+              "const": "Carousel"
+            }
+          },
+          "required": [
+            "component",
+            "children"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "Browse child views one at a time, such as images, captioned instructions, or video.",
       "type": "object",
       "unevaluatedProperties": false
     },
@@ -2093,6 +2134,34 @@
         }
       ],
       "description": "A single- or multi-line text input.",
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "Video": {
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "properties": {
+            "component": {
+              "const": "Video"
+            },
+            "url": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"
+            }
+          },
+          "required": [
+            "component",
+            "url"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "A video from a registered file, with playback and full-screen controls.",
       "type": "object",
       "unevaluatedProperties": false
     },
