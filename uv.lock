@@ -35,7 +35,7 @@ wheels = [
 
 [[package]]
 name = "clio-schemas"
-version = "0.6.0b5"
+version = "0.6.0b9"
 source = { editable = "." }
 dependencies = [
     { name = "annotated-types" },

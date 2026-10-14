@@ -83,6 +83,9 @@
     "Button": {
       "kernel": "Button"
     },
+    "Carousel": {
+      "kernel": "Carousel"
+    },
     "CheckBox": {
       "kernel": "CheckBox"
     },
@@ -130,6 +133,9 @@
     },
     "TextField": {
       "kernel": "TextField"
+    },
+    "Video": {
+      "kernel": "Video"
     },
     "clio.action-card.v1": {
       "kernel": "clio.action-card.v1"

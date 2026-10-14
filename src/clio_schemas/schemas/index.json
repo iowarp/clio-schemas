@@ -1279,6 +1279,16 @@
         "capabilities": {
           "$ref": "#/$defs/SourceCapabilities"
         },
+        "connection": {
+          "default": "provider",
+          "enum": [
+            "provider",
+            "local_vault",
+            "headless_sync"
+          ],
+          "title": "Connection",
+          "type": "string"
+        },
         "id": {
           "minLength": 1,
           "title": "Id",
@@ -1344,7 +1354,8 @@
             "sftp",
             "google_drive",
             "globus",
-            "github"
+            "github",
+            "obsidian"
           ],
           "title": "Provider",
           "type": "string"
@@ -1371,6 +1382,15 @@
           "default": 1,
           "title": "Schema Version",
           "type": "integer"
+        },
+        "source_kind": {
+          "default": "files",
+          "enum": [
+            "files",
+            "knowledge"
+          ],
+          "title": "Source Kind",
+          "type": "string"
         },
         "workspace_id": {
           "anyOf": [
@@ -2412,6 +2432,304 @@
       "type": "object"
     },
     "JsonValue": {},
+    "KnowledgeGraphSnapshot": {
+      "additionalProperties": false,
+      "description": "A whole-source topology overview, independent of paginated file/search reads.",
+      "properties": {
+        "links": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeLink"
+          },
+          "maxItems": 20000,
+          "title": "Links",
+          "type": "array"
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next Offset"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeNote"
+          },
+          "maxItems": 5000,
+          "title": "Notes",
+          "type": "array"
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "relationships_truncated": {
+          "default": false,
+          "title": "Relationships Truncated",
+          "type": "boolean"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "state": {
+          "default": "ready",
+          "enum": [
+            "ready",
+            "indexing",
+            "failed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "truncated": {
+          "default": false,
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_id",
+        "revision",
+        "notes",
+        "links",
+        "total"
+      ],
+      "title": "KnowledgeGraphSnapshot",
+      "type": "object"
+    },
+    "KnowledgeLink": {
+      "additionalProperties": false,
+      "description": "An explicit link or embed; unresolved and ambiguous targets stay explicit.",
+      "properties": {
+        "candidates": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "kind": {
+          "default": "link",
+          "enum": [
+            "link",
+            "embed"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "selector": {
+          "default": "",
+          "title": "Selector",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "status": {
+          "default": "resolved",
+          "enum": [
+            "resolved",
+            "unresolved",
+            "ambiguous",
+            "external"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "KnowledgeLink",
+      "type": "object"
+    },
+    "KnowledgeNote": {
+      "additionalProperties": false,
+      "description": "A source-relative note or attachment, with the indexed content revision.",
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "blocks": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocks",
+          "type": "array"
+        },
+        "excerpt": {
+          "default": "",
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "headings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Headings",
+          "type": "array"
+        },
+        "kind": {
+          "default": "note",
+          "enum": [
+            "note",
+            "attachment"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "title",
+        "revision"
+      ],
+      "title": "KnowledgeNote",
+      "type": "object"
+    },
+    "KnowledgeSnapshot": {
+      "additionalProperties": false,
+      "description": "A bounded source view used by graph, list, reader, and agent operations.",
+      "properties": {
+        "links": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeLink"
+          },
+          "maxItems": 2000,
+          "title": "Links",
+          "type": "array"
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next Offset"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeNote"
+          },
+          "maxItems": 500,
+          "title": "Notes",
+          "type": "array"
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "relationships_truncated": {
+          "default": false,
+          "title": "Relationships Truncated",
+          "type": "boolean"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "state": {
+          "default": "ready",
+          "enum": [
+            "ready",
+            "indexing",
+            "failed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "truncated": {
+          "default": false,
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_id",
+        "revision",
+        "notes",
+        "links",
+        "total"
+      ],
+      "title": "KnowledgeSnapshot",
+      "type": "object"
+    },
     "Mechanism": {
       "description": "What produced an artifact record.",
       "enum": [
@@ -3670,6 +3988,26 @@
           "title": "Native Transfer",
           "type": "boolean"
         },
+        "note_read": {
+          "default": false,
+          "title": "Note Read",
+          "type": "boolean"
+        },
+        "note_relations": {
+          "default": false,
+          "title": "Note Relations",
+          "type": "boolean"
+        },
+        "note_search": {
+          "default": false,
+          "title": "Note Search",
+          "type": "boolean"
+        },
+        "note_write": {
+          "default": false,
+          "title": "Note Write",
+          "type": "boolean"
+        },
         "read_only_mount": {
           "default": false,
           "title": "Read Only Mount",
@@ -4637,6 +4975,18 @@
     },
     "Instrument": {
       "$ref": "#/$defs/Instrument"
+    },
+    "KnowledgeGraphSnapshot": {
+      "$ref": "#/$defs/KnowledgeGraphSnapshot"
+    },
+    "KnowledgeLink": {
+      "$ref": "#/$defs/KnowledgeLink"
+    },
+    "KnowledgeNote": {
+      "$ref": "#/$defs/KnowledgeNote"
+    },
+    "KnowledgeSnapshot": {
+      "$ref": "#/$defs/KnowledgeSnapshot"
     },
     "MessageBlock": {
       "$ref": "#/$defs/MessageBlock"

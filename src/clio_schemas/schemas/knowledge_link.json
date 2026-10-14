@@ -1,0 +1,52 @@
+{
+  "additionalProperties": false,
+  "description": "An explicit link or embed; unresolved and ambiguous targets stay explicit.",
+  "properties": {
+    "candidates": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Candidates",
+      "type": "array"
+    },
+    "kind": {
+      "default": "link",
+      "enum": [
+        "link",
+        "embed"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "selector": {
+      "default": "",
+      "title": "Selector",
+      "type": "string"
+    },
+    "source": {
+      "title": "Source",
+      "type": "string"
+    },
+    "status": {
+      "default": "resolved",
+      "enum": [
+        "resolved",
+        "unresolved",
+        "ambiguous",
+        "external"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "target": {
+      "title": "Target",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source",
+    "target"
+  ],
+  "title": "KnowledgeLink",
+  "type": "object"
+}

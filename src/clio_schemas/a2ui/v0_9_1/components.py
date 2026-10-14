@@ -407,6 +407,28 @@ ImageComponent = _component_model(
         ],
     },
 )
+VideoComponent = _component_model(
+    "VideoComponent",
+    "Video",
+    "A video from a registered file, with playback and full-screen controls.",
+    required={"url": DynamicString},
+)
+CarouselComponent = _component_model(
+    "CarouselComponent",
+    "Carousel",
+    "Browse child views one at a time, such as images, captioned instructions, or video.",
+    required={"children": Annotated[list[ComponentId], Field(min_length=1)]},
+    optional={
+        "activeChild": Annotated[
+            DynamicString,
+            Field(
+                description=(
+                    "Child id of the displayed slide; bind it to retain or coordinate navigation."
+                )
+            ),
+        ]
+    },
+)
 RowComponent = _component_model(
     "RowComponent",
     "Row",

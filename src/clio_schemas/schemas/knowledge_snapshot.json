@@ -1,0 +1,211 @@
+{
+  "$defs": {
+    "KnowledgeLink": {
+      "additionalProperties": false,
+      "description": "An explicit link or embed; unresolved and ambiguous targets stay explicit.",
+      "properties": {
+        "candidates": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "kind": {
+          "default": "link",
+          "enum": [
+            "link",
+            "embed"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "selector": {
+          "default": "",
+          "title": "Selector",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "status": {
+          "default": "resolved",
+          "enum": [
+            "resolved",
+            "unresolved",
+            "ambiguous",
+            "external"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "KnowledgeLink",
+      "type": "object"
+    },
+    "KnowledgeNote": {
+      "additionalProperties": false,
+      "description": "A source-relative note or attachment, with the indexed content revision.",
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "blocks": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocks",
+          "type": "array"
+        },
+        "excerpt": {
+          "default": "",
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "headings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Headings",
+          "type": "array"
+        },
+        "kind": {
+          "default": "note",
+          "enum": [
+            "note",
+            "attachment"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "title",
+        "revision"
+      ],
+      "title": "KnowledgeNote",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A bounded source view used by graph, list, reader, and agent operations.",
+  "properties": {
+    "links": {
+      "items": {
+        "$ref": "#/$defs/KnowledgeLink"
+      },
+      "maxItems": 2000,
+      "title": "Links",
+      "type": "array"
+    },
+    "next_offset": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next Offset"
+    },
+    "notes": {
+      "items": {
+        "$ref": "#/$defs/KnowledgeNote"
+      },
+      "maxItems": 500,
+      "title": "Notes",
+      "type": "array"
+    },
+    "offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "relationships_truncated": {
+      "default": false,
+      "title": "Relationships Truncated",
+      "type": "boolean"
+    },
+    "revision": {
+      "title": "Revision",
+      "type": "string"
+    },
+    "source_id": {
+      "title": "Source Id",
+      "type": "string"
+    },
+    "state": {
+      "default": "ready",
+      "enum": [
+        "ready",
+        "indexing",
+        "failed"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "total": {
+      "minimum": 0,
+      "title": "Total",
+      "type": "integer"
+    },
+    "truncated": {
+      "default": false,
+      "title": "Truncated",
+      "type": "boolean"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "source_id",
+    "revision",
+    "notes",
+    "links",
+    "total"
+  ],
+  "title": "KnowledgeSnapshot",
+  "type": "object"
+}

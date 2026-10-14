@@ -51,6 +51,26 @@
           "title": "Native Transfer",
           "type": "boolean"
         },
+        "note_read": {
+          "default": false,
+          "title": "Note Read",
+          "type": "boolean"
+        },
+        "note_relations": {
+          "default": false,
+          "title": "Note Relations",
+          "type": "boolean"
+        },
+        "note_search": {
+          "default": false,
+          "title": "Note Search",
+          "type": "boolean"
+        },
+        "note_write": {
+          "default": false,
+          "title": "Note Write",
+          "type": "boolean"
+        },
         "read_only_mount": {
           "default": false,
           "title": "Read Only Mount",
@@ -107,6 +127,16 @@
   "properties": {
     "capabilities": {
       "$ref": "#/$defs/SourceCapabilities"
+    },
+    "connection": {
+      "default": "provider",
+      "enum": [
+        "provider",
+        "local_vault",
+        "headless_sync"
+      ],
+      "title": "Connection",
+      "type": "string"
     },
     "id": {
       "minLength": 1,
@@ -173,7 +203,8 @@
         "sftp",
         "google_drive",
         "globus",
-        "github"
+        "github",
+        "obsidian"
       ],
       "title": "Provider",
       "type": "string"
@@ -200,6 +231,15 @@
       "default": 1,
       "title": "Schema Version",
       "type": "integer"
+    },
+    "source_kind": {
+      "default": "files",
+      "enum": [
+        "files",
+        "knowledge"
+      ],
+      "title": "Source Kind",
+      "type": "string"
     },
     "workspace_id": {
       "anyOf": [

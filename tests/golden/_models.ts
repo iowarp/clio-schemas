@@ -225,11 +225,16 @@ export type ConditionalWrite = boolean;
 export type Download = boolean;
 export type LinkFolder = boolean;
 export type NativeTransfer = boolean;
+export type NoteRead = boolean;
+export type NoteRelations = boolean;
+export type NoteSearch = boolean;
+export type NoteWrite = boolean;
 export type ReadOnlyMount = boolean;
 export type RevisionCheck = boolean;
 export type Search = boolean;
 export type SupportedModes = ("read_only" | "working_copy" | "write_enabled")[];
 export type WritableFolder = boolean;
+export type Connection = "provider" | "local_vault" | "headless_sync";
 export type Id = string;
 export type Label1 = string;
 export type LocalPath = string | null;
@@ -238,10 +243,11 @@ export type Mode = "read_only" | "working_copy" | "write_enabled";
 export type OperationId = string | null;
 export type ClioId = string;
 export type HostId = string;
-export type Provider = "local" | "sftp" | "google_drive" | "globus" | "github";
+export type Provider = "local" | "sftp" | "google_drive" | "globus" | "github" | "obsidian";
 export type Revision1 = string | null;
 export type Root = string;
 export type SchemaVersion3 = 1;
+export type SourceKind = "files" | "knowledge";
 export type WorkspaceId1 = string | null;
 export type Arch = string;
 export type ClioVersion = string;
@@ -269,6 +275,55 @@ export type Cmd = string;
 export type ScriptArtifactId = string;
 export type ScriptHash = string;
 export type Tool = string;
+export type Candidates = string[];
+export type Kind5 = "link" | "embed";
+export type Selector = string;
+export type Source2 = string;
+export type Status = "resolved" | "unresolved" | "ambiguous" | "external";
+export type Target = string;
+/**
+ * @maxItems 20000
+ */
+export type Links = KnowledgeLink[];
+export type NextOffset = number | null;
+export type Aliases1 = string[];
+export type Blocks = string[];
+export type Excerpt = string;
+export type Headings = string[];
+export type Kind6 = "note" | "attachment";
+export type Path3 = string;
+export type Revision2 = string;
+export type Tags = string[];
+export type Title1 = string;
+/**
+ * @maxItems 5000
+ */
+export type Notes = KnowledgeNote[];
+export type Offset = number;
+export type RelationshipsTruncated = boolean;
+export type Revision3 = string;
+export type SourceId = string;
+export type State = "ready" | "indexing" | "failed";
+export type Total = number;
+export type Truncated = boolean;
+export type Warnings = string[];
+/**
+ * @maxItems 2000
+ */
+export type Links1 = KnowledgeLink[];
+export type NextOffset1 = number | null;
+/**
+ * @maxItems 500
+ */
+export type Notes1 = KnowledgeNote[];
+export type Offset1 = number;
+export type RelationshipsTruncated1 = boolean;
+export type Revision4 = string;
+export type SourceId1 = string;
+export type State1 = "ready" | "indexing" | "failed";
+export type Total1 = number;
+export type Truncated1 = boolean;
+export type Warnings1 = string[];
 /**
  * Closed discriminated union of the 15 GACT 0.3 message-block types.
  */
@@ -302,7 +357,7 @@ export type DefaultCollapsed = boolean | null;
 export type Id2 = string;
 export type ProviderSource = string | null;
 export type Sequence1 = number | null;
-export type Source2 = string | null;
+export type Source3 = string | null;
 export type StreamSource1 = string | null;
 export type Streaming1 = boolean | null;
 export type Text1 = string;
@@ -321,7 +376,7 @@ export type Detail1 = string | null;
 export type Id4 = string;
 export type Sequence3 = number | null;
 export type StreamSource3 = string | null;
-export type Title1 = string;
+export type Title2 = string;
 export type Type3 = "plan";
 export type AgentId4 = string | null;
 export type Channel4 = string | null;
@@ -345,7 +400,7 @@ export type Sequence6 = number | null;
 export type StreamSource6 = string | null;
 export type Type6 = "artifact";
 export type HandleId = string | null;
-export type Kind5 = string;
+export type Kind7 = string;
 export type Reason = string | null;
 export type Enabled = boolean;
 export type Id8 = string;
@@ -357,10 +412,10 @@ export type Detail2 = string | null;
 export type Id9 = string;
 export type Sequence7 = number | null;
 export type Severity = string | null;
-export type Source3 = string | null;
-export type Status = string | null;
+export type Source4 = string | null;
+export type Status1 = string | null;
 export type StreamSource7 = string | null;
-export type Title2 = string;
+export type Title3 = string;
 export type Type7 = "action_card";
 export type AgentId8 = string | null;
 export type Channel8 = string | null;
@@ -380,7 +435,7 @@ export type Uri = string;
 export type AgentId10 = string | null;
 export type Channel10 = string | null;
 export type Id12 = string;
-export type Path3 = string;
+export type Path4 = string;
 export type Sequence10 = number | null;
 export type StreamSource10 = string | null;
 export type Type10 = "diff";
@@ -408,7 +463,7 @@ export type Channel13 = string | null;
 export type CompactionId = string | null;
 export type Id15 = string;
 export type Sequence13 = number | null;
-export type Source4 = string;
+export type Source5 = string;
 export type StreamSource13 = string | null;
 export type Text2 = string;
 export type Trigger = ("auto" | "manual") | null;
@@ -421,7 +476,7 @@ export type Code3 = string | null;
 export type CompactionId1 = string | null;
 export type Id16 = string;
 export type Sequence14 = number | null;
-export type Source5 = string;
+export type Source6 = string;
 export type StreamSource14 = string | null;
 export type Text3 = string;
 export type Trigger1 = ("auto" | "manual") | null;
@@ -551,7 +606,7 @@ export type Url = string;
 /**
  * The links reduced out of `plain`, in order.
  */
-export type Links = DescriptionLink[];
+export type Links2 = DescriptionLink[];
 /**
  * The text with each markdown link reduced to its label.
  */
@@ -586,14 +641,14 @@ export type Precision = "exact" | "rounded";
 /**
  * Every parameter: the slider value.
  */
-export type Total = number | null;
+export type Total2 = number | null;
 /**
  * Every source that states this value; the first is the winning one.
  *
  * @minItems 1
  */
 export type Evidence10 = [TagEvidence, ...TagEvidence[]];
-export type Kind6 = "usd" | "variable" | "subscription";
+export type Kind8 = "usd" | "variable" | "subscription";
 /**
  * USD per 1M tokens for kind `usd`; null for `variable` and `subscription`.
  */
@@ -654,7 +709,7 @@ export type NetDomain = string;
 export type NetMechanism = string;
 export type NetResolvedIp = string;
 export type Note = string;
-export type Path4 = string;
+export type Path5 = string;
 /**
  * Which side of a transform a provenance edge sits on.
  */
@@ -668,7 +723,7 @@ export type AgentId15 = string;
 export type AgentRole = "executing" | "annotating";
 export type Annotation1 = string;
 export type CallId2 = string;
-export type Candidates = string[];
+export type Candidates1 = string[];
 export type EndedAt = string;
 export type EventId = string;
 export type Generated = ProvEdge[];
@@ -676,7 +731,7 @@ export type Generated = ProvEdge[];
  * Whether provenance was observed under exclusive or contended custody.
  */
 export type TransformKind = "ordinary" | "contended";
-export type Notes = {
+export type Notes2 = {
   [k: string]: unknown | undefined;
 }[];
 /**
@@ -716,6 +771,10 @@ export interface ClioSchemaRegistry {
   HostStorageLocations?: HostStorageLocations;
   IdentityEvidence?: IdentityEvidence;
   Instrument?: Instrument;
+  KnowledgeGraphSnapshot?: KnowledgeGraphSnapshot;
+  KnowledgeLink?: KnowledgeLink;
+  KnowledgeNote?: KnowledgeNote;
+  KnowledgeSnapshot?: KnowledgeSnapshot;
   MessageBlock?: MessageBlock;
   ModelCapabilityTags?: ModelCapabilityTags;
   ModelFacts?: ModelFacts;
@@ -1137,6 +1196,7 @@ export interface _Trust {
  */
 export interface ConnectedSource {
   capabilities: SourceCapabilities;
+  connection?: Connection;
   id: Id;
   label: Label1;
   local_path?: LocalPath;
@@ -1148,6 +1208,7 @@ export interface ConnectedSource {
   revision?: Revision1;
   root: Root;
   schema_version?: SchemaVersion3;
+  source_kind?: SourceKind;
   workspace_id?: WorkspaceId1;
 }
 /**
@@ -1159,6 +1220,10 @@ export interface SourceCapabilities {
   download?: Download;
   link_folder?: LinkFolder;
   native_transfer?: NativeTransfer;
+  note_read?: NoteRead;
+  note_relations?: NoteRelations;
+  note_search?: NoteSearch;
+  note_write?: NoteWrite;
   read_only_mount?: ReadOnlyMount;
   revision_check?: RevisionCheck;
   search?: Search;
@@ -1219,6 +1284,63 @@ export interface Args {
   [k: string]: unknown | undefined;
 }
 /**
+ * A whole-source topology overview, independent of paginated file/search reads.
+ */
+export interface KnowledgeGraphSnapshot {
+  links: Links;
+  next_offset?: NextOffset;
+  notes: Notes;
+  offset?: Offset;
+  relationships_truncated?: RelationshipsTruncated;
+  revision: Revision3;
+  source_id: SourceId;
+  state?: State;
+  total: Total;
+  truncated?: Truncated;
+  warnings?: Warnings;
+}
+/**
+ * An explicit link or embed; unresolved and ambiguous targets stay explicit.
+ */
+export interface KnowledgeLink {
+  candidates?: Candidates;
+  kind?: Kind5;
+  selector?: Selector;
+  source: Source2;
+  status?: Status;
+  target: Target;
+}
+/**
+ * A source-relative note or attachment, with the indexed content revision.
+ */
+export interface KnowledgeNote {
+  aliases?: Aliases1;
+  blocks?: Blocks;
+  excerpt?: Excerpt;
+  headings?: Headings;
+  kind?: Kind6;
+  path: Path3;
+  revision: Revision2;
+  tags?: Tags;
+  title: Title1;
+}
+/**
+ * A bounded source view used by graph, list, reader, and agent operations.
+ */
+export interface KnowledgeSnapshot {
+  links: Links1;
+  next_offset?: NextOffset1;
+  notes: Notes1;
+  offset?: Offset1;
+  relationships_truncated?: RelationshipsTruncated1;
+  revision: Revision4;
+  source_id: SourceId1;
+  state?: State1;
+  total: Total1;
+  truncated?: Truncated1;
+  warnings?: Warnings1;
+}
+/**
  * Assistant or user prose.
  */
 export interface TextMessageBlock {
@@ -1241,7 +1363,7 @@ export interface ReasoningMessageBlock {
   id: Id2;
   provider_source?: ProviderSource;
   sequence?: Sequence1;
-  source?: Source2;
+  source?: Source3;
   stream_source?: StreamSource1;
   streaming?: Streaming1;
   text: Text1;
@@ -1270,7 +1392,7 @@ export interface PlanMessageBlock {
   id: Id4;
   sequence?: Sequence3;
   stream_source?: StreamSource3;
-  title: Title1;
+  title: Title2;
   type: Type3;
 }
 /**
@@ -1320,10 +1442,10 @@ export interface ActionCardMessageBlock {
   id: Id9;
   sequence?: Sequence7;
   severity?: Severity;
-  source?: Source3;
-  status?: Status;
+  source?: Source4;
+  status?: Status1;
   stream_source?: StreamSource7;
-  title: Title2;
+  title: Title3;
   type: Type7;
 }
 /**
@@ -1340,7 +1462,7 @@ export interface ActionCardAction {
  */
 export interface ActionCardBehavior {
   handle_id?: HandleId;
-  kind: Kind5;
+  kind: Kind7;
   reason?: Reason;
   [k: string]: unknown | undefined;
 }
@@ -1376,7 +1498,7 @@ export interface DiffMessageBlock {
   agent_id?: AgentId10;
   channel?: Channel10;
   id: Id12;
-  path: Path3;
+  path: Path4;
   sequence?: Sequence10;
   stream_source?: StreamSource10;
   type: Type10;
@@ -1426,7 +1548,7 @@ export interface InjectionMessageBlock {
   compaction_id?: CompactionId;
   id: Id15;
   sequence?: Sequence13;
-  source: Source4;
+  source: Source5;
   stream_source?: StreamSource13;
   text: Text2;
   trigger?: Trigger;
@@ -1446,7 +1568,7 @@ export interface NoticeMessageBlock {
   compaction_id?: CompactionId1;
   id: Id16;
   sequence?: Sequence14;
-  source: Source5;
+  source: Source6;
   stream_source?: StreamSource14;
   text: Text3;
   trigger?: Trigger1;
@@ -1569,7 +1691,7 @@ export interface DescriptionFact {
  * A description in its raw form and as plain text for display.
  */
 export interface DescriptionValue {
-  links?: Links;
+  links?: Links2;
   plain: Plain;
   text: Text5;
 }
@@ -1595,7 +1717,7 @@ export interface ParametersValue {
   experts_active: ExpertsActive;
   experts_total: ExpertsTotal;
   precision: Precision;
-  total: Total;
+  total: Total2;
 }
 /**
  * What the model costs: the endpoint's own price first, a catalog list price otherwise.
@@ -1624,7 +1746,7 @@ export interface PricingValue {
  * One side (input or output) of a price, per 1M tokens.
  */
 export interface Price {
-  kind: Kind6;
+  kind: Kind8;
   per_1m: Per1M;
 }
 /**
@@ -1667,7 +1789,7 @@ export interface ProvEdge {
   net_mechanism?: NetMechanism;
   net_resolved_ip?: NetResolvedIp;
   note?: Note;
-  path?: Path4;
+  path?: Path5;
   role: EdgeRole;
   sha256?: Sha2562;
   version?: Version5;
@@ -1680,14 +1802,14 @@ export interface TransformRecord {
   agent_role?: AgentRole;
   annotation?: Annotation1;
   call_id: CallId2;
-  candidates?: Candidates;
+  candidates?: Candidates1;
   ended_at?: EndedAt;
   environment?: EnvironmentRecord;
   event_id?: EventId;
   generated?: Generated;
   instrument?: Instrument;
   kind?: TransformKind;
-  notes?: Notes;
+  notes?: Notes2;
   replay?: ReplayContract;
   replay_reason?: ReplayReason;
   session_id?: SessionId1;
