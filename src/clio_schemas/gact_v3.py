@@ -36,6 +36,19 @@ class ReasoningMessageBlock(_ClosedBlock):
     source: str | None = None
     provider_source: str | None = None
     default_collapsed: bool | None = None
+    started_at: str | None = Field(
+        default=None,
+        description="CLIO-observed first reasoning delta, not provider scheduling time.",
+    )
+    completed_at: str | None = Field(
+        default=None, description="CLIO-observed closure of this reasoning passage."
+    )
+    duration_ms: float | None = Field(
+        default=None,
+        ge=0,
+        allow_inf_nan=False,
+        description="Monotonic elapsed time for this reasoning passage; excludes tool execution.",
+    )
 
 
 class ToolMessageBlock(_ClosedBlock):

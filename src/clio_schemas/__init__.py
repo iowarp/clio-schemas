@@ -136,4 +136,4 @@ __all__ = [
 ]
 
 # Exact-pin lockstep versioning (see README "Versioning policy").
-__version__ = "0.6.0b9"
+__version__ = "0.6.0b10"
