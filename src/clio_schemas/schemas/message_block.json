@@ -974,6 +974,19 @@
           "default": null,
           "title": "Channel"
         },
+        "completed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "CLIO-observed closure of this reasoning passage.",
+          "title": "Completed At"
+        },
         "default_collapsed": {
           "anyOf": [
             {
@@ -985,6 +998,20 @@
           ],
           "default": null,
           "title": "Default Collapsed"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Monotonic elapsed time for this reasoning passage; excludes tool execution.",
+          "title": "Duration Ms"
         },
         "id": {
           "title": "Id",
@@ -1026,6 +1053,19 @@
           ],
           "default": null,
           "title": "Source"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "CLIO-observed first reasoning delta, not provider scheduling time.",
+          "title": "Started At"
         },
         "stream_source": {
           "anyOf": [

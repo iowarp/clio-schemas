@@ -201,7 +201,7 @@ def render_workspace_sidecar() -> dict[str, Any]:
                         "additionalProperties": False,
                     },
                 }
-                for provider in ("github", "google_drive", "globus")
+                for provider in ("github", "google_drive", "globus", "ndp")
             },
         },
         "instructions": "instructions.md",
