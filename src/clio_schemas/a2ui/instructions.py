@@ -204,9 +204,17 @@ table itself. Inline rows require `columns`; a `dataUri` table takes
 `selection` with a matching `selectionField` for an explicit cross-artifact
 link (see Shared selection below).
 
-**Mermaid** — declarative diagram source only; no init directives or click
-handlers. Inline `source`, or `dataUri` to a registered `.mmd`/text file:
+**Mermaid** — declarative diagram source rendered with Pele, with compatibility
+for existing Mermaid documents. Inline `source`, or `dataUri` to a registered `.mmd`/text file:
 `{"id": "d1", "component": "clio.mermaid.v1", "source": "graph TD; A-->B;"}`.
+Choose a diagram and panel width that keep its relationships readable; equal,
+uneven and full-width layouts are options, not a fixed recipe. For explicit
+folder navigation use a standalone `click stage "workspace-folder:reports" "Open reports"`
+line naming an existing node and a relative directory in the current workspace.
+The client strips this guarded link before rendering and opens Files on click;
+it neither runs a callback nor grants access. Arbitrary click handlers, external
+link targets, init directives and HTML remain unsupported. Inspect the rendered
+image at the person's viewing width and revise cropping or unreadable labels.
 
 **Map** — labeled points or GeoJSON geometry; the renderer owns the
 basemap, so never pass tile/style URLs. Inline points are capped at 500; a
