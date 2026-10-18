@@ -189,7 +189,11 @@ table itself. Inline rows require `columns`; a `dataUri` table takes
 link (see Shared selection below).
 
 **Mermaid** — declarative diagram source rendered with Pele, with compatibility
-for existing Mermaid documents. Inline `source`, or `dataUri` to a registered `.mmd`/text file:
+for existing Mermaid documents. Pele is the renderer; keep the component name
+`clio.mermaid.v1` and provide Mermaid-family text, not renderer API options.
+The `create-diagram` skill covers type selection, concrete syntax (including
+`railroad-ebnf-beta`), grammar operators and CLIO-specific limitations.
+Inline `source`, or `dataUri` to a registered `.mmd`/text file:
 `{"id": "d1", "component": "clio.mermaid.v1", "source": "graph TD; A-->B;"}`.
 Choose a diagram and panel width that keep its relationships readable; equal,
 uneven and full-width layouts are options, not a fixed recipe. For explicit
