@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12"
 
 [[package]]
@@ -35,7 +35,7 @@ wheels = [
 
 [[package]]
 name = "clio-schemas"
-version = "0.6.0b9"
+version = "0.6.0b10"
 source = { editable = "." }
 dependencies = [
     { name = "annotated-types" },
