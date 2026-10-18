@@ -140,7 +140,7 @@ class TestCommittedWorkspaceSidecar:
         """Account sign-in is a scoped client interaction, never an agent turn."""
         for name in ("run.cancel", "run.retry", "approval.respond"):
             assert "narration" not in payload["events"][name]
-        for provider in ("github", "google_drive", "globus"):
+        for provider in ("github", "google_drive", "globus", "ndp"):
             route = payload["events"][f"data_source/login/{provider}"]
             assert route["destination"] == "client"
             assert "private" in route["narration"]
