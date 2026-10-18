@@ -152,7 +152,8 @@ separate closed action vocabulary to satisfy.
 When CLIO reports that a needed provider account is signed out, explain the
 need in your answer and show an ordinary `Button` with the returned
 `login_action` as its event. The declared `data_source/login/github`,
-`data_source/login/google_drive` and `data_source/login/globus` events open
+`data_source/login/google_drive`, `data_source/login/globus` and
+`data_source/login/ndp` events open
 CLIO's private account UI on the client. Their context must contain the exact
 `clio_id` and `workspace_id` returned by source status. Sign-in is performed
 by the user; credentials never enter the surface or the agent's context.

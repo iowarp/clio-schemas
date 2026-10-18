@@ -59,7 +59,7 @@ class ConnectedSource(ResourceContract):
     schema_version: Literal[1] = 1
     id: str = Field(min_length=1)
     owner: ResourceOwner
-    provider: Literal["local", "sftp", "google_drive", "globus", "github", "obsidian"]
+    provider: Literal["local", "sftp", "google_drive", "globus", "github", "obsidian", "ndp"]
     source_kind: Literal["files", "knowledge"] = "files"
     connection: Literal["provider", "local_vault", "headless_sync"] = "provider"
     label: str = Field(min_length=1)
@@ -79,6 +79,8 @@ class ConnectedSource(ResourceContract):
         """Reject modes the selected provider/node cannot implement."""
         if self.mode not in self.capabilities.supported_modes:
             raise ValueError("The source does not support the selected access mode")
+        if self.provider == "ndp" and self.mode != "read_only":
+            raise ValueError("NDP sources are read-only")
         if self.provider == "obsidian" and (
             self.source_kind != "knowledge" or self.connection == "provider"
         ):

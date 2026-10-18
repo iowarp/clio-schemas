@@ -1355,7 +1355,8 @@
             "google_drive",
             "globus",
             "github",
-            "obsidian"
+            "obsidian",
+            "ndp"
           ],
           "title": "Provider",
           "type": "string"
