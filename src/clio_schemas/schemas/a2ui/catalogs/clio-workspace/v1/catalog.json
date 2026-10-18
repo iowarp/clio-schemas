@@ -3505,7 +3505,7 @@
             ],
             "example": "railroad-ebnf-beta\nrequest = \"READ\" names [ \"WHERE\" name ] ;\nnames = name ( \",\" name )* ;\nname = ( \"a\" | \"b\" | \"c\" )+ ;",
             "family": "railroad",
-            "syntax": "Choose one notation. EBNF: name = expression ;, quoted terminals, bare rule references, adjacency sequence, | choice, [x] optional, (x) grouping, x* zero-or-more, x+ one-or-more. ABNF: name = expression, / choice, [x] optional, *x zero-or-more, 1*x one-or-more, %x41 hex terminal. PEG: name <- expression ;, / ordered choice, x? optional, x* and x+ repetition, &x/!x lookahead; quote terminals. End productions with ; in each notation in this renderer. The railroad DSL uses name = terminal(\"word\") ; with nonterminal(\"rule\"), sequence(...), choice(...), optional(...), zeroOrMore(...) and oneOrMore(...). Do not mix operators; define referenced rules and preserve optionality.",
+            "syntax": "Choose one notation. EBNF: name = expression ;, quoted terminals, bare rule references, adjacency sequence, | choice, [x] optional, (x) grouping, x* zero-or-more, x+ one-or-more. ABNF: name = expression, / choice, [x] optional, *x zero-or-more, 1*x one-or-more, %x41 hex terminal. ABNF quoted literals are case-insensitive; for exact ASCII case use %x byte sequences, e.g. %x4F.50.45.4E for OPEN. This pinned renderer does not accept RFC 7405 %s/%i prefixes. EBNF/PEG quoted literals are case-sensitive; identical displayed labels do not prove language equivalence. PEG: name <- expression ;, / ordered choice, x? optional, x* and x+ repetition, &x/!x lookahead; quote terminals. End productions with ; in each notation in this renderer. The railroad DSL uses name = terminal(\"word\") ; with nonterminal(\"rule\"), sequence(...), choice(...), optional(...), zeroOrMore(...) and oneOrMore(...). Do not mix operators; define referenced rules and preserve optionality.",
             "use": "Accepted token sequences in a grammar."
           },
           {
@@ -3615,11 +3615,12 @@
           "C4Container": "C4Container\n  Person(reader, \"Reader\")\n  Container(api, \"API\", \"Python\")\n  ContainerDb(db, \"Records\", \"SQL\")\n  Rel(reader, api, \"Queries\")\n  Rel(api, db, \"Reads\")",
           "C4Deployment": "C4Deployment\n  Deployment_Node(host, \"Host\", \"Linux\") {\n    Container(api, \"API\", \"Python\")\n  }",
           "C4Dynamic": "C4Dynamic\n  Person(reader, \"Reader\")\n  Container(api, \"API\", \"HTTP\")\n  Rel(reader, api, \"Requests record\")",
-          "railroad-abnf-beta": "railroad-abnf-beta\nrequest = \"READ\" 1*letter [\" ALL\"] ;\nletter = \"a\" / \"b\" / \"c\" ;",
+          "railroad-abnf-beta": "railroad-abnf-beta\nrequest = %x52.45.41.44 1*letter [ %x20.41.4C.4C ] ;\nletter = %x61 / %x62 / %x63 ;",
           "railroad-beta": "railroad-beta\nrequest = sequence(terminal(\"READ\"), optional(terminal(\"ALL\"))) ;",
           "railroad-peg-beta": "railroad-peg-beta\nrequest <- \"READ\" letter+ \"ALL\"? ;\nletter <- \"a\" / \"b\" / \"c\" ;"
         },
         "references": {
+          "abnf_case": "https://www.rfc-editor.org/rfc/rfc7405.html",
           "syntax_examples": "https://pele.run/examples",
           "upstream": "https://pele.run/compatibility",
           "version_rule": "This inventory follows the pinned consumer, not the latest website. New library versions require a fresh coverage and rendering check."

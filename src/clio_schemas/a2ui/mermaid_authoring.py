@@ -348,6 +348,10 @@ MERMAID_AUTHORING: dict[str, Any] = {
             "bare rule references, adjacency sequence, | choice, [x] optional, "
             "(x) grouping, x* zero-or-more, x+ one-or-more. ABNF: name = expression, "
             "/ choice, [x] optional, *x zero-or-more, 1*x one-or-more, %x41 hex terminal. "
+            "ABNF quoted literals are case-insensitive; for exact ASCII case use "
+            "%x byte sequences, e.g. %x4F.50.45.4E for OPEN. This pinned renderer "
+            "does not accept RFC 7405 %s/%i prefixes. EBNF/PEG quoted literals are "
+            "case-sensitive; identical displayed labels do not prove language equivalence. "
             "PEG: name <- expression ;, / ordered choice, x? optional, x* and x+ "
             "repetition, &x/!x lookahead; quote terminals. End productions with ; "
             "in each notation in this renderer. The railroad DSL uses "
@@ -476,7 +480,8 @@ MERMAID_AUTHORING: dict[str, Any] = {
             'railroad-beta\nrequest = sequence(terminal("READ"), optional(terminal("ALL"))) ;'
         ),
         "railroad-abnf-beta": (
-            'railroad-abnf-beta\nrequest = "READ" 1*letter [" ALL"] ;\nletter = "a" / "b" / "c" ;'
+            "railroad-abnf-beta\nrequest = %x52.45.41.44 1*letter [ %x20.41.4C.4C ] ;\n"
+            "letter = %x61 / %x62 / %x63 ;"
         ),
         "railroad-peg-beta": (
             'railroad-peg-beta\nrequest <- "READ" letter+ "ALL"? ;\nletter <- "a" / "b" / "c" ;'
@@ -502,6 +507,7 @@ MERMAID_AUTHORING: dict[str, Any] = {
     "references": {
         "upstream": "https://pele.run/compatibility",
         "syntax_examples": "https://pele.run/examples",
+        "abnf_case": "https://www.rfc-editor.org/rfc/rfc7405.html",
         "version_rule": "This inventory follows the pinned consumer, not the latest website. "
         "New library versions require a fresh coverage and rendering check.",
     },
