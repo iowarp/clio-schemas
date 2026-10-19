@@ -37,8 +37,11 @@ MERMAID_AUTHORING: dict[str, Any] = {
         "file path, it registers that file before validation; reuse its returned URI. "
         "Do not guess artifact IDs or use HTTP URLs. "
         "source can be a dynamic string binding; the bound value is diagram text.",
-        "A mermaid fenced block uses the same diagram language for an inline explanation. "
-        "Use the declared dashboard tools for a saved composed report. Do not install "
+        "Render requested diagrams with the declared A2UI surface tools, including inline "
+        "chat explanations. A mermaid fenced block displays source code, not a rendered "
+        "visual; use it when the user asks for source or Markdown export. If rendering is "
+        "unavailable, report the limitation. Use the declared dashboard tools for a saved "
+        "composed report. Do not install "
         "Pele, import JavaScript, or invent clio.pele.v1.",
         "CLIO supplies theme colours and adaptive container width. Renderer options "
         "maxWidth, responsive, config, themeVariables and custom CSS are not component "
