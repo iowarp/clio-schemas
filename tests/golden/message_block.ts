@@ -19,6 +19,8 @@ export type {
   NoticeMessageBlock,
   PlanMessageBlock,
   ReasoningMessageBlock,
+  ResourceDelivery,
+  ResourceMessageBlock,
   RoutingMessageBlock,
   SubagentMessageBlock,
   TaskMessageBlock,
