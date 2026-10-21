@@ -57,6 +57,7 @@ from clio_schemas.a2ui.chart_spec import (
     X_TYPES,
     load_preset,
 )
+from clio_schemas.a2ui.mermaid_authoring import MERMAID_AUTHORING
 from clio_schemas.a2ui.v0_9_1.bounded_components import (
     CHART_PRESET_FIELDS,
     DEFAULT_QUERY_PER_ENTITY,
@@ -662,7 +663,11 @@ _CODE_COMPONENT_SCHEMA: dict[str, Any] = {
 
 _MERMAID_COMPONENT_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "description": "A declarative Mermaid diagram, inline source or from a referenced file.",
+    "description": (
+        "Mermaid diagrams: workflows, protocols, ER/class models, states, git histories, "
+        "grammars, trees and 33 supported families. Load this component for syntax and examples."
+    ),
+    "x-clio-authoring": MERMAID_AUTHORING,
     "allOf": [
         {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
         {"$ref": "#/$defs/CatalogComponentCommon"},

@@ -46,7 +46,9 @@ or assume a remote URL will play inline; see the media-source guidance.
 
 For a report with several views, bind `Tabs.activeTab` when the agent should
 review each tab or a shared control should navigate it. The value names the
-tab's child id. A map's declared `camera` binding moves its real view and is
+tab's exact `tabs[].child` id: if a tab wraps `lifecycleDiagram` in a Frame
+whose id is `lifecycleFrame`, select `lifecycleFrame`, not `lifecycleDiagram`
+or the display title. A map's declared `camera` binding moves its real view and is
 also updated by human navigation. Keep shared cameras and filters on shared
 paths; do not infer control from arbitrary unbound paths. After a complex
 change, use the available capture tool to inspect actual rendered pixels.
@@ -189,7 +191,14 @@ table itself. Inline rows require `columns`; a `dataUri` table takes
 link (see Shared selection below).
 
 **Mermaid** — declarative diagram source rendered with Pele, with compatibility
-for existing Mermaid documents. Inline `source`, or `dataUri` to a registered `.mmd`/text file:
+for existing Mermaid documents. Pele is the renderer; keep the component name
+`clio.mermaid.v1` and provide Mermaid-family text, not renderer API options.
+The `clio.mermaid.v1` schema's `x-clio-authoring` annotation contains the complete
+supported-family inventory, source syntax, runnable examples, notation variants,
+viewer controls, folder targets and recovery. Load that component in the same
+schema batch as the layout. No separate syntax skill is required.
+`create-diagram` is optional guidance for choosing and reviewing diagrams.
+Inline `source`, or `dataUri` to a registered `.mmd`/text file:
 `{"id": "d1", "component": "clio.mermaid.v1", "source": "graph TD; A-->B;"}`.
 Choose a diagram and panel width that keep its relationships readable; equal,
 uneven and full-width layouts are options, not a fixed recipe. For explicit

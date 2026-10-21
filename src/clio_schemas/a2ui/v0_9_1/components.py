@@ -495,7 +495,9 @@ TabsComponent = _component_model(
             DynamicString,
             Field(
                 description=(
-                    "Child id of the displayed tab, optionally bound to a data-model path. "
+                    "Exactly a tabs[].child id, optionally bound to a data-model path. "
+                    "For tabs=[{title:'Lifecycle',child:'lifecycleFrame'}], use "
+                    "'lifecycleFrame', not a nested diagram id or the title. "
                     "Bind it for agent-driven tab review and shared dashboard navigation."
                 )
             ),
