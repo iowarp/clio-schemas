@@ -88,6 +88,44 @@ class ArtifactMessageBlock(_ClosedBlock):
     artifact_id: str
 
 
+ResourceDeliveryRepresentation = Literal[
+    "native",
+    "bounded_tools",
+    "structured_document",
+    "sandbox",
+    "retrieval",
+    "metadata_only",
+]
+
+
+class ResourceDelivery(BaseModel):
+    """How the agent was given an attached resource: its persisted delivery decision."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    representation: ResourceDeliveryRepresentation
+    evidence_source: str | None = Field(
+        default=None, description="What the delivery decision was based on."
+    )
+    reason: str | None = Field(
+        default=None, description="Why this representation was chosen, for display."
+    )
+
+
+class ResourceMessageBlock(_ClosedBlock):
+    """Reference to one workspace resource attached to the message (a composer upload)."""
+
+    type: Literal["resource"]
+    resource_id: str
+    resource_revision: str = Field(
+        description="Revision of the resource the message refers to; a string, not a count."
+    )
+    workspace_id: str
+    name: str = Field(description="Display name of the resource.")
+    media_type: str
+    delivery: ResourceDelivery | None = None
+
+
 class ActionCardBehavior(BaseModel):
     """Registered action-card behavior with forward-compatible parameters."""
 
@@ -210,10 +248,11 @@ MessageBlockValue = Annotated[
     | ErrorMessageBlock
     | RoutingMessageBlock
     | InjectionMessageBlock
-    | NoticeMessageBlock,
+    | NoticeMessageBlock
+    | ResourceMessageBlock,
     Field(discriminator="type"),
 ]
 
 
 class MessageBlock(RootModel[MessageBlockValue]):
-    """Closed discriminated union of the 15 GACT 0.3 message-block types."""
+    """Closed discriminated union of the 16 GACT 0.3 message-block types."""
