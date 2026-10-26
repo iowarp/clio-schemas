@@ -1,226 +1,280 @@
 # clio-schemas
 
-**The single source of truth for the record shapes shared across the CLIO
-system.** `clio-agent`, `clio-relay`, and `gact-tui` all speak the same wire
-records — artifact versions/chains, transform provenance records, the closed GACT 0.3
-message-block union, and the official A2UI 0.9.1 protocol shapes (envelopes,
-capabilities, catalog files). Historically
-each service hand-wrote its own copy of these types and
-they drifted. This package makes the shapes canonical: they are defined once as
-[pydantic](https://docs.pydantic.dev/) v2 models here and exported to JSON
-Schema. Python consumers import the models; TypeScript consumers **generate**
-types from the JSON Schema shipped inside the package. Nobody hand-writes a
-shared shape again.
+clio-schemas holds the data formats that the programs of the
+[CLIO](https://iowarp.ai) system send to each other. Each format is written once
+as a [pydantic](https://docs.pydantic.dev/) v2 model, and the package also ships
+the [JSON Schema](https://json-schema.org/) generated from every model, so code
+in any language can check a record or generate types from it.
 
-> **Status: canonical records, live UI vocabularies, and A2UI 0.9.1 catalog
-> files, model-capability tags, model facts and accepted parameters (version 0.5.2).**
-> `ArtifactVersion`, `ArtifactRecord`, `ProvEdge`, `TransformRecord`, the 15 GACT 0.3
-> message blocks, the official A2UI 0.9.1 envelope/capability/catalog-file models, and
-> the two builtin catalog files (`clio-workspace`'s 32 CLIO components, the vendored
-> `basic` catalog) are canonical. `ModelCapabilityTags`
-> (`clio_schemas.model_capabilities`) tags one model's input/output modalities,
-> capabilities, model type and role (general vs surrogate), Hugging Face
-> `pipeline_tag` tasks, domains, and free/router flags, every tag with its
-> evidence source; an absent tag means no source stated it. `ModelFacts`
-> (`clio_schemas.model_facts`) carries one model's description, release date (and
-> server-derived recency), pricing per 1M tokens (`usd`, or a typed `variable` /
-> `subscription` with no number) and parameter count (total, plus MoE active/expert
-> counts), each with its evidence or `null`. `AcceptedParameter`
-> (`clio_schemas.model_parameters`) is one request setting a model accepts (temperature,
-> top_p, penalties, seed, output length, a local server's context size, ...): its kind,
-> range or options, group, default (or `null` for the provider's own) and evidence; a
-> catalog row lists only the settings some source states the model accepts. There is no closed component/action Python union
-> anymore — a catalog is a JSON Schema document, validated with
-> `clio_schemas.a2ui.validation` (`jsonschema` + `referencing`), not a pydantic
-> discriminated union.
+Three programs read and write these records:
+- [clio-agent](https://github.com/iowarp/clio-agent), the agent service;
+- [gact-tui](https://github.com/iowarp/gact-tui), its desktop and web front end;
+- [clio-relay](https://github.com/iowarp/clio-relay), which runs work on remote
+  clusters.
 
----
+Each program used to keep its own copy of shapes like "an artifact the agent
+produced" or "a block of a chat message", and the copies slowly stopped
+agreeing. Defining them here once, and checking every consumer against the same
+bytes, is what keeps them in step.
 
-## Why the schemas are immutable package resources (design decision)
-
-An exact `clio-schemas` pin, on its own, does **not** guarantee two services see
-the same schema *bytes*: if each consumer *regenerated* JSON Schema from the
-pydantic models under its own resolved pydantic version, a pydantic point release
-could subtly change the output and drift would return through the back door.
-
-So the canonical JSON Schemas are **built once, committed, and shipped as
-immutable package resources** inside the wheel (`clio_schemas/schemas/*.json`),
-alongside a canonical hash manifest (`HASHES.json`). Consumers **copy** those
-committed bytes — they never regenerate. An exact pin therefore *does* determine
-the bytes. Regenerating from the models is a repo-local developer command
-(`--regenerate`), gated to the single **locked pydantic version**, so the
-committed artifacts can only change deliberately, in this repo.
-
-## What's in the box
-
-Knowledge-source contracts in `clio_schemas.knowledge` define `KnowledgeNote`,
-`KnowledgeLink`, and bounded `KnowledgeSnapshot` views. `ConnectedSource`
-distinguishes knowledge sources from file sources, local vaults from Headless
-Sync copies, and note read/search/relationship/write capabilities. Graphs and
-lists share source-relative paths and content revisions; ambiguous and missing
-links stay explicit. Generated JSON Schema and TypeScript accompany these models.
-
-```
-clio-schemas/
-├── pyproject.toml                     # uv-compatible, py>=3.12, pydantic v2, hatchling
-├── src/clio_schemas/
-│   ├── __init__.py                    # public exports + __version__
-│   ├── constants.py                   # LOCKED_PYDANTIC_VERSION, file names
-│   ├── models.py                      # canonical models + ClioSchemaBase + registry
-│   ├── export.py                      # copy / check / regenerate / verify
-│   ├── py.typed                       # ships type information
-│   ├── a2ui/                          # A2UI 0.9.1: official shapes + catalog rendering
-│   │   ├── v0_9_1/                    #   messages, capabilities, data model, catalog file,
-│   │   │                              #   the 32 CLIO component models (components.py /
-│   │   │                              #   bounded_components.py)
-│   │   ├── sidecar.py                 #   CLIO catalog packaging metadata (never on the wire)
-│   │   ├── validation.py              #   jsonschema + referencing validators
-│   │   ├── catalog_render.py          #   canonicaliser: pydantic spec -> official JSON Schema
-│   │   ├── catalog_bounded.py         #   hand-authored map/table/code/mermaid/diff/workflow/chart
-│   │   ├── chart_spec.py              #   clio.chart.v1 Vega-Lite spec guard + preset renderer
-│   │   └── catalog_export.py          #   assembles + renders a2ui/catalogs/**
-│   └── schemas/                       # COMMITTED immutable artifacts (in the wheel)
-│       ├── artifact_version.json      #   per-model, self-contained
-│       ├── artifact_record.json       #   per-model, self-contained
-│       ├── transform_record.json      #   plus provenance/value model schemas
-│       ├── index.json                 #   aggregate: shared $defs emitted once
-│       ├── HASHES.json                #   canonical sha256 manifest (covers a2ui/catalogs/**
-│       │                              #   and a2ui/chart/** too)
-│       └── a2ui/
-│           ├── v0_9_1/                #   VENDORED spec + basic catalog (SOURCE.json-tracked)
-│           ├── catalogs/              #   RENDERED: clio-workspace/v1 + basic sidecars
-│           └── chart/                 #   clio.chart.v1: guard_rules.json (RENDERED) +
-│                                      #   presets/*.json (hand-authored Vega-Lite templates)
-├── tools/ts-gen/
-│   ├── schemas-to-ts.mjs              # JSON Schema dir -> TS module graph (deterministic)
-│   ├── tsconfig.check.json            # isolated strict typecheck of generated TS
-│   └── package.json / package-lock.json
-├── scripts/check_version_bump.py      # CI: schema change ⇒ version bump
-├── tests/
-│   ├── test_roundtrip.py              # JSON/TS golden anti-drift tests
-│   ├── test_legacy_parity.py          # original clio-agent byte fixtures
-│   ├── test_version_bump.py           # unit tests for the bump-enforcement core
-│   └── golden/                        # committed golden TS directory
-│       ├── _models.ts index.ts artifact_version.ts transform_record.ts ...
-└── ci-drafts/                         # workflow drafts for this repo + both consumers
-```
-
-## The pipeline
-
-```
-pydantic models ──render (locked pydantic)──▶ committed *.json + HASHES.json ──ship in wheel──▶
-    consumer copies bytes ──schemas-to-ts.mjs──▶ TypeScript module graph
-```
-
-Every hop is **deterministic**: JSON is emitted with sorted keys and a stable
-`$defs` order; the TypeScript generator uses a fixed banner (no timestamp),
-sorted file order, and pinned formatting. The aggregate `index.json` carries all
-models under a single shared `$defs`, so the generator emits each shared
-definition (e.g. the `ArtifactKind` enum and nested `IdentityEvidence`) **exactly
-once** — the generated module graph has no duplicate declarations.
-
-## Export command modes
+The package is built for CLIO. The models are ordinary pydantic models and work
+in any Python project, but which fields exist, how strictly they validate, and
+how versions are released are all decided by what CLIO's services need. It is
+not meant as a general-purpose schema library.
 
 ```bash
-# Consumer: copy the immutable committed schemas into ./schemas
+pip install clio-schemas==0.6.0b15   # pin an exact version; see "Versions" below
+```
+
+Python 3.12 or later.
+
+## A worked example
+
+`KnowledgeLink` records a link from one note to another, in a notes source such
+as an Obsidian vault. It lives in `clio_schemas.knowledge`:
+
+```python
+class KnowledgeLink(ResourceContract):
+    """An explicit link or embed; unresolved and ambiguous targets stay explicit."""
+
+    source: str
+    target: str
+    selector: str = ""
+    kind: Literal["link", "embed"] = "link"
+    status: Literal["resolved", "unresolved", "ambiguous", "external"] = "resolved"
+    candidates: list[str] = Field(default_factory=list)
+```
+
+The package ships the JSON Schema generated from it as
+`clio_schemas/schemas/knowledge_link.json`:
+
+<details>
+<summary><code>knowledge_link.json</code></summary>
+
+```json
+{
+  "additionalProperties": false,
+  "description": "An explicit link or embed; unresolved and ambiguous targets stay explicit.",
+  "properties": {
+    "candidates": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Candidates",
+      "type": "array"
+    },
+    "kind": {
+      "default": "link",
+      "enum": [
+        "link",
+        "embed"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "selector": {
+      "default": "",
+      "title": "Selector",
+      "type": "string"
+    },
+    "source": {
+      "title": "Source",
+      "type": "string"
+    },
+    "status": {
+      "default": "resolved",
+      "enum": [
+        "resolved",
+        "unresolved",
+        "ambiguous",
+        "external"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "target": {
+      "title": "Target",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source",
+    "target"
+  ],
+  "title": "KnowledgeLink",
+  "type": "object"
+}
+```
+
+</details>
+
+A Python consumer validates with the model; anything else can validate the same
+record against the shipped schema:
+
+```python
+import json
+from importlib.resources import files
+
+import jsonschema
+from clio_schemas.knowledge import KnowledgeLink
+
+link = KnowledgeLink(source="notes/plan.md", target="notes/results.md")
+schema = json.loads(files("clio_schemas").joinpath("schemas/knowledge_link.json").read_text())
+jsonschema.validate(link.model_dump(mode="json"), schema)
+```
+
+Both reject a record that doesn't fit: `status="broken"` fails the model, and an
+extra `"colour"` key fails the schema (`additionalProperties: false`).
+
+TypeScript types are generated from the same JSON files by the script in
+`tools/ts-gen`, not written by hand. For this model it produces:
+
+```ts
+export interface KnowledgeLink {
+  candidates?: Candidates;
+  kind?: Kind5;
+  selector?: Selector;
+  source: Source2;
+  status?: Status;
+  target: Target;
+}
+```
+
+## What's in the package
+
+| Module | Records |
+|---|---|
+| `models` | Artifacts the agent produces (`ArtifactVersion`, `ArtifactRecord`) and their provenance: how each was made (`TransformRecord`), what it used and produced (`ProvEdge`), the tool and environment involved (`Instrument`, `EnvironmentRecord`). |
+| `gact_v3` | The 15 kinds of block a chat message is made of (text, reasoning, tool call, plan, task, subagent, artifact, citation, diff, ...), as sent from clio-agent to its front ends. GACT is the protocol between them; these blocks are version 0.3. |
+| `a2ui` | [A2UI](https://github.com/google/A2UI) 0.9.1, an open protocol for an agent to send user interfaces as data: the message and capability shapes, a vendored copy of the official spec, and CLIO's own catalog of 32 components with validators for it. |
+| `knowledge`, `connected_resources` | Notes and links from knowledge sources such as Obsidian vaults, connected file sources, storage locations on a host, and a selection within a piece of content. |
+| `model_capabilities`, `model_facts`, `model_parameters` | What a language model takes and produces, its description, release date, pricing and size, and the request settings it accepts. Every value names the source it came from; a value no source stated is left out or `null`. |
+| `attention`, `attention_evidence` | Settings for the heat-map view of a model's attention over a transcript item, the reducer that recomputes a captured view, and the inspection record a reviewer rechecks against the session. |
+
+`clio_schemas.export.EXPORTED_MODELS` lists every model that gets a JSON Schema
+file.
+
+## How the schemas stay identical everywhere
+
+**The installed version fixes the exact schema bytes.** The JSON Schema files are
+generated once, committed to this repository, and shipped inside the package;
+consumers copy them rather than generating their own. That matters because two
+pydantic releases can turn the same model into slightly different JSON Schema,
+so a consumer that regenerated would drift without changing anything.
+
+**Only one pydantic version may regenerate them.** `export --regenerate` refuses
+to run unless the installed pydantic is the locked version
+(`LOCKED_PYDANTIC_VERSION` in `constants.py`), so the committed files change only
+when someone here changes them on purpose.
+
+**Changing a schema requires a new version.** `HASHES.json` records a SHA-256 for
+every shipped file. CI compares it with the last published release tag and
+fails if a schema changed but the version did not.
+
+**Consumers check their copies in CI.** clio-agent's CI exports the schemas from
+the version it pins, byte-checks the copy, and runs its schema-equality tests
+(`schema-check.yml`). gact-tui's CI regenerates its TypeScript and Zod types from
+a pinned clio-schemas commit and fails if the result differs from what is
+committed (`schema-ts-gen.yml`).
+
+## Versions
+
+Consumers pin an exact version (`clio-schemas==X.Y.Z`, never `>=`). With a range,
+two services could resolve to different releases and disagree about a record.
+
+- The version is set in two places that CI requires to match: `version` in
+  `pyproject.toml` and `__version__` in `src/clio_schemas/__init__.py`.
+- Any change to a shipped schema needs a version bump
+  (`scripts/check_version_bump.py`).
+
+Rolling out a change across services that briefly run different versions
+follows three rules:
+
+- **Readers before writers.** An addition (a new optional field, a new enum
+  value) ships first to every service that reads the record, then to the ones
+  that write it. Until then, readers must tolerate the new optional data.
+- **Adjacent versions interoperate.** Services on version *N* and *N-1* must be
+  able to exchange the records they share for the length of a rollout. A
+  breaking change goes through at least one intermediate version, never all at
+  once.
+- **Roll back in reverse.** Retire the writers of a new shape before the readers
+  that understand it, so a rolled-back writer never sends something a
+  rolled-back reader would reject.
+
+### Strict and tolerant records
+
+New records inherit `ClioSchemaBase`: they reject unknown keys, don't coerce
+types (no `"3"` for an `int`), and can't be modified after creation. The
+artifact and provenance records in `models.py` were moved here from clio-agent
+and keep clio-agent's original, more forgiving behavior through
+`LegacyToleranceBase`: unknown keys are ignored and ordinary pydantic coercion
+applies. Tightening them would change what the wire accepts, so it is planned as
+a separate change coordinated with every consumer (iowarp/clio-agent#1121).
+
+## The export command
+
+```bash
+# Copy the shipped schemas into ./schemas
 uv run python -m clio_schemas.export --out schemas
 
-# Consumer CI: verify a directory matches the committed bytes exactly
-# (rejects stale, missing, AND unexpected/orphaned files)
+# Check that ./schemas matches the shipped files exactly
+# (fails on changed, missing, or extra files)
 uv run python -m clio_schemas.export --out schemas --check
 
-# DEV: re-render the committed package resources from the models
-# (refuses unless the installed pydantic == LOCKED_PYDANTIC_VERSION)
+# Development only: regenerate the shipped files from the models
+# (requires the locked pydantic version)
 uv run python -m clio_schemas.export --regenerate
 
-# REPO CI: assert committed artifacts are canonical (match models + hashes)
+# This repository's CI: the committed files match the models and HASHES.json
 uv run python -m clio_schemas.export --verify
 ```
 
-## Quick start
+## Development
 
 ```bash
-uv sync --extra dev                                   # install (locked pydantic)
-uv run python -m clio_schemas.export --verify         # artifacts are canonical
-uv run pytest                                          # golden round-trip + conformance
+uv sync --extra dev
+uv run python -m clio_schemas.export --verify
+uv run pytest
 
-cd tools/ts-gen && npm ci && npm run check            # generate TS + strict typecheck
+cd tools/ts-gen && npm ci && npm run check   # generate TypeScript and type-check it
 ```
 
-## Legacy extraction compatibility
+`tests/golden/` holds the expected TypeScript output. `tests/test_roundtrip.py`
+regenerates it and fails on any difference, which catches a change to a model,
+a schema or the generator that nobody meant to make.
 
-The P2.1 artifact/provenance records use `LegacyToleranceBase` so their
-clio-agent behavior remains byte- and validation-compatible: unknown keys are
-ignored, ordinary Pydantic coercion remains enabled, immutable records stay
-frozen, and `ArtifactRecord` stays mutable. Moving existing records to the
-strict `ClioSchemaBase` contract would be a wire change; that coordinated
-convergence is tracked in iowarp/clio-agent#1121.
+### Adding a model
 
-## How to add a model
-
-1. Define the pydantic v2 model in `src/clio_schemas/models.py`, inheriting
-   `ClioSchemaBase` (strict wire semantics: `extra="forbid"`, `strict=True`,
-   `frozen=True`). Give every field a `Field(description=...)` — descriptions flow
-   into the JSON Schema and the generated TS doc comments.
-2. Append the class to the `EXPORTED_MODELS` tuple in the same file.
-3. Regenerate the committed artifacts and the golden TS, then bump the version:
+1. Define the model, inheriting `ClioSchemaBase`, and give every field a
+   `Field(description=...)`. Descriptions carry through to the JSON Schema and to
+   the generated TypeScript comments.
+2. Add it to `EXPORTED_MODELS` in `models.py`.
+3. Regenerate the shipped schemas and the expected TypeScript:
    ```bash
-   uv run python -m clio_schemas.export --regenerate            # updates schemas/ + HASHES.json
+   uv run python -m clio_schemas.export --regenerate   # schemas/ and HASHES.json
    cd tools/ts-gen && node schemas-to-ts.mjs \
        --in ../../src/clio_schemas/schemas --out ../../tests/golden
    ```
-4. Bump `__version__` in `src/clio_schemas/__init__.py` **and** `version` in
-   `pyproject.toml` in lockstep (CI enforces a bump whenever `HASHES.json`
-   changes), then `uv run pytest`.
+4. Bump the version in both places, then run `uv run pytest`.
 
-## Versioning policy — exact-pin lockstep
+### Repository layout
 
-Consumers pin an **exact** version (`clio-schemas==X.Y.Z`, not `>=`). A schema is
-a contract between multiple services; a range would let two services resolve
-different shapes and reintroduce drift. Therefore:
-
-- **Any** change to a committed schema (detected via `HASHES.json`) requires a
-  `clio-schemas` version bump — enforced mechanically in CI by
-  `scripts/check_version_bump.py`, which compares the hash manifest against the
-  merge base and fails if the version was not incremented.
-- All consumers (`clio-agent`, `clio-relay`, `gact-tui`) update their pin to the
-  new exact version **in lockstep**, in the same coordinated change.
-- The version lives in exactly two places that must agree: `pyproject.toml`
-  `version` and `clio_schemas.__version__`; CI verifies they match.
-
-### Wire evolution
-
-Exact-pin lockstep is the bootstrap rule. As the real records land and the
-system runs mixed versions during rollouts, the intended evolution discipline
-is:
-
-- **Additive, reader-first staging.** Additive changes (new optional field, new
-  enum member) ship to *readers* before *writers*: deploy the version that can
-  *accept* the new shape everywhere first, then deploy the writers that *emit*
-  it. Readers must ignore-or-tolerate unknown-but-optional additions during the
-  transition. Extracted P2.1 records preserve their legacy reader-tolerant
-  behavior through `LegacyToleranceBase`; new records use `ClioSchemaBase`.
-- **N / N-1 compatibility.** Once real schemas exist, adjacent versions are
-  expected to interoperate: a service on version *N* and one on *N-1* must be
-  able to exchange the records they share for the duration of a rollout.
-  Breaking (non-additive) changes require a two-step migration across at least
-  one intermediate version, never a flag-day.
-- **Rollback ordering.** Roll back in the reverse of deploy order: retire the
-  *writers* of a new shape before the *readers* that understand it, so a rolled
-  -back writer never emits a shape an already-rolled-back reader would reject.
-
-Convergence of the extracted records on stricter validation is tracked by
-iowarp/clio-agent#1121 and requires a coordinated consumer migration.
-
-## How consumers regenerate
-
-- **clio-agent (Python):** pin `clio-schemas==X.Y.Z`, `import clio_schemas`. Its
-  CI copies the committed schemas out of the installed package and `--check`s any
-  vendored copy for exact-byte + file-set equality (see
-  `ci-drafts/clio-agent-schema-check.yml`).
-- **clio-relay (Python):** same as clio-agent — import the models, pin exact.
-- **gact-tui (TypeScript):** pin `clio-schemas==X.Y.Z`, copy the shipped JSON
-  Schema out of the package, and run the in-repo generator (`tools/ts-gen`,
-  pinned via its lockfile) to produce `.ts`. Its CI regenerates into a clean dir
-  and compares exact file *sets* + bytes so untracked/orphaned files are caught
-  (see `ci-drafts/gact-tui-ts-gen.yml`).
+```
+src/clio_schemas/
+  models.py, gact_v3.py, knowledge.py, ...   the models (see the table above)
+  export.py                                  copy / check / regenerate / verify
+  constants.py                               LOCKED_PYDANTIC_VERSION, file names
+  a2ui/                                      A2UI shapes, catalog rendering, validators
+  schemas/                                   the committed JSON Schema files
+    *.json, index.json                         one file per model, plus all of them
+                                               in index.json with shared definitions
+                                               emitted once
+    HASHES.json                                SHA-256 of every shipped file
+    a2ui/                                      the vendored A2UI spec and CLIO's
+                                               rendered catalogs
+tools/ts-gen/                                JSON Schema -> TypeScript generator
+scripts/check_version_bump.py                CI: a schema change needs a version bump
+tests/                                       includes golden/ (expected TypeScript)
+ci-drafts/                                   early drafts of this repo's and the
+                                             consumers' CI workflows
+```
