@@ -62,7 +62,11 @@ SYNC_GROUP_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
 #: The 3 CLIO-authored functions (see ``catalog_export.py::_render_workspace_functions``).
 #: Kept here, not just there, so the pydantic ``call`` validator below and the
 #: rendered catalog's function names can never drift apart.
-CLIO_FUNCTION_NAMES: frozenset[str] = frozenset({"openArtifact", "selectData", "focusWorkflow"})
+#: ``openView``'s target: a study view's entry id or a dashboard's artifact URI.
+OPEN_VIEW_PATTERN = r"^(e_[0-9a-f]{12}|artifact://artifact_[A-Za-z0-9_-]+)$"
+CLIO_FUNCTION_NAMES: frozenset[str] = frozenset(
+    {"openArtifact", "selectData", "focusWorkflow", "openView"}
+)
 
 
 @functools.lru_cache(maxsize=1)

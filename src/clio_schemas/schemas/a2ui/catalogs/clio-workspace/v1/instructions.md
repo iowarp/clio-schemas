@@ -246,6 +246,13 @@ plan's progress. Inline `nodes` and `edges` together, or `dataUri` to a
 registered JSON file shaped `{"nodes": [...], "edges": [...]}` (never both,
 never neither):
 `{"id": "wf1", "component": "clio.workflow.v1", "nodes": [{"id": "fetch", "label": "Fetch"}, {"id": "process", "label": "Process"}], "edges": [{"source": "fetch", "target": "process"}]}`.
+A node may carry an `action`, run when it is clicked; bind `selected` to follow a selection.
+
+**Opening views** — `openView` opens a study view (its `view` entry id) or a
+dashboard (its `artifact://` URI) from any conversation of this workspace,
+optionally applying a selection there. A tree of a study's branches can open
+each branch's view from its node, and a button can open another dashboard on one case:
+`{"functionCall": {"call": "openView", "args": {"view": "artifact://artifact_abc123", "selection": {"path": "/selection/case", "field": "case", "values": ["c07"]}}, "returnType": "void"}}`.
 
 **Slider** — `clio.slider.v1` is a numeric control for a physical
 parameter: it keeps a `step` (for example `0.01`), shows `unit`, and has a

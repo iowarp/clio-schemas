@@ -488,6 +488,13 @@ _WORKFLOW_NODE_DEF: dict[str, Any] = {
         "label": {"type": "string"},
         "state": {"type": "string"},
         "detail": {"type": "string"},
+        "action": {
+            "$ref": f"{COMMON_TYPES_ID}#/$defs/Action",
+            "description": (
+                "What clicking this node does, such as an openView call for the view "
+                "of the branch it stands for."
+            ),
+        },
     },
     "required": ["id", "label"],
     "additionalProperties": False,
@@ -540,7 +547,10 @@ _WORKFLOW_COMPONENT_SCHEMA: dict[str, Any] = {
                         '"edges": [...]}.'
                     ),
                 },
-                "selected": {"type": "string"},
+                "selected": {
+                    "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString",
+                    "description": "The selected node id; bind it to follow a selection.",
+                },
                 "action": {"$ref": f"{COMMON_TYPES_ID}#/$defs/Action"},
             },
             "required": ["component"],

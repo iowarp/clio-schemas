@@ -1165,6 +1165,10 @@
     "WorkflowNode": {
       "additionalProperties": false,
       "properties": {
+        "action": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action",
+          "description": "What clicking this node does, such as an openView call for the view of the branch it stands for."
+        },
         "detail": {
           "type": "string"
         },
@@ -1345,6 +1349,9 @@
         },
         {
           "$ref": "#/functions/openUrl"
+        },
+        {
+          "$ref": "#/functions/openView"
         },
         {
           "$ref": "#/functions/or"
@@ -4244,7 +4251,8 @@
               "type": "array"
             },
             "selected": {
-              "type": "string"
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "The selected node id; bind it to follow a selection."
             }
           },
           "required": [
@@ -4712,6 +4720,65 @@
         },
         "call": {
           "const": "openUrl"
+        },
+        "returnType": {
+          "const": "void"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "openView": {
+      "description": "Opens a study view or a dashboard, optionally with a selection applied.",
+      "properties": {
+        "args": {
+          "properties": {
+            "selection": {
+              "additionalProperties": false,
+              "description": "A selection to apply in the opened view, at its path.",
+              "properties": {
+                "field": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "path": {
+                  "pattern": "^/selection/[^/]+$",
+                  "type": "string"
+                },
+                "values": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 10000,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "path",
+                "field",
+                "values"
+              ],
+              "type": "object"
+            },
+            "view": {
+              "description": "A study view's entry id (e_...) or a dashboard's artifact:// URI, from any conversation of this workspace.",
+              "pattern": "^(e_[0-9a-f]{12}|artifact://artifact_[A-Za-z0-9_-]+)$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "view"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "openView"
         },
         "returnType": {
           "const": "void"

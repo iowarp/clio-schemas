@@ -486,6 +486,8 @@ class WorkflowNode(_ClosedModel):
     label: str
     state: str | None = None
     detail: str | None = None
+    #: What clicking the node does, such as opening the view of the branch it stands for.
+    action: Action | None = None
 
 
 class WorkflowEdge(_ClosedModel):
@@ -505,7 +507,7 @@ class WorkflowComponent(_ComponentBase):
     )
     edges: list[WorkflowEdge] | None = Field(default=None, max_length=MAX_WORKFLOW_EDGES)
     dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
-    selected: str | None = None
+    selected: DynamicString | None = None
     action: Action | None = None
 
     @model_validator(mode="after")

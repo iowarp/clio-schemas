@@ -504,6 +504,47 @@ CLIO_ACCEPT_CASES.extend(
         ),
     ]
 )
+# Addendum C: links between views.
+_OPEN_VIEW = {
+    "functionCall": {
+        "call": "openView",
+        "args": {
+            "view": "artifact://artifact_dash1",
+            "selection": {"path": "/selection/case", "field": "case", "values": ["c07"]},
+        },
+        "returnType": "void",
+    }
+}
+CLIO_ACCEPT_CASES.extend(
+    [
+        pytest.param(
+            {
+                "id": "tree",
+                "component": "clio.workflow.v1",
+                "nodes": [
+                    {
+                        "id": "b1",
+                        "label": "Branch 1",
+                        "action": {
+                            "functionCall": {
+                                "call": "openView",
+                                "args": {"view": "e_0123456789ab"},
+                                "returnType": "void",
+                            }
+                        },
+                    }
+                ],
+                "edges": [],
+                "selected": {"path": "/selection/branch/values/0"},
+            },
+            id="Workflow-node-opens-a-view-and-selected-is-bound",
+        ),
+        pytest.param(
+            {"id": "go", "component": "Button", "child": "label", "action": _OPEN_VIEW},
+            id="Button-openView-with-selection",
+        ),
+    ]
+)
 CLIO_REJECT_CASES.extend(
     [
         pytest.param(
@@ -1142,3 +1183,16 @@ def test_select_data_writes_a_selection_path_and_field() -> None:
         {**args, "values": ["GNSS01"]},
     ):
         assert not WORKSPACE_VALIDATORS["Button"].is_valid(_select_data_button(bad)), bad
+
+
+def test_open_view_names_a_view_entry_or_a_dashboard_not_a_path() -> None:
+    """Function arguments are the catalog's to check (pydantic checks only the name)."""
+
+    def button(view: str) -> dict[str, Any]:
+        call = {"call": "openView", "args": {"view": view}, "returnType": "void"}
+        return {"id": "go", "component": "Button", "child": "l", "action": {"functionCall": call}}
+
+    validator = WORKSPACE_VALIDATORS["Button"]
+    assert validator.is_valid(button("e_0123456789ab"))
+    assert validator.is_valid(button("artifact://artifact_dash1"))
+    assert not validator.is_valid(button("/home/me/dashboard.json"))
