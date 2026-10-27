@@ -36,6 +36,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     ArtifactUri,
     ChildList,
     ComponentId,
+    DynamicArtifactUri,
     DynamicBoolean,
     DynamicNumber,
     DynamicString,
@@ -258,6 +259,21 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
 
     if t == ArtifactUri:
         return {"type": "string", "pattern": ARTIFACT_URI_PATTERN}
+    if t == DynamicArtifactUri:
+        # An artifact URI, or a binding/function resolved on the client (checked there
+        # against the same pattern), so a viewer can follow the selection.
+        return {
+            "oneOf": [
+                {"type": "string", "pattern": ARTIFACT_URI_PATTERN},
+                {"$ref": f"{COMMON_TYPES_ID}#/$defs/DataBinding"},
+                {
+                    "allOf": [
+                        {"$ref": f"{COMMON_TYPES_ID}#/$defs/FunctionCall"},
+                        {"properties": {"returnType": {"const": "string"}}},
+                    ]
+                },
+            ]
+        }
     if t == SyncGroup:
         return {"type": "string", "pattern": SYNC_GROUP_PATTERN}
 

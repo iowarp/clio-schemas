@@ -50,6 +50,12 @@ SELECTION_PATH_PATTERN = r"^/selection/[^/]+$"
 
 #: A registered-artifact reference (the only form bulk data may take on the wire).
 ARTIFACT_URI_PATTERN = r"^artifact://artifact_[A-Za-z0-9_-]+$"
+#: A table's data source: a registered artifact, or a live study source a view reads
+#: (``study://<study>/measurements|entries|records/<view>``).
+TABLE_DATA_URI_PATTERN = (
+    r"^(artifact://artifact_[A-Za-z0-9_-]+"
+    r"|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$"
+)
 #: Name shared by components that coordinate client-side (camera, color range).
 SYNC_GROUP_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
 
@@ -178,6 +184,9 @@ ChildList = list[str] | _ChildTemplate
 # Pattern-constrained string markers: plain strings on the wire, rendered by
 # the catalog canonicaliser as ``{"type": "string", "pattern": ...}``.
 ArtifactUri = Annotated[str, Field(pattern=ARTIFACT_URI_PATTERN)]
+#: An artifact a viewer shows, given literally or bound to the data model (for
+#: example the selected row's file), so one viewer can follow a selection.
+DynamicArtifactUri = ArtifactUri | _DataBinding | _StringFunctionCall
 SyncGroup = Annotated[str, Field(pattern=SYNC_GROUP_PATTERN)]
 
 
@@ -660,10 +669,10 @@ MeshViewportComponent = _component_model(
         "An orbitable 3D view of a registered standard mesh or a CLIO FEA mesh "
         "with optional result fields."
     ),
-    required={"meshUri": ArtifactUri},
+    required={"meshUri": DynamicArtifactUri},
     optional={
         "format": Literal["glb", "gltf", "obj", "stl", "ply", "fbx", "3mf", "vtk", "vtp", "drc"],
-        "materialUri": ArtifactUri,
+        "materialUri": DynamicArtifactUri,
         "title": DynamicString,
         "field": DynamicString,
         "showField": DynamicBoolean,
@@ -684,7 +693,7 @@ RasterViewportComponent = _component_model(
         "An interactive viewport for a registered two-dimensional grid, "
         "with sampled values, colour scale, and region reference."
     ),
-    required={"rasterUri": ArtifactUri},
+    required={"rasterUri": DynamicArtifactUri},
     optional={
         "title": DynamicString,
         "variable": str,

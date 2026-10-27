@@ -42,6 +42,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     MAX_MAP_POINTS,
     MAX_WORKFLOW_EDGES,
     MAX_WORKFLOW_NODES,
+    TABLE_DATA_URI_PATTERN,
     Action,
     ActionCardComponent,
     ApprovalComponent,
@@ -425,7 +426,7 @@ class MapComponent(_ComponentBase):
     title: DynamicString | None = None
     camera: MapCamera | _DataBinding | None = None
     points: list[MapPoint] | None = Field(default=None, min_length=1, max_length=MAX_MAP_POINTS)
-    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    dataUri: str | None = Field(default=None, pattern=TABLE_DATA_URI_PATTERN)
     geojsonUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
     dataQuery: DataQuery | None = None
     latitudeField: FieldName | None = None
@@ -523,7 +524,7 @@ class DataTableComponent(_ComponentBase):
     component: Literal["clio.data-table.v1"] = "clio.data-table.v1"
     columns: list[str | _DataTableColumn] | None = None
     rows: list[dict[str, JsonValue]] | None = None
-    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    dataUri: str | None = Field(default=None, pattern=TABLE_DATA_URI_PATTERN)
     dataQuery: DataQuery | None = None
     # DynamicValue (not a static string): bind it to /selection/<key>, whose
     # value is a SelectionState. A plain string stays valid (backward compatible).
@@ -612,7 +613,7 @@ class ChartComponent(_ComponentBase):
     facetField: FieldName | None = None
     xType: Literal["temporal", "quantitative", "ordinal"] | None = None
     data: list[dict[str, ChartRowValue]] | None = Field(default=None, max_length=MAX_INLINE_ROWS)
-    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    dataUri: str | None = Field(default=None, pattern=TABLE_DATA_URI_PATTERN)
     dataQuery: DataQuery | None = None
     selection: DynamicValue | None = None
     selectionParam: str | None = Field(default=None, pattern=SELECTION_PARAM_PATTERN)

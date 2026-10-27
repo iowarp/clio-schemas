@@ -2383,11 +2383,11 @@
               "$ref": "#/$defs/DataQuery"
             },
             "dataUri": {
-              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation.",
+              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation. Or a live study source, study://<study>/measurements, study://<study>/entries or study://<study>/records/<view>, which updates as the study records entries.",
               "not": {
                 "pattern": "\\s"
               },
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "pattern": "^(artifact://artifact_[A-Za-z0-9_-]+|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$",
               "type": "string"
             },
             "entityField": {
@@ -2804,11 +2804,11 @@
               "$ref": "#/$defs/DataQuery"
             },
             "dataUri": {
-              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation.",
+              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation. Or a live study source, study://<study>/measurements, study://<study>/entries or study://<study>/records/<view>, which updates as the study records entries.",
               "not": {
                 "pattern": "\\s"
               },
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "pattern": "^(artifact://artifact_[A-Za-z0-9_-]+|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$",
               "type": "string"
             },
             "rows": {
@@ -3017,11 +3017,11 @@
               "$ref": "#/$defs/DataQuery"
             },
             "dataUri": {
-              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation. Requires latitudeField/longitudeField/labelField; a referenced dataset is bounded by dataQuery/limit, not the inline point cap.",
+              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation. Or a live study source, study://<study>/measurements, study://<study>/entries or study://<study>/records/<view>, which updates as the study records entries. Requires latitudeField/longitudeField/labelField; a referenced dataset is bounded by dataQuery/limit, not the inline point cap.",
               "not": {
                 "pattern": "\\s"
               },
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "pattern": "^(artifact://artifact_[A-Za-z0-9_-]+|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$",
               "type": "string"
             },
             "detailField": {
@@ -3679,12 +3679,54 @@
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicNumber"
             },
             "materialUri": {
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
-              "type": "string"
+              "oneOf": [
+                {
+                  "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+                  "type": "string"
+                },
+                {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding"
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/FunctionCall"
+                    },
+                    {
+                      "properties": {
+                        "returnType": {
+                          "const": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             },
             "meshUri": {
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
-              "type": "string"
+              "oneOf": [
+                {
+                  "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+                  "type": "string"
+                },
+                {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding"
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/FunctionCall"
+                    },
+                    {
+                      "properties": {
+                        "returnType": {
+                          "const": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             },
             "showField": {
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicBoolean"
@@ -3880,8 +3922,29 @@
               "const": "clio.raster-viewport.v1"
             },
             "rasterUri": {
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
-              "type": "string"
+              "oneOf": [
+                {
+                  "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+                  "type": "string"
+                },
+                {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding"
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/FunctionCall"
+                    },
+                    {
+                      "properties": {
+                        "returnType": {
+                          "const": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             },
             "title": {
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"

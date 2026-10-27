@@ -470,6 +470,62 @@ CLIO_ACCEPT_CASES.extend(
 )
 
 
+# Addendum B/C: a live study source as tabular data, and a viewer whose file follows
+# the shared selection.
+CLIO_ACCEPT_CASES.extend(
+    [
+        pytest.param(
+            {
+                "id": "law",
+                "component": "clio.chart.v1",
+                "preset": "scatter",
+                "xField": "condition.n",
+                "yField": "value",
+                "entityField": "branch",
+                "dataUri": "study://e_abc123/measurements",
+            },
+            id="Chart-study-measurements-source",
+        ),
+        pytest.param(
+            {
+                "id": "board",
+                "component": "clio.data-table.v1",
+                "dataUri": "study://e_abc123/records/board",
+            },
+            id="DataTable-study-records-source",
+        ),
+        pytest.param(
+            {
+                "id": "vp_sel",
+                "component": "clio.mesh-viewport.v1",
+                "meshUri": {"path": "/selection/case/values/0"},
+            },
+            id="MeshViewport-meshUri-bound-to-selection",
+        ),
+    ]
+)
+CLIO_REJECT_CASES.extend(
+    [
+        pytest.param(
+            {
+                "id": "bad",
+                "component": "clio.data-table.v1",
+                "dataUri": "study://e_abc123/notes",
+            },
+            id="DataTable-unknown-study-source",
+        ),
+        pytest.param(
+            {
+                "id": "vp_bad",
+                "component": "clio.mesh-viewport.v1",
+                "meshUri": "https://example.com/mesh.stl",
+            },
+            id="MeshViewport-meshUri-not-an-artifact",
+        ),
+    ]
+)
+
+
 @pytest.mark.parametrize("payload", CLIO_REJECT_CASES)
 def test_clio_workspace_reject_case_fails(payload: dict[str, Any]) -> None:
     assert not WORKSPACE_VALIDATORS[payload["component"]].is_valid(payload)
