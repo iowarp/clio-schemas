@@ -1196,3 +1196,20 @@ def test_open_view_names_a_view_entry_or_a_dashboard_not_a_path() -> None:
     assert validator.is_valid(button("e_0123456789ab"))
     assert validator.is_valid(button("artifact://artifact_dash1"))
     assert not validator.is_valid(button("/home/me/dashboard.json"))
+
+
+def test_viewers_take_a_height_and_a_table_its_first_page_size() -> None:
+    """A dashboard can give a 3D view or raster room, and a long table more rows."""
+
+    mesh = {"id": "m", "component": "clio.mesh-viewport.v1", "meshUri": "artifact://artifact_a"}
+    assert WORKSPACE_VALIDATORS["clio.mesh-viewport.v1"].is_valid({**mesh, "height": 560})
+    assert not WORKSPACE_VALIDATORS["clio.mesh-viewport.v1"].is_valid({**mesh, "height": 40})
+    raster = {
+        "id": "r",
+        "component": "clio.raster-viewport.v1",
+        "rasterUri": "artifact://artifact_a",
+    }
+    assert WORKSPACE_VALIDATORS["clio.raster-viewport.v1"].is_valid({**raster, "height": 480})
+    table = {"id": "t", "component": "clio.data-table.v1", "columns": ["a"], "rows": [{"a": 1}]}
+    assert WORKSPACE_VALIDATORS["clio.data-table.v1"].is_valid({**table, "pageSize": 25})
+    assert not WORKSPACE_VALIDATORS["clio.data-table.v1"].is_valid({**table, "pageSize": 7})

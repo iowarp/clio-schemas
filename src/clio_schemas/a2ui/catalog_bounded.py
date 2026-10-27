@@ -594,6 +594,10 @@ _DATA_TABLE_COMPONENT_SCHEMA: dict[str, Any] = {
                         "queried/dataset columns)."
                     ),
                 },
+                "pageSize": {
+                    "enum": [10, 25, 50, 100, 500],
+                    "description": "Rows per page at first (default 10); the reader can change it.",
+                },
                 "rows": {
                     "type": "array",
                     "items": {"type": "object"},

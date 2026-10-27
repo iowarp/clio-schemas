@@ -666,6 +666,11 @@ NumberSliderComponent = _component_model(
     },
     optional={"step": float, "unit": str, "range": bool},
 )
+#: Bounds of a viewer's height. Unit: CSS pixels.
+MIN_VIEWPORT_HEIGHT = 160
+MAX_VIEWPORT_HEIGHT = 2000
+ViewportHeight = Annotated[int, Field(ge=MIN_VIEWPORT_HEIGHT, le=MAX_VIEWPORT_HEIGHT)]
+
 MeshViewportComponent = _component_model(
     "MeshViewportComponent",
     "clio.mesh-viewport.v1",
@@ -687,6 +692,7 @@ MeshViewportComponent = _component_model(
         "camera": DynamicValue,
         "syncGroup": SyncGroup,
         "upAxis": Literal["x", "y", "z"],
+        "height": ViewportHeight,
     },
 )
 
@@ -704,6 +710,7 @@ RasterViewportComponent = _component_model(
         "band": Annotated[int, Field(ge=1)],
         "colormap": Literal["viridis", "magma", "plasma", "cividis", "turbo", "grayscale"],
         "unit": str,
+        "height": ViewportHeight,
     },
 )
 

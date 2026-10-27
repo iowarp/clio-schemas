@@ -2818,6 +2818,16 @@
               "pattern": "^(artifact://artifact_[A-Za-z0-9_-]+|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$",
               "type": "string"
             },
+            "pageSize": {
+              "description": "Rows per page at first (default 10); the reader can change it.",
+              "enum": [
+                10,
+                25,
+                50,
+                100,
+                500
+              ]
+            },
             "rows": {
               "description": "Inline rows; use dataUri instead for a registered dataset.",
               "items": {
@@ -3685,6 +3695,11 @@
             "frame": {
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicNumber"
             },
+            "height": {
+              "maximum": 2000,
+              "minimum": 160,
+              "type": "integer"
+            },
             "materialUri": {
               "oneOf": [
                 {
@@ -3927,6 +3942,11 @@
             },
             "component": {
               "const": "clio.raster-viewport.v1"
+            },
+            "height": {
+              "maximum": 2000,
+              "minimum": 160,
+              "type": "integer"
             },
             "rasterUri": {
               "oneOf": [

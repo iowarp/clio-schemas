@@ -533,6 +533,7 @@ class DataTableComponent(_ComponentBase):
     selection: DynamicValue | None = None
     selectionField: FieldName | None = None
     action: Action | None = None
+    pageSize: Literal[10, 25, 50, 100, 500] | None = None
 
     @model_validator(mode="after")
     def _validate_data_source(self) -> DataTableComponent:
