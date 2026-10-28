@@ -272,10 +272,10 @@ A node may carry an `action`, run when it is clicked; bind `selected` to follow 
 
 **Opening views** — `openView` opens a study view (its `view` entry id) or a
 dashboard (its `artifact://` URI) from any conversation of this workspace,
-optionally applying a selection there. A tree of a study's branches can open
+optionally applying a selection at `/selection/<key>`. A tree of a study's branches can open
 each branch's view from its node, and a button can open another dashboard on one case:
 `{"functionCall": {"call": "openView", "args": {"view": "artifact://artifact_abc123", \
-"selection": {"path": "/selection/case", "field": "case", "values": ["c07"]}}, \
+"selection": {"key": "case", "field": "case", "values": ["c07"]}}, \
 "returnType": "void"}}`.
 
 **Slider** — `clio.slider.v1` is a numeric control for a physical

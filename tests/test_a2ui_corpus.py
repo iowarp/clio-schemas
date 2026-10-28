@@ -510,7 +510,7 @@ _OPEN_VIEW = {
         "call": "openView",
         "args": {
             "view": "artifact://artifact_dash1",
-            "selection": {"path": "/selection/case", "field": "case", "values": ["c07"]},
+            "selection": {"key": "case", "field": "case", "values": ["c07"]},
         },
         "returnType": "void",
     }

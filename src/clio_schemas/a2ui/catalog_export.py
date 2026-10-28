@@ -125,7 +125,14 @@ def _render_workspace_functions() -> dict[str, Any]:
                 "selection": {
                     "type": "object",
                     "properties": {
-                        "path": {"type": "string", "pattern": SELECTION_PATH_PATTERN},
+                        "key": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_.-]{1,64}$",
+                            "description": (
+                                "The selection's key: it is written at /selection/<key> "
+                                "(not a `path`, which A2UI reads as a data binding)."
+                            ),
+                        },
                         "field": {"type": "string", "minLength": 1, "maxLength": 128},
                         "values": {
                             "type": "array",
@@ -133,9 +140,9 @@ def _render_workspace_functions() -> dict[str, Any]:
                             "items": {"type": "string"},
                         },
                     },
-                    "required": ["path", "field", "values"],
+                    "required": ["key", "field", "values"],
                     "additionalProperties": False,
-                    "description": "A selection to apply in the opened view, at its path.",
+                    "description": "A selection to apply in the opened view, at /selection/<key>.",
                 },
             },
             ["view"],
