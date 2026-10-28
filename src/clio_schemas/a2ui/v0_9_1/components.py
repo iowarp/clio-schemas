@@ -50,13 +50,23 @@ SELECTION_PATH_PATTERN = r"^/selection/[^/]+$"
 
 #: A registered-artifact reference (the only form bulk data may take on the wire).
 ARTIFACT_URI_PATTERN = r"^artifact://artifact_[A-Za-z0-9_-]+$"
+#: A table's data source: a registered artifact, or a live study source a view reads
+#: (``study://<study>/measurements|entries|records/<view>``).
+TABLE_DATA_URI_PATTERN = (
+    r"^(artifact://artifact_[A-Za-z0-9_-]+"
+    r"|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$"
+)
 #: Name shared by components that coordinate client-side (camera, color range).
 SYNC_GROUP_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
 
 #: The 3 CLIO-authored functions (see ``catalog_export.py::_render_workspace_functions``).
 #: Kept here, not just there, so the pydantic ``call`` validator below and the
 #: rendered catalog's function names can never drift apart.
-CLIO_FUNCTION_NAMES: frozenset[str] = frozenset({"openArtifact", "selectData", "focusWorkflow"})
+#: ``openView``'s target: a study view's entry id or a dashboard's artifact URI.
+OPEN_VIEW_PATTERN = r"^(e_[0-9a-f]{12}|artifact://artifact_[A-Za-z0-9_-]+)$"
+CLIO_FUNCTION_NAMES: frozenset[str] = frozenset(
+    {"openArtifact", "selectData", "focusWorkflow", "openView"}
+)
 
 
 @functools.lru_cache(maxsize=1)
@@ -178,6 +188,9 @@ ChildList = list[str] | _ChildTemplate
 # Pattern-constrained string markers: plain strings on the wire, rendered by
 # the catalog canonicaliser as ``{"type": "string", "pattern": ...}``.
 ArtifactUri = Annotated[str, Field(pattern=ARTIFACT_URI_PATTERN)]
+#: An artifact a viewer shows, given literally or bound to the data model (for
+#: example the selected row's file), so one viewer can follow a selection.
+DynamicArtifactUri = ArtifactUri | _DataBinding | _StringFunctionCall
 SyncGroup = Annotated[str, Field(pattern=SYNC_GROUP_PATTERN)]
 
 
@@ -653,6 +666,11 @@ NumberSliderComponent = _component_model(
     },
     optional={"step": float, "unit": str, "range": bool},
 )
+#: Bounds of a viewer's height. Unit: CSS pixels.
+MIN_VIEWPORT_HEIGHT = 160
+MAX_VIEWPORT_HEIGHT = 2000
+ViewportHeight = Annotated[int, Field(ge=MIN_VIEWPORT_HEIGHT, le=MAX_VIEWPORT_HEIGHT)]
+
 MeshViewportComponent = _component_model(
     "MeshViewportComponent",
     "clio.mesh-viewport.v1",
@@ -660,10 +678,10 @@ MeshViewportComponent = _component_model(
         "An orbitable 3D view of a registered standard mesh or a CLIO FEA mesh "
         "with optional result fields."
     ),
-    required={"meshUri": ArtifactUri},
+    required={"meshUri": DynamicArtifactUri},
     optional={
         "format": Literal["glb", "gltf", "obj", "stl", "ply", "fbx", "3mf", "vtk", "vtp", "drc"],
-        "materialUri": ArtifactUri,
+        "materialUri": DynamicArtifactUri,
         "title": DynamicString,
         "field": DynamicString,
         "showField": DynamicBoolean,
@@ -674,6 +692,7 @@ MeshViewportComponent = _component_model(
         "camera": DynamicValue,
         "syncGroup": SyncGroup,
         "upAxis": Literal["x", "y", "z"],
+        "height": ViewportHeight,
     },
 )
 
@@ -684,13 +703,14 @@ RasterViewportComponent = _component_model(
         "An interactive viewport for a registered two-dimensional grid, "
         "with sampled values, colour scale, and region reference."
     ),
-    required={"rasterUri": ArtifactUri},
+    required={"rasterUri": DynamicArtifactUri},
     optional={
         "title": DynamicString,
         "variable": str,
         "band": Annotated[int, Field(ge=1)],
         "colormap": Literal["viridis", "magma", "plasma", "cividis", "turbo", "grayscale"],
         "unit": str,
+        "height": ViewportHeight,
     },
 )
 

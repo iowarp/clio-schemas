@@ -205,7 +205,8 @@ table itself. Inline rows require `columns`; a `dataUri` table takes
 "clio.data-table.v1", "dataUri": "artifact://artifact_stations01", "dataQuery": {"limit": \
 500}}`. Views over the same artifact link selected rows automatically. Use
 `selection` with a matching `selectionField` for an explicit cross-artifact
-link (see Shared selection below).
+link (see Shared selection below). `pageSize` (10, 25, 50, 100 or 500) sets
+the rows shown at first; the reader can change it.
 
 **Mermaid** — declarative diagram source rendered with Pele, with compatibility
 for existing Mermaid documents. Pele is the renderer; keep the component name
@@ -267,6 +268,15 @@ registered JSON file shaped `{"nodes": [...], "edges": [...]}` (never both,
 never neither):
 `{"id": "wf1", "component": "clio.workflow.v1", "nodes": [{"id": "fetch", "label": "Fetch"}, \
 {"id": "process", "label": "Process"}], "edges": [{"source": "fetch", "target": "process"}]}`.
+A node may carry an `action`, run when it is clicked; bind `selected` to follow a selection.
+
+**Opening views** — `openView` opens a study view (its `view` entry id) or a
+dashboard (its `artifact://` URI) from any conversation of this workspace,
+optionally applying a selection at `/selection/<key>`. A tree of a study's branches can open
+each branch's view from its node, and a button can open another dashboard on one case:
+`{"functionCall": {"call": "openView", "args": {"view": "artifact://artifact_abc123", \
+"selection": {"key": "case", "field": "case", "values": ["c07"]}}, \
+"returnType": "void"}}`.
 
 **Slider** — `clio.slider.v1` is a numeric control for a physical
 parameter: it keeps a `step` (for example `0.01`), shows `unit`, and has a
@@ -332,16 +342,24 @@ also carry node or cell results: `field` colors by one result, `frame`
 chooses a result frame, and `thresholdField` with `thresholdMin`/
 `thresholdMax` shows cells in range. Bind those values to controls when
 the person should explore them. Bind `camera` to a path when a later action
-should retain the chosen angle. Viewports with a `syncGroup` share camera
-and color range:
+should retain the chosen angle. To show the case a person selects, bind
+`meshUri` to the selection, e.g. `{"path": "/selection/case/values/0"}`
+over a table whose selection field holds each case's artifact URI; one
+viewer then follows the table instead of one viewer per case. A 3D view
+needs room to be read: `height` sets it in pixels (the default is 320),
+and in a `Row` the children's `weight` shares the width, so a viewer can sit
+between spacers instead of filling or squeezing the line; a list of cases
+usually reads best beside or below it. Viewports with a `syncGroup` share
+camera and color range:
 `{"id": "vp1", "component": "clio.mesh-viewport.v1", "title": "Design", "meshUri": \
 "artifact://artifact_abc123", "field": "DENSITY", "frame": {"path": "/cycle"}, \
 "thresholdField": "DENSITY", "thresholdMin": {"path": "/iso"}, "thresholdMax": 1}`.
 
 **RasterViewport** — `clio.raster-viewport.v1` presents a registered
 two-dimensional NPY, numeric CSV grid, GeoTIFF, NetCDF, or zipped Zarr
-artifact. Set `rasterUri`; for a NetCDF or Zarr file with several arrays,
-set `variable`, or `band` for a multiband GeoTIFF. Optionally set `unit`
+artifact. Set `rasterUri` (or bind it to a selection, as for a mesh); for
+a NetCDF or Zarr file with several arrays, set `variable`, or `band` for a
+multiband GeoTIFF. `height` sizes it as for a mesh. Optionally set `unit`
 and a `colormap`. The viewer queries a bounded sample for its visible
 extent and supplies hover values, a colour legend, pan, zoom, region
 selection, export, and Reference this without renderer actions in the spec.

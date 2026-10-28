@@ -297,3 +297,18 @@ def test_trajectories_default_x_type_is_quantitative() -> None:
 def test_load_preset_refuses_unknown_names() -> None:
     with pytest.raises(ValueError, match="unknown chart preset"):
         load_preset("../catalogs/clio-workspace/v1/catalog")
+
+
+def test_a_dotted_column_is_escaped_where_vega_lite_reads_a_field() -> None:
+    """A table's dotted column (a study's ``condition.n``) is one column, not a nested
+    path: preset fields are escaped in ``field``, and left as written in prose."""
+
+    from clio_schemas.a2ui.chart_spec import render_preset, vega_field_name
+
+    assert vega_field_name("condition.n") == "condition\\.n"
+    assert vega_field_name("a[0]\\b") == "a\\[0\\]\\\\b"
+    spec = render_preset(
+        "scatter", {"xField": "condition.n", "yField": "value", "entityField": "branch"}
+    )
+    assert spec["encoding"]["x"]["field"] == "condition\\.n"
+    assert "condition.n" in spec["description"]

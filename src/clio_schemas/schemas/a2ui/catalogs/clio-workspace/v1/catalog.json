@@ -1165,6 +1165,10 @@
     "WorkflowNode": {
       "additionalProperties": false,
       "properties": {
+        "action": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action",
+          "description": "What clicking this node does, such as an openView call for the view of the branch it stands for."
+        },
         "detail": {
           "type": "string"
         },
@@ -1345,6 +1349,9 @@
         },
         {
           "$ref": "#/functions/openUrl"
+        },
+        {
+          "$ref": "#/functions/openView"
         },
         {
           "$ref": "#/functions/or"
@@ -2383,11 +2390,11 @@
               "$ref": "#/$defs/DataQuery"
             },
             "dataUri": {
-              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation.",
+              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation. Or a live study source, study://<study>/measurements, study://<study>/entries or study://<study>/records/<view>, which updates as the study records entries.",
               "not": {
                 "pattern": "\\s"
               },
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "pattern": "^(artifact://artifact_[A-Za-z0-9_-]+|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$",
               "type": "string"
             },
             "entityField": {
@@ -2804,12 +2811,22 @@
               "$ref": "#/$defs/DataQuery"
             },
             "dataUri": {
-              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation.",
+              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation. Or a live study source, study://<study>/measurements, study://<study>/entries or study://<study>/records/<view>, which updates as the study records entries.",
               "not": {
                 "pattern": "\\s"
               },
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "pattern": "^(artifact://artifact_[A-Za-z0-9_-]+|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$",
               "type": "string"
+            },
+            "pageSize": {
+              "description": "Rows per page at first (default 10); the reader can change it.",
+              "enum": [
+                10,
+                25,
+                50,
+                100,
+                500
+              ]
             },
             "rows": {
               "description": "Inline rows; use dataUri instead for a registered dataset.",
@@ -3017,11 +3034,11 @@
               "$ref": "#/$defs/DataQuery"
             },
             "dataUri": {
-              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation. Requires latitudeField/longitudeField/labelField; a referenced dataset is bounded by dataQuery/limit, not the inline point cap.",
+              "description": "A workspace file path or artifact:// reference; CLIO registers a path as an artifact before validation. Or a live study source, study://<study>/measurements, study://<study>/entries or study://<study>/records/<view>, which updates as the study records entries. Requires latitudeField/longitudeField/labelField; a referenced dataset is bounded by dataQuery/limit, not the inline point cap.",
               "not": {
                 "pattern": "\\s"
               },
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "pattern": "^(artifact://artifact_[A-Za-z0-9_-]+|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$",
               "type": "string"
             },
             "detailField": {
@@ -3678,13 +3695,60 @@
             "frame": {
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicNumber"
             },
+            "height": {
+              "maximum": 2000,
+              "minimum": 160,
+              "type": "integer"
+            },
             "materialUri": {
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
-              "type": "string"
+              "oneOf": [
+                {
+                  "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+                  "type": "string"
+                },
+                {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding"
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/FunctionCall"
+                    },
+                    {
+                      "properties": {
+                        "returnType": {
+                          "const": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             },
             "meshUri": {
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
-              "type": "string"
+              "oneOf": [
+                {
+                  "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+                  "type": "string"
+                },
+                {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding"
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/FunctionCall"
+                    },
+                    {
+                      "properties": {
+                        "returnType": {
+                          "const": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             },
             "showField": {
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicBoolean"
@@ -3879,9 +3943,35 @@
             "component": {
               "const": "clio.raster-viewport.v1"
             },
+            "height": {
+              "maximum": 2000,
+              "minimum": 160,
+              "type": "integer"
+            },
             "rasterUri": {
-              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
-              "type": "string"
+              "oneOf": [
+                {
+                  "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+                  "type": "string"
+                },
+                {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding"
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/FunctionCall"
+                    },
+                    {
+                      "properties": {
+                        "returnType": {
+                          "const": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             },
             "title": {
               "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"
@@ -4181,7 +4271,8 @@
               "type": "array"
             },
             "selected": {
-              "type": "string"
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "The selected node id; bind it to follow a selection."
             }
           },
           "required": [
@@ -4649,6 +4740,66 @@
         },
         "call": {
           "const": "openUrl"
+        },
+        "returnType": {
+          "const": "void"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "openView": {
+      "description": "Opens a study view or a dashboard, optionally with a selection applied.",
+      "properties": {
+        "args": {
+          "properties": {
+            "selection": {
+              "additionalProperties": false,
+              "description": "A selection to apply in the opened view, at /selection/<key>.",
+              "properties": {
+                "field": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "key": {
+                  "description": "The selection's key: it is written at /selection/<key> (not a `path`, which A2UI reads as a data binding).",
+                  "pattern": "^[A-Za-z0-9_.-]{1,64}$",
+                  "type": "string"
+                },
+                "values": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 10000,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "key",
+                "field",
+                "values"
+              ],
+              "type": "object"
+            },
+            "view": {
+              "description": "A study view's entry id (e_...) or a dashboard's artifact:// URI, from any conversation of this workspace.",
+              "pattern": "^(e_[0-9a-f]{12}|artifact://artifact_[A-Za-z0-9_-]+)$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "view"
+          ],
+          "type": "object",
+          "unevaluatedProperties": false
+        },
+        "call": {
+          "const": "openView"
         },
         "returnType": {
           "const": "void"

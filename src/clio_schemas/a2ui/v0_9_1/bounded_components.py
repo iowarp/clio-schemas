@@ -42,6 +42,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     MAX_MAP_POINTS,
     MAX_WORKFLOW_EDGES,
     MAX_WORKFLOW_NODES,
+    TABLE_DATA_URI_PATTERN,
     Action,
     ActionCardComponent,
     ApprovalComponent,
@@ -425,7 +426,7 @@ class MapComponent(_ComponentBase):
     title: DynamicString | None = None
     camera: MapCamera | _DataBinding | None = None
     points: list[MapPoint] | None = Field(default=None, min_length=1, max_length=MAX_MAP_POINTS)
-    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    dataUri: str | None = Field(default=None, pattern=TABLE_DATA_URI_PATTERN)
     geojsonUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
     dataQuery: DataQuery | None = None
     latitudeField: FieldName | None = None
@@ -485,6 +486,8 @@ class WorkflowNode(_ClosedModel):
     label: str
     state: str | None = None
     detail: str | None = None
+    #: What clicking the node does, such as opening the view of the branch it stands for.
+    action: Action | None = None
 
 
 class WorkflowEdge(_ClosedModel):
@@ -504,7 +507,7 @@ class WorkflowComponent(_ComponentBase):
     )
     edges: list[WorkflowEdge] | None = Field(default=None, max_length=MAX_WORKFLOW_EDGES)
     dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
-    selected: str | None = None
+    selected: DynamicString | None = None
     action: Action | None = None
 
     @model_validator(mode="after")
@@ -523,13 +526,14 @@ class DataTableComponent(_ComponentBase):
     component: Literal["clio.data-table.v1"] = "clio.data-table.v1"
     columns: list[str | _DataTableColumn] | None = None
     rows: list[dict[str, JsonValue]] | None = None
-    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    dataUri: str | None = Field(default=None, pattern=TABLE_DATA_URI_PATTERN)
     dataQuery: DataQuery | None = None
     # DynamicValue (not a static string): bind it to /selection/<key>, whose
     # value is a SelectionState. A plain string stays valid (backward compatible).
     selection: DynamicValue | None = None
     selectionField: FieldName | None = None
     action: Action | None = None
+    pageSize: Literal[10, 25, 50, 100, 500] | None = None
 
     @model_validator(mode="after")
     def _validate_data_source(self) -> DataTableComponent:
@@ -612,7 +616,7 @@ class ChartComponent(_ComponentBase):
     facetField: FieldName | None = None
     xType: Literal["temporal", "quantitative", "ordinal"] | None = None
     data: list[dict[str, ChartRowValue]] | None = Field(default=None, max_length=MAX_INLINE_ROWS)
-    dataUri: str | None = Field(default=None, pattern=ARTIFACT_URI_PATTERN)
+    dataUri: str | None = Field(default=None, pattern=TABLE_DATA_URI_PATTERN)
     dataQuery: DataQuery | None = None
     selection: DynamicValue | None = None
     selectionParam: str | None = Field(default=None, pattern=SELECTION_PARAM_PATTERN)

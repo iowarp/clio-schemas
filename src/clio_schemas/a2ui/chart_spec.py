@@ -445,23 +445,30 @@ def load_preset(name: str) -> dict[str, Any]:
 _OMIT: Final = object()
 
 
-def _fill(node: Any, fields: Mapping[str, str], preset: str) -> Any:
+def vega_field_name(column: str) -> str:
+    """A column name as a Vega-Lite ``field``: a dot or bracket there means a nested
+    path, so a table's own dotted column (``condition.arm_length_m``) is escaped."""
+
+    return re.sub(r"[.\[\]\\]", lambda m: "\\" + m.group(0), column)
+
+
+def _fill(node: Any, fields: Mapping[str, str], preset: str, key: str = "") -> Any:
     if isinstance(node, dict):
         if "$if" in node:
             extra = set(node) - {"$if", "then", "else"}
             if extra or "then" not in node or node["$if"] not in PRESET_SLOTS:
                 raise ValueError(f"preset {preset!r}: malformed $if node {node!r}")
             if node["$if"] in fields:
-                return _fill(node["then"], fields, preset)
-            return _fill(node["else"], fields, preset) if "else" in node else _OMIT
+                return _fill(node["then"], fields, preset, key)
+            return _fill(node["else"], fields, preset, key) if "else" in node else _OMIT
         out: dict[str, Any] = {}
-        for key, value in node.items():
-            filled = _fill(value, fields, preset)
+        for name, value in node.items():
+            filled = _fill(value, fields, preset, name)
             if filled is not _OMIT:
-                out[key] = filled
+                out[name] = filled
         return out
     if isinstance(node, list):
-        return [f for f in (_fill(v, fields, preset) for v in node) if f is not _OMIT]
+        return [f for f in (_fill(v, fields, preset, key) for v in node) if f is not _OMIT]
     if isinstance(node, str):
 
         def slot_value(slot: str) -> str:
@@ -471,7 +478,8 @@ def _fill(node: Any, fields: Mapping[str, str], preset: str) -> Any:
 
         whole = _WHOLE_SLOT.match(node)
         if whole:
-            return slot_value(whole.group(1))
+            value = slot_value(whole.group(1))
+            return vega_field_name(value) if key == "field" else value
         return _SLOT.sub(lambda m: slot_value(m.group(1)), node)
     return node
 

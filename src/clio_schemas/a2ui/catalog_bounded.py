@@ -77,6 +77,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     MAX_SELECTION_VALUES,
     MAX_WORKFLOW_EDGES,
     MAX_WORKFLOW_NODES,
+    TABLE_DATA_URI_PATTERN,
 )
 
 _SELECTION_DESCRIPTION = (
@@ -101,6 +102,11 @@ _SELECTION_FIELD_REQUIRED_WHEN_BOUND_RULE: dict[str, Any] = {
 _DATA_URI_DESCRIPTION = (
     "A workspace file path or artifact:// reference; CLIO registers a path as an "
     "artifact before validation."
+)
+_TABLE_DATA_URI_DESCRIPTION = (
+    _DATA_URI_DESCRIPTION
+    + " Or a live study source, study://<study>/measurements, study://<study>/entries "
+    "or study://<study>/records/<view>, which updates as the study records entries."
 )
 _DATA_QUERY_REF: dict[str, Any] = {"$ref": "#/$defs/DataQuery"}
 
@@ -332,10 +338,10 @@ _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
                 },
                 "dataUri": {
                     "type": "string",
-                    "pattern": ARTIFACT_URI_PATTERN,
+                    "pattern": TABLE_DATA_URI_PATTERN,
                     "not": {"pattern": r"\s"},
                     "description": (
-                        f"{_DATA_URI_DESCRIPTION} Requires latitudeField/longitudeField/"
+                        f"{_TABLE_DATA_URI_DESCRIPTION} Requires latitudeField/longitudeField/"
                         "labelField; a referenced dataset is bounded by dataQuery/limit, "
                         "not the inline point cap."
                     ),
@@ -482,6 +488,13 @@ _WORKFLOW_NODE_DEF: dict[str, Any] = {
         "label": {"type": "string"},
         "state": {"type": "string"},
         "detail": {"type": "string"},
+        "action": {
+            "$ref": f"{COMMON_TYPES_ID}#/$defs/Action",
+            "description": (
+                "What clicking this node does, such as an openView call for the view "
+                "of the branch it stands for."
+            ),
+        },
     },
     "required": ["id", "label"],
     "additionalProperties": False,
@@ -534,7 +547,10 @@ _WORKFLOW_COMPONENT_SCHEMA: dict[str, Any] = {
                         '"edges": [...]}.'
                     ),
                 },
-                "selected": {"type": "string"},
+                "selected": {
+                    "$ref": f"{COMMON_TYPES_ID}#/$defs/DynamicString",
+                    "description": "The selected node id; bind it to follow a selection.",
+                },
                 "action": {"$ref": f"{COMMON_TYPES_ID}#/$defs/Action"},
             },
             "required": ["component"],
@@ -578,6 +594,10 @@ _DATA_TABLE_COMPONENT_SCHEMA: dict[str, Any] = {
                         "queried/dataset columns)."
                     ),
                 },
+                "pageSize": {
+                    "enum": [10, 25, 50, 100, 500],
+                    "description": "Rows per page at first (default 10); the reader can change it.",
+                },
                 "rows": {
                     "type": "array",
                     "items": {"type": "object"},
@@ -585,9 +605,9 @@ _DATA_TABLE_COMPONENT_SCHEMA: dict[str, Any] = {
                 },
                 "dataUri": {
                     "type": "string",
-                    "pattern": ARTIFACT_URI_PATTERN,
+                    "pattern": TABLE_DATA_URI_PATTERN,
                     "not": {"pattern": r"\s"},
-                    "description": _DATA_URI_DESCRIPTION,
+                    "description": _TABLE_DATA_URI_DESCRIPTION,
                 },
                 "dataQuery": _DATA_QUERY_REF,
                 # DynamicValue (not a static string): bind it to /selection/<key>, whose
@@ -1050,9 +1070,9 @@ def _chart_component_schema() -> dict[str, Any]:
                     },
                     "dataUri": {
                         "type": "string",
-                        "pattern": ARTIFACT_URI_PATTERN,
+                        "pattern": TABLE_DATA_URI_PATTERN,
                         "not": {"pattern": r"\s"},
-                        "description": _DATA_URI_DESCRIPTION,
+                        "description": _TABLE_DATA_URI_DESCRIPTION,
                     },
                     "dataQuery": _DATA_QUERY_REF,
                     "selection": {
