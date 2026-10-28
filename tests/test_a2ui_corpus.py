@@ -470,6 +470,103 @@ CLIO_ACCEPT_CASES.extend(
 )
 
 
+# Addendum B/C: a live study source as tabular data, and a viewer whose file follows
+# the shared selection.
+CLIO_ACCEPT_CASES.extend(
+    [
+        pytest.param(
+            {
+                "id": "law",
+                "component": "clio.chart.v1",
+                "preset": "scatter",
+                "xField": "condition.n",
+                "yField": "value",
+                "entityField": "branch",
+                "dataUri": "study://e_abc123/measurements",
+            },
+            id="Chart-study-measurements-source",
+        ),
+        pytest.param(
+            {
+                "id": "board",
+                "component": "clio.data-table.v1",
+                "dataUri": "study://e_abc123/records/board",
+            },
+            id="DataTable-study-records-source",
+        ),
+        pytest.param(
+            {
+                "id": "vp_sel",
+                "component": "clio.mesh-viewport.v1",
+                "meshUri": {"path": "/selection/case/values/0"},
+            },
+            id="MeshViewport-meshUri-bound-to-selection",
+        ),
+    ]
+)
+# Addendum C: links between views.
+_OPEN_VIEW = {
+    "functionCall": {
+        "call": "openView",
+        "args": {
+            "view": "artifact://artifact_dash1",
+            "selection": {"key": "case", "field": "case", "values": ["c07"]},
+        },
+        "returnType": "void",
+    }
+}
+CLIO_ACCEPT_CASES.extend(
+    [
+        pytest.param(
+            {
+                "id": "tree",
+                "component": "clio.workflow.v1",
+                "nodes": [
+                    {
+                        "id": "b1",
+                        "label": "Branch 1",
+                        "action": {
+                            "functionCall": {
+                                "call": "openView",
+                                "args": {"view": "e_0123456789ab"},
+                                "returnType": "void",
+                            }
+                        },
+                    }
+                ],
+                "edges": [],
+                "selected": {"path": "/selection/branch/values/0"},
+            },
+            id="Workflow-node-opens-a-view-and-selected-is-bound",
+        ),
+        pytest.param(
+            {"id": "go", "component": "Button", "child": "label", "action": _OPEN_VIEW},
+            id="Button-openView-with-selection",
+        ),
+    ]
+)
+CLIO_REJECT_CASES.extend(
+    [
+        pytest.param(
+            {
+                "id": "bad",
+                "component": "clio.data-table.v1",
+                "dataUri": "study://e_abc123/notes",
+            },
+            id="DataTable-unknown-study-source",
+        ),
+        pytest.param(
+            {
+                "id": "vp_bad",
+                "component": "clio.mesh-viewport.v1",
+                "meshUri": "https://example.com/mesh.stl",
+            },
+            id="MeshViewport-meshUri-not-an-artifact",
+        ),
+    ]
+)
+
+
 @pytest.mark.parametrize("payload", CLIO_REJECT_CASES)
 def test_clio_workspace_reject_case_fails(payload: dict[str, Any]) -> None:
     assert not WORKSPACE_VALIDATORS[payload["component"]].is_valid(payload)
@@ -1086,3 +1183,33 @@ def test_select_data_writes_a_selection_path_and_field() -> None:
         {**args, "values": ["GNSS01"]},
     ):
         assert not WORKSPACE_VALIDATORS["Button"].is_valid(_select_data_button(bad)), bad
+
+
+def test_open_view_names_a_view_entry_or_a_dashboard_not_a_path() -> None:
+    """Function arguments are the catalog's to check (pydantic checks only the name)."""
+
+    def button(view: str) -> dict[str, Any]:
+        call = {"call": "openView", "args": {"view": view}, "returnType": "void"}
+        return {"id": "go", "component": "Button", "child": "l", "action": {"functionCall": call}}
+
+    validator = WORKSPACE_VALIDATORS["Button"]
+    assert validator.is_valid(button("e_0123456789ab"))
+    assert validator.is_valid(button("artifact://artifact_dash1"))
+    assert not validator.is_valid(button("/home/me/dashboard.json"))
+
+
+def test_viewers_take_a_height_and_a_table_its_first_page_size() -> None:
+    """A dashboard can give a 3D view or raster room, and a long table more rows."""
+
+    mesh = {"id": "m", "component": "clio.mesh-viewport.v1", "meshUri": "artifact://artifact_a"}
+    assert WORKSPACE_VALIDATORS["clio.mesh-viewport.v1"].is_valid({**mesh, "height": 560})
+    assert not WORKSPACE_VALIDATORS["clio.mesh-viewport.v1"].is_valid({**mesh, "height": 40})
+    raster = {
+        "id": "r",
+        "component": "clio.raster-viewport.v1",
+        "rasterUri": "artifact://artifact_a",
+    }
+    assert WORKSPACE_VALIDATORS["clio.raster-viewport.v1"].is_valid({**raster, "height": 480})
+    table = {"id": "t", "component": "clio.data-table.v1", "columns": ["a"], "rows": [{"a": 1}]}
+    assert WORKSPACE_VALIDATORS["clio.data-table.v1"].is_valid({**table, "pageSize": 25})
+    assert not WORKSPACE_VALIDATORS["clio.data-table.v1"].is_valid({**table, "pageSize": 7})

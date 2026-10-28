@@ -19,7 +19,11 @@ from clio_schemas.a2ui.catalog_render import render_factory_components
 from clio_schemas.a2ui.instructions import BASIC_INSTRUCTIONS_MD, WORKSPACE_INSTRUCTIONS_MD
 from clio_schemas.a2ui.sidecar import CatalogSidecar
 from clio_schemas.a2ui.v0_9_1.catalog_file import CatalogFile
-from clio_schemas.a2ui.v0_9_1.components import MAX_SELECTION_VALUES, SELECTION_PATH_PATTERN
+from clio_schemas.a2ui.v0_9_1.components import (
+    MAX_SELECTION_VALUES,
+    OPEN_VIEW_PATTERN,
+    SELECTION_PATH_PATTERN,
+)
 
 WORKSPACE_CATALOG_ID = "https://iowarp.ai/a2ui/catalogs/clio-workspace/v1"
 
@@ -107,6 +111,43 @@ def _render_workspace_functions() -> dict[str, Any]:
             ["stepId"],
             "Focuses one node of a clio.workflow.v1 component.",
         ),
+        "openView": call_schema(
+            "openView",
+            {
+                "view": {
+                    "type": "string",
+                    "pattern": OPEN_VIEW_PATTERN,
+                    "description": (
+                        "A study view's entry id (e_...) or a dashboard's artifact:// URI, "
+                        "from any conversation of this workspace."
+                    ),
+                },
+                "selection": {
+                    "type": "object",
+                    "properties": {
+                        "key": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_.-]{1,64}$",
+                            "description": (
+                                "The selection's key: it is written at /selection/<key> "
+                                "(not a `path`, which A2UI reads as a data binding)."
+                            ),
+                        },
+                        "field": {"type": "string", "minLength": 1, "maxLength": 128},
+                        "values": {
+                            "type": "array",
+                            "maxItems": MAX_SELECTION_VALUES,
+                            "items": {"type": "string"},
+                        },
+                    },
+                    "required": ["key", "field", "values"],
+                    "additionalProperties": False,
+                    "description": "A selection to apply in the opened view, at /selection/<key>.",
+                },
+            },
+            ["view"],
+            "Opens a study view or a dashboard, optionally with a selection applied.",
+        ),
     }
 
 
@@ -123,8 +164,8 @@ def render_workspace_catalog() -> dict[str, Any]:
     against this catalog, and every ``Checkable``/dynamic-value function call
     (``checks[].condition``, ``formatString`` inside a ``DynamicString``,
     ...) is unsatisfiable even though the pydantic generator still accepts
-    it. The 3 CLIO functions (``openArtifact``/``selectData``/
-    ``focusWorkflow``) are added alongside them, in the same call-schema
+    it. The 4 CLIO functions (``openArtifact``/``selectData``/
+    ``focusWorkflow``/``openView``) are added alongside them, in the same call-schema
     style.
     """
 
