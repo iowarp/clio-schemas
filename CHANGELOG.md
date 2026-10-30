@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Added
+
+- The `resource` message block: a workspace resource attached to a message, with
+  how it was delivered to the agent (#6).
+- The `context_reference` message block: a workspace file, artifact, session,
+  agent run, evidence source, context frame, diff or plan the message points at.
+- `metadata` on `notice` blocks: the answer hook that added the notice and the
+  answer part its revision replaces.
+
+All three describe what clio-agent already sends; `MessageBlock` now has 17 types.
+The version is 0.6.1.
+
 ## [0.6.0] - 2026-10-28
 
 ### Added

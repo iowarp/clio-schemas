@@ -88,6 +88,26 @@ BASIC_CATALOG = json.loads(BASIC_CATALOG_PATH.read_text(encoding="utf-8"))
         ("subagent", {"subagent_id": "agent_1"}),
         ("artifact", {"artifact_id": "artifact_1"}),
         (
+            "resource",
+            {
+                "resource_id": "res_1",
+                "resource_revision": "1",
+                "workspace_id": "ws_1",
+                "name": "data.csv",
+                "media_type": "text/csv",
+            },
+        ),
+        (
+            "context_reference",
+            {
+                "ref_kind": "workspace_file",
+                "ref_id": "data.csv",
+                "label": "data.csv",
+                "revision": "sha256:1",
+                "media_type": "text/csv",
+            },
+        ),
+        (
             "action_card",
             {
                 "title": "Review",
@@ -110,7 +130,7 @@ BASIC_CATALOG = json.loads(BASIC_CATALOG_PATH.read_text(encoding="utf-8"))
         ("notice", {"source": "compaction_failed", "text": "Compaction failed."}),
     ],
 )
-def test_message_block_union_accepts_exactly_the_fifteen_v3_types(
+def test_message_block_union_accepts_exactly_the_sixteen_v3_types(
     block_type: str,
     payload: dict[str, object],
 ) -> None:
