@@ -2744,7 +2744,7 @@
       "type": "string"
     },
     "MessageBlock": {
-      "description": "Closed discriminated union of the 15 GACT 0.3 message-block types.",
+      "description": "Closed discriminated union of the 16 GACT 0.3 message-block types.",
       "discriminator": {
         "mapping": {
           "a2ui": "#/$defs/A2UIMessageBlock",
@@ -2757,6 +2757,7 @@
           "notice": "#/$defs/NoticeMessageBlock",
           "plan": "#/$defs/PlanMessageBlock",
           "reasoning": "#/$defs/ReasoningMessageBlock",
+          "resource": "#/$defs/ResourceMessageBlock",
           "routing": "#/$defs/RoutingMessageBlock",
           "subagent": "#/$defs/SubagentMessageBlock",
           "task": "#/$defs/TaskMessageBlock",
@@ -2810,6 +2811,9 @@
         },
         {
           "$ref": "#/$defs/NoticeMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/ResourceMessageBlock"
         }
       ],
       "title": "MessageBlock"
@@ -3861,6 +3865,163 @@
       ],
       "title": "ReplayContract",
       "type": "string"
+    },
+    "ResourceDelivery": {
+      "additionalProperties": false,
+      "description": "How the agent was given an attached resource: its persisted delivery decision.",
+      "properties": {
+        "evidence_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What the delivery decision was based on.",
+          "title": "Evidence Source"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Why this representation was chosen, for display.",
+          "title": "Reason"
+        },
+        "representation": {
+          "enum": [
+            "native",
+            "bounded_tools",
+            "structured_document",
+            "sandbox",
+            "retrieval",
+            "metadata_only"
+          ],
+          "title": "Representation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "representation"
+      ],
+      "title": "ResourceDelivery",
+      "type": "object"
+    },
+    "ResourceMessageBlock": {
+      "additionalProperties": false,
+      "description": "Reference to one workspace resource attached to the message (a composer upload).",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "delivery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResourceDelivery"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "media_type": {
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name of the resource.",
+          "title": "Name",
+          "type": "string"
+        },
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "resource_revision": {
+          "description": "Revision of the resource the message refers to; a string, not a count.",
+          "title": "Resource Revision",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "resource",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "resource_id",
+        "resource_revision",
+        "workspace_id",
+        "name",
+        "media_type"
+      ],
+      "title": "ResourceMessageBlock",
+      "type": "object"
     },
     "ResourceOwner": {
       "additionalProperties": false,

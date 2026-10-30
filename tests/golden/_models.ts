@@ -325,7 +325,7 @@ export type Total1 = number;
 export type Truncated1 = boolean;
 export type Warnings1 = string[];
 /**
- * Closed discriminated union of the 15 GACT 0.3 message-block types.
+ * Closed discriminated union of the 16 GACT 0.3 message-block types.
  */
 export type MessageBlock =
   | TextMessageBlock
@@ -342,7 +342,8 @@ export type MessageBlock =
   | ErrorMessageBlock
   | RoutingMessageBlock
   | InjectionMessageBlock
-  | NoticeMessageBlock;
+  | NoticeMessageBlock
+  | ResourceMessageBlock;
 export type AgentId = string | null;
 export type Channel = string | null;
 export type Id1 = string;
@@ -493,6 +494,33 @@ export type StreamSource14 = string | null;
 export type Text3 = string;
 export type Trigger1 = ("auto" | "manual") | null;
 export type Type14 = "notice";
+export type AgentId15 = string | null;
+export type Channel15 = string | null;
+/**
+ * What the delivery decision was based on.
+ */
+export type EvidenceSource = string | null;
+/**
+ * Why this representation was chosen, for display.
+ */
+export type Reason1 = string | null;
+export type Representation =
+  "native" | "bounded_tools" | "structured_document" | "sandbox" | "retrieval" | "metadata_only";
+export type Id17 = string;
+export type MediaType = string;
+/**
+ * Display name of the resource.
+ */
+export type Name5 = string;
+export type ResourceId = string;
+/**
+ * Revision of the resource the message refers to; a string, not a count.
+ */
+export type ResourceRevision = string;
+export type Sequence15 = number | null;
+export type StreamSource15 = string | null;
+export type Type15 = "resource";
+export type WorkspaceId2 = string;
 /**
  * Every source that states this value; the first is the winning one.
  *
@@ -715,7 +743,7 @@ export type CrossWorkspaceBind = boolean;
 export type EdgeEvidence = "schema-arg" | "hash-pair" | "lease-window" | "authority" | "assertion";
 export type ExternalRef = string;
 export type FenceProven = boolean;
-export type Name5 = string;
+export type Name6 = string;
 export type NetAt = string;
 export type NetDomain = string;
 export type NetMechanism = string;
@@ -728,7 +756,7 @@ export type Path5 = string;
 export type EdgeRole = "used" | "generated";
 export type Sha2562 = string | null;
 export type Version5 = number | null;
-export type AgentId15 = string;
+export type AgentId16 = string;
 /**
  * Whether the agent executed or annotated the transform.
  */
@@ -759,7 +787,7 @@ export type StartedAt1 = string;
 export type TransformStatus = "success" | "failed";
 export type TurnId = string;
 export type Used = ProvEdge[];
-export type WorkspaceId2 = string;
+export type WorkspaceId3 = string;
 
 /**
  * Aggregate of all canonical clio-schemas records with shared definitions emitted once. Used to generate TypeScript without duplicate declarations.
@@ -1590,6 +1618,31 @@ export interface NoticeMessageBlock {
   type: Type14;
 }
 /**
+ * Reference to one workspace resource attached to the message (a composer upload).
+ */
+export interface ResourceMessageBlock {
+  agent_id?: AgentId15;
+  channel?: Channel15;
+  delivery?: ResourceDelivery | null;
+  id: Id17;
+  media_type: MediaType;
+  name: Name5;
+  resource_id: ResourceId;
+  resource_revision: ResourceRevision;
+  sequence?: Sequence15;
+  stream_source?: StreamSource15;
+  type: Type15;
+  workspace_id: WorkspaceId2;
+}
+/**
+ * How the agent was given an attached resource: its persisted delivery decision.
+ */
+export interface ResourceDelivery {
+  evidence_source?: EvidenceSource;
+  reason?: Reason1;
+  representation: Representation;
+}
+/**
  * Everything a model picker may tag one model with, each tag with its evidence.
  *
  * An absent tag means no source stated it -- never "no". ``role`` always
@@ -1798,7 +1851,7 @@ export interface ProvEdge {
   evidence: EdgeEvidence;
   external_ref?: ExternalRef;
   fence_proven?: FenceProven;
-  name?: Name5;
+  name?: Name6;
   net_at?: NetAt;
   net_domain?: NetDomain;
   net_mechanism?: NetMechanism;
@@ -1813,7 +1866,7 @@ export interface ProvEdge {
  * One coarse transform keyed by the observer call id.
  */
 export interface TransformRecord {
-  agent_id?: AgentId15;
+  agent_id?: AgentId16;
   agent_role?: AgentRole;
   annotation?: Annotation1;
   call_id: CallId2;
@@ -1832,5 +1885,5 @@ export interface TransformRecord {
   status?: TransformStatus;
   turn_id?: TurnId;
   used?: Used;
-  workspace_id?: WorkspaceId2;
+  workspace_id?: WorkspaceId3;
 }
