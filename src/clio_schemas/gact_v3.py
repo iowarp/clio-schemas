@@ -220,6 +220,17 @@ class InjectionMessageBlock(_ClosedBlock):
     try_index: int | None = Field(default=None, ge=0)
 
 
+class NoticeMetadata(BaseModel):
+    """Who produced a notice: an answer hook, and the answer part its revision replaces."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    hook: str | None = Field(default=None, description="The answer hook that added the notice.")
+    revises: str | None = Field(
+        default=None, description="The answer part a hook's revision replaces."
+    )
+
+
 class NoticeMessageBlock(_ClosedBlock):
     """A service notice recorded in the transcript, e.g. a failed compaction
     (``source: "compaction_failed"``). It is never shown to the model. ``code`` is the
@@ -231,6 +242,38 @@ class NoticeMessageBlock(_ClosedBlock):
     code: str | None = None
     trigger: Literal["auto", "manual"] | None = None
     compaction_id: str | None = None
+    metadata: NoticeMetadata | None = None
+
+
+ContextReferenceKind = Literal[
+    "workspace_file",
+    "artifact",
+    "session",
+    "agent_run",
+    "evidence_source",
+    "context_frame",
+    "diff",
+    "plan",
+]
+
+
+class ContextReferenceMessageBlock(_ClosedBlock):
+    """Something the user pointed the message at: a workspace file, artifact, session,
+    agent run, evidence source, context frame, diff or plan, pinned at one revision."""
+
+    type: Literal["context_reference"]
+    ref_kind: ContextReferenceKind
+    ref_id: str
+    label: str = Field(description="Display name of the referenced item.")
+    revision: str = Field(description="Revision the message refers to; a string, not a count.")
+    media_type: str
+    navigation: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "Where a client opens the item, e.g. {workspace_id, path} for a file or "
+            "{workspace_id, session_id} for a session."
+        ),
+    )
 
 
 MessageBlockValue = Annotated[
@@ -249,10 +292,11 @@ MessageBlockValue = Annotated[
     | RoutingMessageBlock
     | InjectionMessageBlock
     | NoticeMessageBlock
-    | ResourceMessageBlock,
+    | ResourceMessageBlock
+    | ContextReferenceMessageBlock,
     Field(discriminator="type"),
 ]
 
 
 class MessageBlock(RootModel[MessageBlockValue]):
-    """Closed discriminated union of the 16 GACT 0.3 message-block types."""
+    """Closed discriminated union of the 17 GACT 0.3 message-block types."""

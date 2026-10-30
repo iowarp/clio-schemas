@@ -98,6 +98,16 @@ BASIC_CATALOG = json.loads(BASIC_CATALOG_PATH.read_text(encoding="utf-8"))
             },
         ),
         (
+            "context_reference",
+            {
+                "ref_kind": "workspace_file",
+                "ref_id": "data.csv",
+                "label": "data.csv",
+                "revision": "sha256:1",
+                "media_type": "text/csv",
+            },
+        ),
+        (
             "action_card",
             {
                 "title": "Review",
