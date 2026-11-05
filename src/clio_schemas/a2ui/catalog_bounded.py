@@ -105,7 +105,9 @@ _DATA_URI_DESCRIPTION = (
 )
 _TABLE_DATA_URI_DESCRIPTION = (
     _DATA_URI_DESCRIPTION
-    + " Or a live study source, study://<study>/measurements, study://<study>/entries "
+    + " Or a live source the view follows: a named artifact at its latest version, "
+    "artifact://<workspace>/<name>@latest, which updates when a new version of that file "
+    "is recorded; or a study source, study://<study>/measurements, study://<study>/entries "
     "or study://<study>/records/<view>, which updates as the study records entries."
 )
 _DATA_QUERY_REF: dict[str, Any] = {"$ref": "#/$defs/DataQuery"}

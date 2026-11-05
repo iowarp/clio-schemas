@@ -50,10 +50,15 @@ SELECTION_PATH_PATTERN = r"^/selection/[^/]+$"
 
 #: A registered-artifact reference (the only form bulk data may take on the wire).
 ARTIFACT_URI_PATTERN = r"^artifact://artifact_[A-Za-z0-9_-]+$"
-#: A table's data source: a registered artifact, or a live study source a view reads
+#: A named artifact at its latest version (``artifact://<workspace>/<name>@latest``): a
+#: live source a view follows as new versions are recorded.
+LATEST_ARTIFACT_URI_PATTERN = r"artifact://[A-Za-z0-9_-]+/[^@\s?#]+@latest"
+#: A table's data source: a registered artifact (one fixed version), a named artifact at
+#: its latest version, or a live study source a view reads
 #: (``study://<study>/measurements|entries|records/<view>``).
 TABLE_DATA_URI_PATTERN = (
     r"^(artifact://artifact_[A-Za-z0-9_-]+"
+    rf"|{LATEST_ARTIFACT_URI_PATTERN}"
     r"|study://[A-Za-z0-9_-]+/(measurements|entries|records/[A-Za-z0-9_.-]+))$"
 )
 #: Name shared by components that coordinate client-side (camera, color range).

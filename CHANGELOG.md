@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+
+- A named artifact at its latest version, `artifact://<workspace>/<name>@latest`, as a
+  live data source for charts, maps and tables.
+
 ## [0.6.0] - 2026-10-28
 
 ### Added
