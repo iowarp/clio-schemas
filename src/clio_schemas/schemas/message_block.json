@@ -429,6 +429,121 @@
       "title": "CitationMessageBlock",
       "type": "object"
     },
+    "ContextReferenceMessageBlock": {
+      "additionalProperties": false,
+      "description": "Something the user pointed the message at: a workspace file, artifact, session,\nagent run, evidence source, context frame, diff or plan, pinned at one revision.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "Display name of the referenced item.",
+          "title": "Label",
+          "type": "string"
+        },
+        "media_type": {
+          "title": "Media Type",
+          "type": "string"
+        },
+        "navigation": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Where a client opens the item, e.g. {workspace_id, path} for a file or {workspace_id, session_id} for a session.",
+          "title": "Navigation",
+          "type": "object"
+        },
+        "ref_id": {
+          "title": "Ref Id",
+          "type": "string"
+        },
+        "ref_kind": {
+          "enum": [
+            "workspace_file",
+            "artifact",
+            "session",
+            "agent_run",
+            "evidence_source",
+            "context_frame",
+            "diff",
+            "plan"
+          ],
+          "title": "Ref Kind",
+          "type": "string"
+        },
+        "revision": {
+          "description": "Revision the message refers to; a string, not a count.",
+          "title": "Revision",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "context_reference",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "ref_kind",
+        "ref_id",
+        "label",
+        "revision",
+        "media_type"
+      ],
+      "title": "ContextReferenceMessageBlock",
+      "type": "object"
+    },
     "DiffMessageBlock": {
       "additionalProperties": false,
       "description": "Unified file diff.",
@@ -795,6 +910,17 @@
           "title": "Id",
           "type": "string"
         },
+        "metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NoticeMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "sequence": {
           "anyOf": [
             {
@@ -857,6 +983,40 @@
         "text"
       ],
       "title": "NoticeMessageBlock",
+      "type": "object"
+    },
+    "NoticeMetadata": {
+      "additionalProperties": false,
+      "description": "Who produced a notice: an answer hook, and the answer part its revision replaces.",
+      "properties": {
+        "hook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The answer hook that added the notice.",
+          "title": "Hook"
+        },
+        "revises": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The answer part a hook's revision replaces.",
+          "title": "Revises"
+        }
+      },
+      "title": "NoticeMetadata",
       "type": "object"
     },
     "PlanMessageBlock": {
@@ -1107,6 +1267,163 @@
         "text"
       ],
       "title": "ReasoningMessageBlock",
+      "type": "object"
+    },
+    "ResourceDelivery": {
+      "additionalProperties": false,
+      "description": "How the agent was given an attached resource: its persisted delivery decision.",
+      "properties": {
+        "evidence_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What the delivery decision was based on.",
+          "title": "Evidence Source"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Why this representation was chosen, for display.",
+          "title": "Reason"
+        },
+        "representation": {
+          "enum": [
+            "native",
+            "bounded_tools",
+            "structured_document",
+            "sandbox",
+            "retrieval",
+            "metadata_only"
+          ],
+          "title": "Representation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "representation"
+      ],
+      "title": "ResourceDelivery",
+      "type": "object"
+    },
+    "ResourceMessageBlock": {
+      "additionalProperties": false,
+      "description": "Reference to one workspace resource attached to the message (a composer upload).",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "delivery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResourceDelivery"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "media_type": {
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name of the resource.",
+          "title": "Name",
+          "type": "string"
+        },
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "resource_revision": {
+          "description": "Revision of the resource the message refers to; a string, not a count.",
+          "title": "Resource Revision",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "resource",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "resource_id",
+        "resource_revision",
+        "workspace_id",
+        "name",
+        "media_type"
+      ],
+      "title": "ResourceMessageBlock",
       "type": "object"
     },
     "RoutingMessageBlock": {
@@ -1521,19 +1838,21 @@
       "type": "object"
     }
   },
-  "description": "Closed discriminated union of the 15 GACT 0.3 message-block types.",
+  "description": "Closed discriminated union of the 17 GACT 0.3 message-block types.",
   "discriminator": {
     "mapping": {
       "a2ui": "#/$defs/A2UIMessageBlock",
       "action_card": "#/$defs/ActionCardMessageBlock",
       "artifact": "#/$defs/ArtifactMessageBlock",
       "citation": "#/$defs/CitationMessageBlock",
+      "context_reference": "#/$defs/ContextReferenceMessageBlock",
       "diff": "#/$defs/DiffMessageBlock",
       "error": "#/$defs/ErrorMessageBlock",
       "injection": "#/$defs/InjectionMessageBlock",
       "notice": "#/$defs/NoticeMessageBlock",
       "plan": "#/$defs/PlanMessageBlock",
       "reasoning": "#/$defs/ReasoningMessageBlock",
+      "resource": "#/$defs/ResourceMessageBlock",
       "routing": "#/$defs/RoutingMessageBlock",
       "subagent": "#/$defs/SubagentMessageBlock",
       "task": "#/$defs/TaskMessageBlock",
@@ -1587,6 +1906,12 @@
     },
     {
       "$ref": "#/$defs/NoticeMessageBlock"
+    },
+    {
+      "$ref": "#/$defs/ResourceMessageBlock"
+    },
+    {
+      "$ref": "#/$defs/ContextReferenceMessageBlock"
     }
   ],
   "title": "MessageBlock"
