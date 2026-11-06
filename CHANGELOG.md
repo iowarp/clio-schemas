@@ -4,6 +4,8 @@
 
 ### Added
 
+- The `stream` artifact kind and the `clio-core` custody: an artifact whose content lives
+  in clio-core as typed entries (its latest entry or a window), not as file bytes.
 - A named artifact at its latest version, `artifact://<workspace>/<name>@latest`, as a
   live data source for charts, maps and tables.
 - The `resource` message block: a workspace resource attached to a message, with
