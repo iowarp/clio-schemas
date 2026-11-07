@@ -74,6 +74,7 @@ class ArtifactKind(str, Enum):  # noqa: UP042 - legacy str() semantics preserved
     CONFIG = "config"
     MODEL = "model"
     UI_PAYLOAD = "ui_payload"
+    STREAM = "stream"
     OTHER = "other"
 
 
@@ -86,6 +87,7 @@ class Custody(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (cli
     CAS = "cas"
     WORKSPACE_REFERENCED = "workspace-referenced"
     EXTERNAL_REFERENCED = "external-referenced"
+    CLIO_CORE = "clio-core"
 
 
 class Mechanism(str, Enum):  # noqa: UP042 - legacy str() semantics preserved (clio-agent#1121)

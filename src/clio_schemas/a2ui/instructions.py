@@ -88,7 +88,10 @@ The three tabular components — `clio.chart.v1`, `clio.map.v1`,
 (never with inline values): one shared shape (`$defs/DataQuery`) that
 filters, aggregates, downsamples, and limits the referenced table
 server-side before it reaches the component. Their `dataUri` names a registered
-CSV or Parquet table, not a source JSON file. Check relevant workspace
+CSV or Parquet table, not a source JSON file. `artifact://artifact_<id>` is one
+fixed version; `artifact://<workspace>/<name>@latest` follows that file as new
+versions are recorded, so use it for a view of something that is still changing.
+Check relevant workspace
 artifacts before seeking a new external source; reuse a suitable table when
 its provenance and columns answer the question. Preserve numeric columns as
 numbers and timestamps as ISO-8601 strings with an offset when converting

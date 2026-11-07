@@ -4,6 +4,10 @@
 
 ### Added
 
+- The `stream` artifact kind and the `clio-core` custody: an artifact whose content lives
+  in clio-core as typed entries (its latest entry or a window), not as file bytes.
+- A named artifact at its latest version, `artifact://<workspace>/<name>@latest`, as a
+  live data source for charts, maps and tables.
 - The `resource` message block: a workspace resource attached to a message, with
   how it was delivered to the agent (#6).
 - The `context_reference` message block: a workspace file, artifact, session,
@@ -12,7 +16,7 @@
   answer part its revision replaces.
 
 All three describe what clio-agent already sends; `MessageBlock` now has 17 types.
-The version is 0.6.1.
+Develop released these as 0.6.1; this branch's version is 0.7.0b1.
 
 ## [0.6.0] - 2026-10-28
 

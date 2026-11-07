@@ -11,6 +11,7 @@
         "config",
         "model",
         "ui_payload",
+        "stream",
         "other"
       ],
       "title": "ArtifactKind",
@@ -21,7 +22,8 @@
       "enum": [
         "cas",
         "workspace-referenced",
-        "external-referenced"
+        "external-referenced",
+        "clio-core"
       ],
       "title": "Custody",
       "type": "string"

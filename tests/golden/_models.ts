@@ -121,7 +121,7 @@ export type CreatedAt = string;
 /**
  * Where artifact bytes live and what custody guarantee applies.
  */
-export type Custody = "cas" | "workspace-referenced" | "external-referenced";
+export type Custody = "cas" | "workspace-referenced" | "external-referenced" | "clio-core";
 export type CustodyGap = {
   [k: string]: unknown | undefined;
 } | null;
@@ -137,7 +137,16 @@ export type SizeBytes = number | null;
  * The curated kinds an artifact version may take.
  */
 export type ArtifactKind =
-  "dataset" | "image" | "report" | "plan" | "script" | "config" | "model" | "ui_payload" | "other";
+  | "dataset"
+  | "image"
+  | "report"
+  | "plan"
+  | "script"
+  | "config"
+  | "model"
+  | "ui_payload"
+  | "stream"
+  | "other";
 export type KindWarning = string;
 /**
  * What produced an artifact record.
