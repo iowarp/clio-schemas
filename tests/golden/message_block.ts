@@ -16,6 +16,7 @@ export type {
   DiffMessageBlock,
   ErrorMessageBlock,
   InjectionMessageBlock,
+  InjectionMetadata,
   MessageBlock,
   NoticeMessageBlock,
   NoticeMetadata,

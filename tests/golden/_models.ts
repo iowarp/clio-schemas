@@ -485,6 +485,22 @@ export type CallId1 = string | null;
 export type Channel13 = string | null;
 export type CompactionId = string | null;
 export type Id15 = string;
+/**
+ * The messages the summary stands for; their count is the number summarized.
+ */
+export type CompactedMessageIds = string[] | null;
+/**
+ * The context segments the summary replaced.
+ */
+export type DerivedFrom = string[] | null;
+/**
+ * The messages the agent still sees verbatim after compaction.
+ */
+export type KeptMessageIds = string[] | null;
+/**
+ * The system prompt in force when the compaction ran. Absent when the agent has not recorded one, e.g. a manual compaction just after a restart.
+ */
+export type SystemPrompt = string | null;
 export type Sequence13 = number | null;
 export type Source5 = string;
 export type StreamSource13 = string | null;
@@ -1624,8 +1640,10 @@ export interface RoutingMessageBlock {
  *
  * ``source: "summarization"`` is a compaction's record: ``text`` is the summary the
  * agent continues from, ``trigger`` says who asked for it (``auto`` or ``manual``)
- * and ``compaction_id`` names that compaction. ``variants_id`` / ``try_index`` mean
- * the block belongs to that variant try's tab (e.g. Refine advice given inside a try).
+ * and ``compaction_id`` names that compaction; ``metadata`` lists the messages it
+ * summarized and kept, and the system prompt in force. ``variants_id`` / ``try_index``
+ * mean the block belongs to that variant try's tab (e.g. Refine advice given inside a
+ * try).
  */
 export interface InjectionMessageBlock {
   agent_id?: AgentId13;
@@ -1633,6 +1651,7 @@ export interface InjectionMessageBlock {
   channel?: Channel13;
   compaction_id?: CompactionId;
   id: Id15;
+  metadata?: InjectionMetadata | null;
   sequence?: Sequence13;
   source: Source5;
   stream_source?: StreamSource13;
@@ -1641,6 +1660,16 @@ export interface InjectionMessageBlock {
   try_index?: TryIndex;
   type: Type13;
   variants_id?: VariantsId;
+}
+/**
+ * What a compaction's record (``source: "summarization"``) stands for: the messages
+ * it summarized, the messages kept verbatim beside it, and the system prompt in force.
+ */
+export interface InjectionMetadata {
+  compacted_message_ids?: CompactedMessageIds;
+  derived_from?: DerivedFrom;
+  kept_message_ids?: KeptMessageIds;
+  system_prompt?: SystemPrompt;
 }
 /**
  * A service notice recorded in the transcript, e.g. a failed compaction

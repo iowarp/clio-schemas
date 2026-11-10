@@ -14,6 +14,8 @@
   agent run, evidence source, context frame, diff or plan the message points at.
 - `metadata` on `notice` blocks: the answer hook that added the notice and the
   answer part its revision replaces.
+- `metadata` on `injection` blocks: for a compaction's record, the messages it
+  summarized and kept and the system prompt in force.
 
 All three describe what clio-agent already sends; `MessageBlock` now has 17 types.
 Develop released these as 0.6.1; this branch's version is 0.7.0b1.

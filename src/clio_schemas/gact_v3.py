@@ -199,6 +199,31 @@ class RoutingMessageBlock(_ClosedBlock):
     detail: str | None = None
 
 
+class InjectionMetadata(BaseModel):
+    """What a compaction's record (``source: "summarization"``) stands for: the messages
+    it summarized, the messages kept verbatim beside it, and the system prompt in force."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    derived_from: list[str] | None = Field(
+        default=None, description="The context segments the summary replaced."
+    )
+    compacted_message_ids: list[str] | None = Field(
+        default=None,
+        description="The messages the summary stands for; their count is the number summarized.",
+    )
+    kept_message_ids: list[str] | None = Field(
+        default=None, description="The messages the agent still sees verbatim after compaction."
+    )
+    system_prompt: str | None = Field(
+        default=None,
+        description=(
+            "The system prompt in force when the compaction ran. Absent when the agent "
+            "has not recorded one, e.g. a manual compaction just after a restart."
+        ),
+    )
+
+
 class InjectionMessageBlock(_ClosedBlock):
     """Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path
     suggestion, a saved oversize result, a hook's effect. ``source`` names what it is;
@@ -206,8 +231,10 @@ class InjectionMessageBlock(_ClosedBlock):
 
     ``source: "summarization"`` is a compaction's record: ``text`` is the summary the
     agent continues from, ``trigger`` says who asked for it (``auto`` or ``manual``)
-    and ``compaction_id`` names that compaction. ``variants_id`` / ``try_index`` mean
-    the block belongs to that variant try's tab (e.g. Refine advice given inside a try).
+    and ``compaction_id`` names that compaction; ``metadata`` lists the messages it
+    summarized and kept, and the system prompt in force. ``variants_id`` / ``try_index``
+    mean the block belongs to that variant try's tab (e.g. Refine advice given inside a
+    try).
     """
 
     type: Literal["injection"]
@@ -218,6 +245,7 @@ class InjectionMessageBlock(_ClosedBlock):
     compaction_id: str | None = None
     variants_id: str | None = None
     try_index: int | None = Field(default=None, ge=0)
+    metadata: InjectionMetadata | None = None
 
 
 class NoticeMetadata(BaseModel):
