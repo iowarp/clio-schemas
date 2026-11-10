@@ -711,7 +711,7 @@
     },
     "InjectionMessageBlock": {
       "additionalProperties": false,
-      "description": "Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path\nsuggestion, a saved oversize result, a hook's effect. ``source`` names what it is;\n``text`` is exactly what the agent got; ``call_id`` ties a note to its tool call.\n\n``source: \"summarization\"`` is a compaction's record: ``text`` is the summary the\nagent continues from, ``trigger`` says who asked for it (``auto`` or ``manual``)\nand ``compaction_id`` names that compaction. ``variants_id`` / ``try_index`` mean\nthe block belongs to that variant try's tab (e.g. Refine advice given inside a try).",
+      "description": "Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path\nsuggestion, a saved oversize result, a hook's effect. ``source`` names what it is;\n``text`` is exactly what the agent got; ``call_id`` ties a note to its tool call.\n\n``source: \"summarization\"`` is a compaction's record: ``text`` is the summary the\nagent continues from, ``trigger`` says who asked for it (``auto`` or ``manual``)\nand ``compaction_id`` names that compaction; ``metadata`` lists the messages it\nsummarized and kept, and the system prompt in force. ``variants_id`` / ``try_index``\nmean the block belongs to that variant try's tab (e.g. Refine advice given inside a\ntry).",
       "properties": {
         "agent_id": {
           "anyOf": [
@@ -764,6 +764,17 @@
         "id": {
           "title": "Id",
           "type": "string"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InjectionMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "sequence": {
           "anyOf": [
@@ -852,6 +863,75 @@
         "text"
       ],
       "title": "InjectionMessageBlock",
+      "type": "object"
+    },
+    "InjectionMetadata": {
+      "additionalProperties": false,
+      "description": "What a compaction's record (``source: \"summarization\"``) stands for: the messages\nit summarized, the messages kept verbatim beside it, and the system prompt in force.",
+      "properties": {
+        "compacted_message_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The messages the summary stands for; their count is the number summarized.",
+          "title": "Compacted Message Ids"
+        },
+        "derived_from": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The context segments the summary replaced.",
+          "title": "Derived From"
+        },
+        "kept_message_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The messages the agent still sees verbatim after compaction.",
+          "title": "Kept Message Ids"
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The system prompt in force when the compaction ran. Absent when the agent has not recorded one, e.g. a manual compaction just after a restart.",
+          "title": "System Prompt"
+        }
+      },
+      "title": "InjectionMetadata",
       "type": "object"
     },
     "NoticeMessageBlock": {
