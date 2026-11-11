@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.7.0b1] - 2026-11-11
+
 ### Added
 
 - The `stream` artifact kind and the `clio-core` custody: an artifact whose content lives
@@ -17,8 +19,8 @@
 - `metadata` on `injection` blocks: for a compaction's record, the messages it
   summarized and kept and the system prompt in force.
 
-All three describe what clio-agent already sends; `MessageBlock` now has 17 types.
-Develop released these as 0.6.1; this branch's version is 0.7.0b1.
+The message blocks describe what clio-agent already sends; `MessageBlock` now has 17
+types.
 
 ## [0.6.0] - 2026-10-28
 
