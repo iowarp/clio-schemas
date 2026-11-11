@@ -677,6 +677,7 @@
         "config",
         "model",
         "ui_payload",
+        "stream",
         "other"
       ],
       "title": "ArtifactKind",
@@ -1531,6 +1532,121 @@
       "title": "ContentSelection",
       "type": "object"
     },
+    "ContextReferenceMessageBlock": {
+      "additionalProperties": false,
+      "description": "Something the user pointed the message at: a workspace file, artifact, session,\nagent run, evidence source, context frame, diff or plan, pinned at one revision.",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "Display name of the referenced item.",
+          "title": "Label",
+          "type": "string"
+        },
+        "media_type": {
+          "title": "Media Type",
+          "type": "string"
+        },
+        "navigation": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Where a client opens the item, e.g. {workspace_id, path} for a file or {workspace_id, session_id} for a session.",
+          "title": "Navigation",
+          "type": "object"
+        },
+        "ref_id": {
+          "title": "Ref Id",
+          "type": "string"
+        },
+        "ref_kind": {
+          "enum": [
+            "workspace_file",
+            "artifact",
+            "session",
+            "agent_run",
+            "evidence_source",
+            "context_frame",
+            "diff",
+            "plan"
+          ],
+          "title": "Ref Kind",
+          "type": "string"
+        },
+        "revision": {
+          "description": "Revision the message refers to; a string, not a count.",
+          "title": "Revision",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "context_reference",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "ref_kind",
+        "ref_id",
+        "label",
+        "revision",
+        "media_type"
+      ],
+      "title": "ContextReferenceMessageBlock",
+      "type": "object"
+    },
     "CreateSurfacePayload": {
       "additionalProperties": false,
       "description": "``createSurface``: begin rendering a new surface against one catalog.",
@@ -1583,7 +1699,8 @@
       "enum": [
         "cas",
         "workspace-referenced",
-        "external-referenced"
+        "external-referenced",
+        "clio-core"
       ],
       "title": "Custody",
       "type": "string"
@@ -2205,7 +2322,7 @@
     },
     "InjectionMessageBlock": {
       "additionalProperties": false,
-      "description": "Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path\nsuggestion, a saved oversize result, a hook's effect. ``source`` names what it is;\n``text`` is exactly what the agent got; ``call_id`` ties a note to its tool call.\n\n``source: \"summarization\"`` is a compaction's record: ``text`` is the summary the\nagent continues from, ``trigger`` says who asked for it (``auto`` or ``manual``)\nand ``compaction_id`` names that compaction. ``variants_id`` / ``try_index`` mean\nthe block belongs to that variant try's tab (e.g. Refine advice given inside a try).",
+      "description": "Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path\nsuggestion, a saved oversize result, a hook's effect. ``source`` names what it is;\n``text`` is exactly what the agent got; ``call_id`` ties a note to its tool call.\n\n``source: \"summarization\"`` is a compaction's record: ``text`` is the summary the\nagent continues from, ``trigger`` says who asked for it (``auto`` or ``manual``)\nand ``compaction_id`` names that compaction; ``metadata`` lists the messages it\nsummarized and kept, and the system prompt in force. ``variants_id`` / ``try_index``\nmean the block belongs to that variant try's tab (e.g. Refine advice given inside a\ntry).",
       "properties": {
         "agent_id": {
           "anyOf": [
@@ -2258,6 +2375,17 @@
         "id": {
           "title": "Id",
           "type": "string"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InjectionMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "sequence": {
           "anyOf": [
@@ -2346,6 +2474,75 @@
         "text"
       ],
       "title": "InjectionMessageBlock",
+      "type": "object"
+    },
+    "InjectionMetadata": {
+      "additionalProperties": false,
+      "description": "What a compaction's record (``source: \"summarization\"``) stands for: the messages\nit summarized, the messages kept verbatim beside it, and the system prompt in force.",
+      "properties": {
+        "compacted_message_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The messages the summary stands for; their count is the number summarized.",
+          "title": "Compacted Message Ids"
+        },
+        "derived_from": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The context segments the summary replaced.",
+          "title": "Derived From"
+        },
+        "kept_message_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The messages the agent still sees verbatim after compaction.",
+          "title": "Kept Message Ids"
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The system prompt in force when the compaction ran. Absent when the agent has not recorded one, e.g. a manual compaction just after a restart.",
+          "title": "System Prompt"
+        }
+      },
+      "title": "InjectionMetadata",
       "type": "object"
     },
     "InlineCatalog": {
@@ -2744,19 +2941,21 @@
       "type": "string"
     },
     "MessageBlock": {
-      "description": "Closed discriminated union of the 15 GACT 0.3 message-block types.",
+      "description": "Closed discriminated union of the 17 GACT 0.3 message-block types.",
       "discriminator": {
         "mapping": {
           "a2ui": "#/$defs/A2UIMessageBlock",
           "action_card": "#/$defs/ActionCardMessageBlock",
           "artifact": "#/$defs/ArtifactMessageBlock",
           "citation": "#/$defs/CitationMessageBlock",
+          "context_reference": "#/$defs/ContextReferenceMessageBlock",
           "diff": "#/$defs/DiffMessageBlock",
           "error": "#/$defs/ErrorMessageBlock",
           "injection": "#/$defs/InjectionMessageBlock",
           "notice": "#/$defs/NoticeMessageBlock",
           "plan": "#/$defs/PlanMessageBlock",
           "reasoning": "#/$defs/ReasoningMessageBlock",
+          "resource": "#/$defs/ResourceMessageBlock",
           "routing": "#/$defs/RoutingMessageBlock",
           "subagent": "#/$defs/SubagentMessageBlock",
           "task": "#/$defs/TaskMessageBlock",
@@ -2810,6 +3009,12 @@
         },
         {
           "$ref": "#/$defs/NoticeMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/ResourceMessageBlock"
+        },
+        {
+          "$ref": "#/$defs/ContextReferenceMessageBlock"
         }
       ],
       "title": "MessageBlock"
@@ -3130,6 +3335,17 @@
           "title": "Id",
           "type": "string"
         },
+        "metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NoticeMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "sequence": {
           "anyOf": [
             {
@@ -3192,6 +3408,40 @@
         "text"
       ],
       "title": "NoticeMessageBlock",
+      "type": "object"
+    },
+    "NoticeMetadata": {
+      "additionalProperties": false,
+      "description": "Who produced a notice: an answer hook, and the answer part its revision replaces.",
+      "properties": {
+        "hook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The answer hook that added the notice.",
+          "title": "Hook"
+        },
+        "revises": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The answer part a hook's revision replaces.",
+          "title": "Revises"
+        }
+      },
+      "title": "NoticeMetadata",
       "type": "object"
     },
     "ParametersFact": {
@@ -3861,6 +4111,163 @@
       ],
       "title": "ReplayContract",
       "type": "string"
+    },
+    "ResourceDelivery": {
+      "additionalProperties": false,
+      "description": "How the agent was given an attached resource: its persisted delivery decision.",
+      "properties": {
+        "evidence_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What the delivery decision was based on.",
+          "title": "Evidence Source"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Why this representation was chosen, for display.",
+          "title": "Reason"
+        },
+        "representation": {
+          "enum": [
+            "native",
+            "bounded_tools",
+            "structured_document",
+            "sandbox",
+            "retrieval",
+            "metadata_only"
+          ],
+          "title": "Representation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "representation"
+      ],
+      "title": "ResourceDelivery",
+      "type": "object"
+    },
+    "ResourceMessageBlock": {
+      "additionalProperties": false,
+      "description": "Reference to one workspace resource attached to the message (a composer upload).",
+      "properties": {
+        "agent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel"
+        },
+        "delivery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResourceDelivery"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "media_type": {
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name of the resource.",
+          "title": "Name",
+          "type": "string"
+        },
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "resource_revision": {
+          "description": "Revision of the resource the message refers to; a string, not a count.",
+          "title": "Resource Revision",
+          "type": "string"
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sequence"
+        },
+        "stream_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stream Source"
+        },
+        "type": {
+          "const": "resource",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "resource_id",
+        "resource_revision",
+        "workspace_id",
+        "name",
+        "media_type"
+      ],
+      "title": "ResourceMessageBlock",
+      "type": "object"
     },
     "ResourceOwner": {
       "additionalProperties": false,

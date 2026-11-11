@@ -567,6 +567,54 @@ CLIO_REJECT_CASES.extend(
 )
 
 
+# A named artifact at its latest version is a live source; a pinned version of a name is
+# not a data source (a fixed version is addressed by its artifact id).
+CLIO_ACCEPT_CASES.extend(
+    [
+        pytest.param(
+            {
+                "id": "status",
+                "component": "clio.data-table.v1",
+                "dataUri": "artifact://ws_lab/data/status.csv@latest",
+            },
+            id="DataTable-named-artifact-at-latest",
+        ),
+        pytest.param(
+            {
+                "id": "temps",
+                "component": "clio.chart.v1",
+                "preset": "scatter",
+                "xField": "t",
+                "yField": "nozzle_c",
+                "entityField": "printer",
+                "dataUri": "artifact://ws_lab/data/status.csv@latest",
+            },
+            id="Chart-named-artifact-at-latest",
+        ),
+    ]
+)
+CLIO_REJECT_CASES.extend(
+    [
+        pytest.param(
+            {
+                "id": "pinned_name",
+                "component": "clio.data-table.v1",
+                "dataUri": "artifact://ws_lab/data/status.csv@v3",
+            },
+            id="DataTable-named-artifact-at-a-version",
+        ),
+        pytest.param(
+            {
+                "id": "bare_name",
+                "component": "clio.data-table.v1",
+                "dataUri": "artifact://ws_lab/data/status.csv",
+            },
+            id="DataTable-named-artifact-without-latest",
+        ),
+    ]
+)
+
+
 @pytest.mark.parametrize("payload", CLIO_REJECT_CASES)
 def test_clio_workspace_reject_case_fails(payload: dict[str, Any]) -> None:
     assert not WORKSPACE_VALIDATORS[payload["component"]].is_valid(payload)

@@ -88,6 +88,44 @@ class ArtifactMessageBlock(_ClosedBlock):
     artifact_id: str
 
 
+ResourceDeliveryRepresentation = Literal[
+    "native",
+    "bounded_tools",
+    "structured_document",
+    "sandbox",
+    "retrieval",
+    "metadata_only",
+]
+
+
+class ResourceDelivery(BaseModel):
+    """How the agent was given an attached resource: its persisted delivery decision."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    representation: ResourceDeliveryRepresentation
+    evidence_source: str | None = Field(
+        default=None, description="What the delivery decision was based on."
+    )
+    reason: str | None = Field(
+        default=None, description="Why this representation was chosen, for display."
+    )
+
+
+class ResourceMessageBlock(_ClosedBlock):
+    """Reference to one workspace resource attached to the message (a composer upload)."""
+
+    type: Literal["resource"]
+    resource_id: str
+    resource_revision: str = Field(
+        description="Revision of the resource the message refers to; a string, not a count."
+    )
+    workspace_id: str
+    name: str = Field(description="Display name of the resource.")
+    media_type: str
+    delivery: ResourceDelivery | None = None
+
+
 class ActionCardBehavior(BaseModel):
     """Registered action-card behavior with forward-compatible parameters."""
 
@@ -161,6 +199,31 @@ class RoutingMessageBlock(_ClosedBlock):
     detail: str | None = None
 
 
+class InjectionMetadata(BaseModel):
+    """What a compaction's record (``source: "summarization"``) stands for: the messages
+    it summarized, the messages kept verbatim beside it, and the system prompt in force."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    derived_from: list[str] | None = Field(
+        default=None, description="The context segments the summary replaced."
+    )
+    compacted_message_ids: list[str] | None = Field(
+        default=None,
+        description="The messages the summary stands for; their count is the number summarized.",
+    )
+    kept_message_ids: list[str] | None = Field(
+        default=None, description="The messages the agent still sees verbatim after compaction."
+    )
+    system_prompt: str | None = Field(
+        default=None,
+        description=(
+            "The system prompt in force when the compaction ran. Absent when the agent "
+            "has not recorded one, e.g. a manual compaction just after a restart."
+        ),
+    )
+
+
 class InjectionMessageBlock(_ClosedBlock):
     """Data the harness (CLIO) gave the agent: a plan reminder, the todo list, a path
     suggestion, a saved oversize result, a hook's effect. ``source`` names what it is;
@@ -168,8 +231,10 @@ class InjectionMessageBlock(_ClosedBlock):
 
     ``source: "summarization"`` is a compaction's record: ``text`` is the summary the
     agent continues from, ``trigger`` says who asked for it (``auto`` or ``manual``)
-    and ``compaction_id`` names that compaction. ``variants_id`` / ``try_index`` mean
-    the block belongs to that variant try's tab (e.g. Refine advice given inside a try).
+    and ``compaction_id`` names that compaction; ``metadata`` lists the messages it
+    summarized and kept, and the system prompt in force. ``variants_id`` / ``try_index``
+    mean the block belongs to that variant try's tab (e.g. Refine advice given inside a
+    try).
     """
 
     type: Literal["injection"]
@@ -180,6 +245,18 @@ class InjectionMessageBlock(_ClosedBlock):
     compaction_id: str | None = None
     variants_id: str | None = None
     try_index: int | None = Field(default=None, ge=0)
+    metadata: InjectionMetadata | None = None
+
+
+class NoticeMetadata(BaseModel):
+    """Who produced a notice: an answer hook, and the answer part its revision replaces."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    hook: str | None = Field(default=None, description="The answer hook that added the notice.")
+    revises: str | None = Field(
+        default=None, description="The answer part a hook's revision replaces."
+    )
 
 
 class NoticeMessageBlock(_ClosedBlock):
@@ -193,6 +270,38 @@ class NoticeMessageBlock(_ClosedBlock):
     code: str | None = None
     trigger: Literal["auto", "manual"] | None = None
     compaction_id: str | None = None
+    metadata: NoticeMetadata | None = None
+
+
+ContextReferenceKind = Literal[
+    "workspace_file",
+    "artifact",
+    "session",
+    "agent_run",
+    "evidence_source",
+    "context_frame",
+    "diff",
+    "plan",
+]
+
+
+class ContextReferenceMessageBlock(_ClosedBlock):
+    """Something the user pointed the message at: a workspace file, artifact, session,
+    agent run, evidence source, context frame, diff or plan, pinned at one revision."""
+
+    type: Literal["context_reference"]
+    ref_kind: ContextReferenceKind
+    ref_id: str
+    label: str = Field(description="Display name of the referenced item.")
+    revision: str = Field(description="Revision the message refers to; a string, not a count.")
+    media_type: str
+    navigation: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "Where a client opens the item, e.g. {workspace_id, path} for a file or "
+            "{workspace_id, session_id} for a session."
+        ),
+    )
 
 
 MessageBlockValue = Annotated[
@@ -210,10 +319,12 @@ MessageBlockValue = Annotated[
     | ErrorMessageBlock
     | RoutingMessageBlock
     | InjectionMessageBlock
-    | NoticeMessageBlock,
+    | NoticeMessageBlock
+    | ResourceMessageBlock
+    | ContextReferenceMessageBlock,
     Field(discriminator="type"),
 ]
 
 
 class MessageBlock(RootModel[MessageBlockValue]):
-    """Closed discriminated union of the 15 GACT 0.3 message-block types."""
+    """Closed discriminated union of the 17 GACT 0.3 message-block types."""
