@@ -33,6 +33,7 @@ from pydantic import (
     JsonValue,
     create_model,
     field_validator,
+    model_validator,
 )
 
 # Bounds shared with bounded_components.py's clio.map.v1 / clio.workflow.v1
@@ -718,6 +719,102 @@ RasterViewportComponent = _component_model(
         "height": ViewportHeight,
     },
 )
+
+#: An MCP server's name as CLIO namespaces its tools, or one of that server's tools.
+MCP_APP_NAME_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+#: The key a view reports a state channel under in ``ui/update-model-context``.
+MCP_APP_CHANNEL_KEY_PATTERN = r"^[A-Za-z_][A-Za-z0-9_.-]{0,63}$"
+#: An absolute data-model path (a JSON Pointer) a channel binds to.
+MCP_APP_CHANNEL_PATH_PATTERN = r"^(/[^/\s]+)+$"
+#: At most this many state channels on one app.
+MAX_MCP_APP_CHANNELS = 16
+
+
+class _McpAppChannel(_ClosedModel):
+    """One state channel between an MCP App's view and the surface's data model."""
+
+    key: Annotated[
+        str,
+        Field(
+            pattern=MCP_APP_CHANNEL_KEY_PATTERN,
+            description="The key the view reports this state under in its model context.",
+        ),
+    ]
+    path: Annotated[
+        str,
+        Field(
+            max_length=256,
+            pattern=MCP_APP_CHANNEL_PATH_PATTERN,
+            description=(
+                "The data-model path the state is written to; components bound to it follow it."
+            ),
+        ),
+    ]
+    tool: (
+        Annotated[
+            str,
+            Field(
+                pattern=MCP_APP_NAME_PATTERN,
+                description=(
+                    "A tool of the server or of the view that sets this state from {key: value} "
+                    "when the path changes elsewhere; omit for report-only state."
+                ),
+            ),
+        ]
+        | None
+    ) = None
+
+
+_McpAppComponentBase = _component_model(
+    "McpAppComponentBase",
+    "clio.mcp-app.v1",
+    "An MCP App view opened by a tool call, with its state linked to the surface's data model.",
+    required={
+        "server": Annotated[
+            str,
+            Field(
+                pattern=MCP_APP_NAME_PATTERN,
+                description="The MCP server whose tool opens the view, as CLIO names it.",
+            ),
+        ],
+        "tool": Annotated[
+            str,
+            Field(
+                pattern=MCP_APP_NAME_PATTERN,
+                description="The server's tool that opens the view (it declares a ui:// resource).",
+            ),
+        ],
+    },
+    optional={
+        "arguments": Annotated[
+            dict[str, JsonValue],
+            Field(description="The arguments the opening tool is called with."),
+        ],
+        "state": Annotated[
+            list[_McpAppChannel],
+            Field(
+                max_length=MAX_MCP_APP_CHANNELS,
+                description="State channels linking the view to data-model paths.",
+            ),
+        ],
+        "height": ViewportHeight,
+    },
+)
+
+
+class McpAppComponent(_McpAppComponentBase):  # type: ignore[misc, valid-type]
+    """``clio.mcp-app.v1``: each channel key and each channel path appears once."""
+
+    @model_validator(mode="after")
+    def _channels_are_distinct(self) -> McpAppComponent:
+        channels = cast(list[_McpAppChannel], getattr(self, "state", None) or [])
+        for attribute in ("key", "path"):
+            values = [getattr(channel, attribute) for channel in channels]
+            duplicates = sorted({value for value in values if values.count(value) > 1})
+            if duplicates:
+                raise ValueError(f"state channel {attribute}s must be distinct: {duplicates}")
+        return self
+
 
 MessageDraftComponent = _component_model(
     "MessageDraftComponent",
