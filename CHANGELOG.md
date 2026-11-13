@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [0.7.0] - 2026-11-13
+
+The stable release of 0.7.0b1, with no schema changes since the beta.
+
 ## [0.7.0b1] - 2026-11-11
 
 ### Added
