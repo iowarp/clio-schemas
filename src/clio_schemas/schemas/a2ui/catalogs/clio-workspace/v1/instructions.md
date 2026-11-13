@@ -343,6 +343,19 @@ selection, export, and Reference this without renderer actions in the spec.
 Use this when the spatial pattern or grid cells matter more than a table
 of sampled values.
 
+**McpApp** — `clio.mcp-app.v1` puts a server's interactive view (an MCP App)
+in the surface. `server`, `tool` and `arguments` are the call that opens the
+view, exactly as you would make it; CLIO makes it when the surface is shown.
+`state` links the view to the data model. Each channel names the `key` the
+view reports in its context (the keys appear in the view's context in your
+turn), the `path` that value is written to, and optionally a `tool`, of the
+server or of the view, that CLIO calls with `{key: value}` when another
+component changes the path. At a `/selection/<key>` path the value is the
+shared selection's one value, so a chart, table or map bound to that path
+follows the view and drives it:
+`{"id": "app", "component": "clio.mcp-app.v1", "server": "viewer", "tool": "open_view", "arguments": {"file": "run.vtu"}, "state": [{"key": "time", "path": "/selection/time", "tool": "set_time"}], "height": 480}` beside a
+chart with `"selection": {"path": "/selection/time"}, "selectionField": "time"`.
+
 **Chart** — `clio.chart.v1` draws any Vega-Lite chart over tabular rows.
 Prefer a `preset` over writing a `spec`: `trajectories` (one line per entity
 over time or a step), `spectra` (one curve per entity over wavelength or
