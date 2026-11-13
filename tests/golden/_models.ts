@@ -252,7 +252,8 @@ export type Mode = "read_only" | "working_copy" | "write_enabled";
 export type OperationId = string | null;
 export type ClioId = string;
 export type HostId = string;
-export type Provider = "local" | "sftp" | "google_drive" | "globus" | "github" | "obsidian" | "ndp";
+export type Provider =
+  "local" | "sftp" | "google_drive" | "globus" | "github" | "obsidian" | "ndp" | "s3";
 export type Revision1 = string | null;
 export type Root = string;
 export type SchemaVersion3 = 1;
