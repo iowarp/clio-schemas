@@ -3292,6 +3292,11 @@
               "minimum": 160,
               "type": "integer"
             },
+            "recordingUri": {
+              "description": "A video of the view (a workspace path or artifact:// reference), played when the live view cannot run.",
+              "pattern": "^artifact://artifact_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
             "server": {
               "description": "The MCP server whose tool opens the view, as CLIO names it.",
               "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$",

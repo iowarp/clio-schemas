@@ -799,6 +799,16 @@ _McpAppComponentBase = _component_model(
                 description="State channels linking the view to data-model paths.",
             ),
         ],
+        "recordingUri": Annotated[
+            str,
+            Field(
+                pattern=ARTIFACT_URI_PATTERN,
+                description=(
+                    "A video of the view (a workspace path or artifact:// reference), "
+                    "played when the live view cannot run."
+                ),
+            ),
+        ],
         "height": ViewportHeight,
     },
 )

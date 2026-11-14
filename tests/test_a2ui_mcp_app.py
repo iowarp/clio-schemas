@@ -37,6 +37,7 @@ ACCEPT: list[Any] = [
         },
         id="channels-arguments-height",
     ),
+    pytest.param({**BASE, "recordingUri": "artifact://artifact_helene_clip"}, id="with-recording"),
 ]
 
 REJECT: list[Any] = [
@@ -55,6 +56,8 @@ REJECT: list[Any] = [
         id="too-many-channels",
     ),
     pytest.param({**BASE, "height": 40}, id="height-too-small"),
+    # A path is registered as an artifact by the producer before validation.
+    pytest.param({**BASE, "recordingUri": "videos/clip.mp4"}, id="recording-not-registered"),
     pytest.param({**BASE, "html": "<p>inline</p>"}, id="no-inline-view"),
 ]
 
