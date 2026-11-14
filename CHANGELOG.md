@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## [0.7.0b2] - unreleased
+## [0.8.0b1] - unreleased
 
 ### Added
 
@@ -14,6 +14,10 @@
 
 - A description on a non-string component property (for example `Tabs.activeTab`)
   now reaches the rendered catalog instead of being dropped.
+
+## [0.7.0] - 2026-11-13
+
+The stable release of 0.7.0b1, with no schema changes since the beta.
 
 ## [0.7.0b1] - 2026-11-11
 
