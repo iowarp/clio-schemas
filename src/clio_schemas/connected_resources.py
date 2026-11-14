@@ -59,9 +59,7 @@ class ConnectedSource(ResourceContract):
     schema_version: Literal[1] = 1
     id: str = Field(min_length=1)
     owner: ResourceOwner
-    provider: Literal[
-        "local", "sftp", "google_drive", "globus", "github", "obsidian", "ndp", "s3"
-    ]
+    provider: Literal["local", "sftp", "google_drive", "globus", "github", "obsidian", "ndp", "s3"]
     source_kind: Literal["files", "knowledge"] = "files"
     connection: Literal["provider", "local_vault", "headless_sync"] = "provider"
     label: str = Field(min_length=1)
