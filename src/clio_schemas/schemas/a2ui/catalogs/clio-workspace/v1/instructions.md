@@ -359,6 +359,9 @@ shared selection's one value, so a chart, table or map bound to that path
 follows the view and drives it:
 `{"id": "app", "component": "clio.mcp-app.v1", "server": "viewer", "tool": "open_view", "arguments": {"file": "run.vtu"}, "state": [{"key": "time", "path": "/selection/time", "tool": "set_time"}], "height": 480}` beside a
 chart with `"selection": {"path": "/selection/time"}, "selectionField": "time"`.
+A live view runs only while its server does; give `recordingUri` a video of it
+(an exported animation) and the surface plays that when the view cannot open,
+so a shared or archived dashboard still shows it.
 
 **Chart** — `clio.chart.v1` draws any Vega-Lite chart over tabular rows.
 Prefer a `preset` over writing a `spec`: `trajectories` (one line per entity
