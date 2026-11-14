@@ -706,14 +706,16 @@ RasterViewportComponent = _component_model(
     "RasterViewportComponent",
     "clio.raster-viewport.v1",
     (
-        "An interactive viewport for a registered two-dimensional grid, "
-        "with sampled values, colour scale, and region reference."
+        "An interactive viewport for a registered grid (one 2-D field, or one frame of "
+        "a time series), with sampled values, colour scale, and region reference."
     ),
     required={"rasterUri": DynamicArtifactUri},
     optional={
         "title": DynamicString,
         "variable": str,
         "band": Annotated[int, Field(ge=1)],
+        "selection": DynamicValue,
+        "selectionField": str,
         "colormap": Literal["viridis", "magma", "plasma", "cividis", "turbo", "grayscale"],
         "unit": str,
         "height": ViewportHeight,
