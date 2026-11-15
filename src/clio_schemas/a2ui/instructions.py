@@ -230,8 +230,10 @@ it neither runs a callback nor grants access. Arbitrary click handlers, external
 link targets, init directives and HTML remain unsupported. Inspect the rendered
 image at the person's viewing width and revise cropping or unreadable labels.
 
-**Map** — labeled points or GeoJSON geometry; the renderer owns the
-basemap, so never pass tile/style URLs. Inline points are capped at 500; a
+**Map** — labeled points or GeoJSON geometry on a flat (2D) map; `bearing`
+and `pitch` turn and tilt it, and it has no globe view. Interactive 3D globes
+come from a plugin (such as Geo), which offer_plugin's search finds. The
+renderer owns the basemap, so never pass tile/style URLs. Inline points are capped at 500; a
 `dataUri` map names its columns with `latitudeField`/`longitudeField`/
 `labelField` (required) and optionally `idField`/`detailField`/
 `categoryField` for categorical colours or `valueField` for a numeric colour
