@@ -341,7 +341,27 @@ and a `colormap`. The viewer queries a bounded sample for its visible
 extent and supplies hover values, a colour legend, pan, zoom, region
 selection, export, and Reference this without renderer actions in the spec.
 Use this when the spatial pattern or grid cells matter more than a table
-of sampled values.
+of sampled values. A NetCDF variable with a time (or other leading)
+dimension draws one frame and says which; bind `selection` to the shared
+`/selection/<key>` path with `selectionField` naming that dimension
+(`"time"`) and the field follows the chart, map or app view on that path.
+Grids with latitude and longitude coordinates are placed by them.
+
+**McpApp** — `clio.mcp-app.v1` puts a server's interactive view (an MCP App)
+in the surface. `server`, `tool` and `arguments` are the call that opens the
+view, exactly as you would make it; CLIO makes it when the surface is shown.
+`state` links the view to the data model. Each channel names the `key` the
+view reports in its context (the keys appear in the view's context in your
+turn), the `path` that value is written to, and optionally a `tool`, of the
+server or of the view, that CLIO calls with `{key: value}` when another
+component changes the path. At a `/selection/<key>` path the value is the
+shared selection's one value, so a chart, table or map bound to that path
+follows the view and drives it:
+`{"id": "app", "component": "clio.mcp-app.v1", "server": "viewer", "tool": "open_view", "arguments": {"file": "run.vtu"}, "state": [{"key": "time", "path": "/selection/time", "tool": "set_time"}], "height": 480}` beside a
+chart with `"selection": {"path": "/selection/time"}, "selectionField": "time"`.
+A live view runs only while its server does; give `recordingUri` a video of it
+(an exported animation) and the surface plays that when the view cannot open,
+so a shared or archived dashboard still shows it.
 
 **Chart** — `clio.chart.v1` draws any Vega-Lite chart over tabular rows.
 Prefer a `preset` over writing a `spec`: `trajectories` (one line per entity

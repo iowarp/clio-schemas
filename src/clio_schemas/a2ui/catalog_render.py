@@ -310,6 +310,8 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
             rendered.update(_string_constraints(meta))
         else:
             rendered.update(_number_bounds(meta))
+            if meta.description:
+                rendered["description"] = meta.description
         return rendered
 
     if origin is list:
@@ -341,6 +343,9 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
         raise NotImplementedError(
             f"no catalog rendering rule for list item type {item_type!r} (field {field_name!r})"
         )
+
+    if t == dict[str, JsonValue]:
+        return {"type": "object"}
 
     if origin is Literal:
         return {"type": "string", "enum": list(typing.get_args(t))}

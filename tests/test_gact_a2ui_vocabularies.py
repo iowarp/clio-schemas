@@ -268,11 +268,12 @@ def test_catalog_declares_current_components_and_preserves_checkbox_spelling() -
         "clio.chart.v1",
     }
     names = factory_names | bounded_names
-    assert len(names) == 39
+    assert len(names) == 40
     assert factory_names.isdisjoint(bounded_names)
     assert "CheckBox" in names
     assert {"DateTimeInput", "clio.message-draft.v1", "clio.weather.v1", "clio.steps.v1"} <= names
     assert {"Carousel", "Video"} <= names
+    assert "clio.mcp-app.v1" in names
     assert "Checkbox" not in names
     assert "clio.time-series.v1" not in names
 

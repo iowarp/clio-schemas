@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## [0.8.0b1] - unreleased
+
+### Added
+
+- `clio.mcp-app.v1`: an MCP App view in a surface, opened by the call it names
+  (`server`, `tool`, `arguments`), with `state` channels that tie keys the view
+  reports to data-model paths and, optionally, to the tool that sets each one.
+
+### Fixed
+
+- A description on a non-string component property (for example `Tabs.activeTab`)
+  now reaches the rendered catalog instead of being dropped.
+
 ## [0.7.0] - 2026-11-13
 
 The stable release of 0.7.0b1, with no schema changes since the beta.
