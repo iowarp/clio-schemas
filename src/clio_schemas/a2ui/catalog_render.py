@@ -306,7 +306,13 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
                 rendered["minItems"] = min_items
             if max_items is not None:
                 rendered["maxItems"] = max_items
-        if rendered.get("type") == "string":
+        if rendered.get("type") == "object" and "additionalProperties" in rendered:
+            min_keys, max_keys = _list_bounds(meta)
+            if min_keys is not None:
+                rendered["minProperties"] = min_keys
+            if max_keys is not None:
+                rendered["maxProperties"] = max_keys
+        elif rendered.get("type") == "string":
             rendered.update(_string_constraints(meta))
         else:
             rendered.update(_number_bounds(meta))
@@ -346,6 +352,19 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
 
     if t == dict[str, JsonValue]:
         return {"type": "object"}
+
+    if origin is dict:
+        # A typed map (e.g. a mesh's opacity per node name): its keys and values are
+        # rendered with the same rules as any other field, never left open.
+        key_type, value_type = typing.get_args(t)
+        keys = render_type(key_type, field_name, local_defs)
+        values = render_type(value_type, field_name, local_defs)
+        if keys is None or values is None or keys.get("type") != "string":
+            raise NotImplementedError(
+                f"no catalog rendering rule for map type {t!r} (field {field_name!r})"
+            )
+        keys.pop("type")
+        return {"type": "object", "propertyNames": keys, "additionalProperties": values}
 
     if origin is Literal:
         return {"type": "string", "enum": list(typing.get_args(t))}

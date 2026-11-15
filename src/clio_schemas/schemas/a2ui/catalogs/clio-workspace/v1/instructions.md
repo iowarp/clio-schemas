@@ -321,7 +321,9 @@ also carry node or cell results: `field` colors by one result, `frame`
 chooses a result frame, and `thresholdField` with `thresholdMin`/
 `thresholdMax` shows cells in range. Bind those values to controls when
 the person should explore them. Bind `camera` to a path when a later action
-should retain the chosen angle. To show the case a person selects, bind
+should retain the chosen angle. `nodeOpacity` maps node names in the model to an
+opacity from 0 to 1, e.g. `{"lid": 0.3, "base": 0.3}` to see a board through its
+case; a name the model lacks is reported in the view. To show the case a person selects, bind
 `meshUri` to the selection, e.g. `{"path": "/selection/case/values/0"}`
 over a table whose selection field holds each case's artifact URI; one
 viewer then follows the table instead of one viewer per case. A 3D view
