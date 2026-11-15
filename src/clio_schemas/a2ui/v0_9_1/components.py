@@ -677,6 +677,12 @@ MIN_VIEWPORT_HEIGHT = 160
 MAX_VIEWPORT_HEIGHT = 2000
 ViewportHeight = Annotated[int, Field(ge=MIN_VIEWPORT_HEIGHT, le=MAX_VIEWPORT_HEIGHT)]
 
+#: Opacity per named node of a mesh (0 transparent, 1 opaque), e.g. a see-through case.
+NodeOpacity = Annotated[
+    dict[Annotated[str, Field(min_length=1, max_length=128)], Annotated[float, Field(ge=0, le=1)]],
+    Field(max_length=256),
+]
+
 MeshViewportComponent = _component_model(
     "MeshViewportComponent",
     "clio.mesh-viewport.v1",
@@ -698,6 +704,7 @@ MeshViewportComponent = _component_model(
         "camera": DynamicValue,
         "syncGroup": SyncGroup,
         "upAxis": Literal["x", "y", "z"],
+        "nodeOpacity": NodeOpacity,
         "height": ViewportHeight,
     },
 )
