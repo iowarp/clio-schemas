@@ -305,7 +305,11 @@ _MAP_POINT_DEF: dict[str, Any] = {
 
 _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "description": "Interactive points, ordered trajectories, or GeoJSON geometry on a map.",
+    "description": (
+        "Interactive points, ordered trajectories, or GeoJSON geometry on a flat (2D) map. "
+        "Interactive 3D globes come from a plugin (such as Geo), which offer_plugin's "
+        "search finds."
+    ),
     "allOf": [
         {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
         {"$ref": "#/$defs/CatalogComponentCommon"},

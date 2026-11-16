@@ -421,7 +421,9 @@ class MapCamera(_ClosedModel):
 
 
 class MapComponent(_ComponentBase):
-    """Interactive geospatial component: inline points, tabular rows, or GeoJSON."""
+    """Interactive geospatial component on a flat (2D) map: inline points, tabular rows,
+    or GeoJSON. Interactive 3D globes come from a plugin (such as Geo), not this component.
+    """
 
     component: Literal["clio.map.v1"] = "clio.map.v1"
     title: DynamicString | None = None
