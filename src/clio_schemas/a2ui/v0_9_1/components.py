@@ -683,6 +683,26 @@ NodeOpacity = Annotated[
     Field(max_length=256),
 ]
 
+Vector3 = Annotated[list[float], Field(min_length=3, max_length=3)]
+
+
+class MeshCamera(_ClosedModel):
+    """Where a 3D view looks from: the eye, the point it looks at, and its lens."""
+
+    position: Vector3 = Field(description="The eye, in the model's units and axes.")
+    target: Vector3 = Field(description="The point the view looks at and orbits around.")
+    up: Vector3 | None = Field(default=None, description="Which way is up; default +Y.")
+    fov: Annotated[float, Field(gt=1, lt=179)] | None = Field(
+        default=None, description="Vertical field of view in degrees."
+    )
+    zoom: Annotated[float, Field(gt=0)] | None = None
+
+
+#: A mesh view's camera: a literal, or a data-model binding a later update or the person's
+#: orbiting moves (and ``capture_a2ui_surface`` then shows what it sees).
+MeshCameraValue = MeshCamera | _DataBinding
+
+
 MeshViewportComponent = _component_model(
     "MeshViewportComponent",
     "clio.mesh-viewport.v1",
@@ -701,7 +721,7 @@ MeshViewportComponent = _component_model(
         "thresholdField": str,
         "thresholdMin": DynamicNumber,
         "thresholdMax": DynamicNumber,
-        "camera": DynamicValue,
+        "camera": MeshCameraValue,
         "syncGroup": SyncGroup,
         "upAxis": Literal["x", "y", "z"],
         "nodeOpacity": NodeOpacity,

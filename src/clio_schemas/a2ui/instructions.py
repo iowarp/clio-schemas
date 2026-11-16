@@ -344,8 +344,12 @@ colours; texture images are reported as unavailable. A CLIO FEA GLB can
 also carry node or cell results: `field` colors by one result, `frame`
 chooses a result frame, and `thresholdField` with `thresholdMin`/
 `thresholdMax` shows cells in range. Bind those values to controls when
-the person should explore them. Bind `camera` to a path when a later action
-should retain the chosen angle. `nodeOpacity` maps node names in the model to an
+the person should explore them. `camera` aims the view: a literal
+`{"position": [x, y, z], "target": [x, y, z]}` in the model's units (with
+optional `up`, `fov`, `zoom`) turns it to what you need to see, such as a
+connector opening or a standoff, and `capture_a2ui_surface` then shows it
+there; bind `camera` to a path when a later action should keep or move the
+chosen angle. `nodeOpacity` maps node names in the model to an
 opacity from 0 to 1, e.g. `{"lid": 0.3, "base": 0.3}` to see a board through its
 case; a name the model lacks is reported in the view. To show the case a person selects, bind
 `meshUri` to the selection, e.g. `{"path": "/selection/case/values/0"}`

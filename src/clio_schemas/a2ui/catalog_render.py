@@ -43,6 +43,8 @@ from clio_schemas.a2ui.v0_9_1.components import (
     DynamicStringList,
     DynamicValue,
     IconValue,
+    MeshCamera,
+    MeshCameraValue,
     SyncGroup,
     _CardAction,
     _ChoiceOption,
@@ -276,6 +278,19 @@ def render_type(t: Any, field_name: str, local_defs: dict[str, Any]) -> dict[str
         }
     if t == SyncGroup:
         return {"type": "string", "pattern": SYNC_GROUP_PATTERN}
+    if t == MeshCameraValue:
+        local_defs.setdefault("MeshCamera", _render_nested_model(MeshCamera.model_fields))
+        return {
+            "description": (
+                "Where the view looks from: a literal {position, target, up?, fov?, zoom?} in "
+                "the model's units, or a data-model binding. Turn the view to a part (an "
+                "opening, a standoff) by setting it, then capture the view to see it there."
+            ),
+            "oneOf": [
+                {"$ref": "#/$defs/MeshCamera"},
+                {"$ref": f"{COMMON_TYPES_ID}#/$defs/DataBinding"},
+            ],
+        }
 
     origin = typing.get_origin(t)
 
