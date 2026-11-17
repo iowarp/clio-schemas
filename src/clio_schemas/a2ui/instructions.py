@@ -377,6 +377,47 @@ dimension draws one frame and says which; bind `selection` to the shared
 (`"time"`) and the field follows the chart, map or app view on that path.
 Grids with latitude and longitude coordinates are placed by them.
 
+**LayeredMap** — `clio.layered-map.v1` draws gridded fields, points, tracks
+and shapes on one flat map with one time axis. Each of up to 12 `layers` has
+an `id`, a `kind` and a `label`: a `grid` layer reads a registered NetCDF or
+zipped Zarr with longitude and latitude (`gridUri`, `variable`; hold other
+leading dimensions with `fixed`, such as `{"level": 500}`) and is drawn as
+tiles rendered next to the data; `points` and `tracks` layers read a
+registered table (`dataUri`, `latitudeField`, `longitudeField`, `idField`,
+and for tracks `trackField` and `timeField`); `shapes` reads GeoJSON
+(`geojsonUri`). Bind `time` to `/selection/<key>` with `timeField`: the
+scrubber writes it, grids draw the nearest frame and rows after it are
+hidden, and a chart or table on the same path follows. `draw` lets the
+person draw a `box`, `path` or `point`; the GeoJSON geometry is written at
+`draw.value` (for example `{"path": "/view/path"}`), and with `action` the
+person can send it, so a recomputed section or subset uses the drawn path.
+An `editable` points layer lets the person move points; moves go to `edits`:
+`{"id": "m1", "component": "clio.layered-map.v1", "layers": [{"id": "sst", \
+"kind": "grid", "label": "SST anomaly", "gridUri": "artifact://artifact_abc", \
+"variable": "anomaly", "colormap": "balance"}, {"id": "ev", "kind": "tracks", \
+"label": "Events", "dataUri": "artifact://artifact_def", "latitudeField": "lat", \
+"longitudeField": "lon", "idField": "event", "trackField": "event", \
+"timeField": "time"}], "time": {"path": "/selection/time"}, "timeField": "time", \
+"selection": {"path": "/selection/event"}, "selectionField": "event"}`.
+
+**Section** — `clio.section.v1` shows a registered section file (dimensions
+`distance` and a vertical such as pressure or depth, as the section tools
+write) with filled colour, contours every `contourInterval`, and the stations
+along it; `variables` lets the person switch. Bind `selection` with
+`selectionField` naming the profile id so a selected station highlights the
+same profile in a profile stack or on a map; `pointer` receives the clicked
+`{distance, vertical, value}`.
+
+**ProfileStack** — `clio.profile-stack.v1` draws many vertical profiles from a
+table (one row per sample: `profileField`, `verticalField`, `valueField`),
+inline `data` or `dataUri`. `variables` lets the person switch value columns;
+`overlayField` draws a second column dashed on the same profiles (model
+against observation). The person can toggle and exclude profiles; bind
+`excluded` (for example `{"path": "/view/excluded"}`) so the excluded ids
+reach you with every action, and add `action` to let them send the choice.
+Bind `selection` with `selectionField` to link profiles with the map's
+points and the section's stations.
+
 **McpApp** — `clio.mcp-app.v1` puts a server's interactive view (an MCP App)
 in the surface. `server`, `tool` and `arguments` are the call that opens the
 view, exactly as you would make it; CLIO makes it when the surface is shown.

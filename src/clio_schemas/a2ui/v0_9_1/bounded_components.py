@@ -655,6 +655,10 @@ class ChartComponent(_ComponentBase):
 # replaced by clio.chart.v1 — owner ruling, issue #1533), in the same relative
 # order as the original hand-maintained union (a2ui_v091.py, pre-slice) so
 # consumers see minimal churn.
+from clio_schemas.a2ui.v0_9_1.field_components import (  # noqa: E402 - needs the models above
+    FIELD_COMPONENT_MODELS as _FIELD_MODELS,
+)
+
 COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     TextComponent,
     IconComponent,
@@ -696,4 +700,5 @@ COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     MessageDraftComponent,
     WeatherComponent,
     StepsComponent,
+    *_FIELD_MODELS,
 )

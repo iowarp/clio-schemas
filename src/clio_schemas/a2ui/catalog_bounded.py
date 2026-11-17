@@ -1137,7 +1137,7 @@ def _chart_component_schema() -> dict[str, Any]:
 
 
 def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
-    """The 7 bounded components and their local ``$defs``."""
+    """The bounded and field components and their local ``$defs``."""
 
     components = {
         "clio.map.v1": _MAP_COMPONENT_SCHEMA,
@@ -1177,4 +1177,9 @@ def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
         "QueryDownsample": _QUERY_DOWNSAMPLE_DEF,
         "SelectionState": _SELECTION_STATE_DEF,
     }
+    from clio_schemas.a2ui.catalog_fields import field_components  # noqa: PLC0415
+
+    fields, field_defs = field_components()
+    components.update(fields)
+    defs.update(field_defs)
     return components, defs
