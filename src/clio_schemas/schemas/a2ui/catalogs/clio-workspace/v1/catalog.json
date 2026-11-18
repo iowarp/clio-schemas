@@ -730,7 +730,7 @@
           "type": "string"
         },
         "gridUri": {
-          "description": "Registered NetCDF or zipped Zarr grid with longitude and latitude (grid layers).",
+          "description": "Registered NetCDF or zipped Zarr grid with longitude and latitude, or a GeoTIFF, COG, VRT or IMG in any CRS (grid layers).",
           "not": {
             "pattern": "\\s"
           },
@@ -809,7 +809,7 @@
         },
         "variable": {
           "$ref": "#/$defs/FieldName",
-          "description": "Grid variable to draw."
+          "description": "Grid variable to draw; for a raster, the band (number, bandN or description)."
         },
         "visible": {
           "default": true,

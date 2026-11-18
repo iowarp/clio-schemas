@@ -68,10 +68,13 @@ _MAP_LAYER_DEF: dict[str, Any] = {
         "gridUri": {
             **_GRID_URI,
             "description": (
-                "Registered NetCDF or zipped Zarr grid with longitude and latitude (grid layers)."
+                "Registered NetCDF or zipped Zarr grid with longitude and latitude, "
+                "or a GeoTIFF, COG, VRT or IMG in any CRS (grid layers)."
             ),
         },
-        "variable": _field("Grid variable to draw."),
+        "variable": _field(
+            "Grid variable to draw; for a raster, the band (number, bandN or description)."
+        ),
         "timeDimension": _field("Grid dimension the shared time selects (default time)."),
         "fixed": {
             "type": "object",

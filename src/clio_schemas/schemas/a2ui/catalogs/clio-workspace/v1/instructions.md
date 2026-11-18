@@ -354,7 +354,8 @@ Grids with latitude and longitude coordinates are placed by them.
 **LayeredMap** — `clio.layered-map.v1` draws gridded fields, points, tracks
 and shapes on one flat map with one time axis. Each of up to 12 `layers` has
 an `id`, a `kind` and a `label`: a `grid` layer reads a registered NetCDF or
-zipped Zarr with longitude and latitude (`gridUri`, `variable`; hold other
+zipped Zarr with longitude and latitude, or a GeoTIFF, COG, VRT or IMG in any
+CRS (`gridUri`, `variable`; for a raster `variable` selects the band; hold other
 leading dimensions with `fixed`, such as `{"level": 500}`) and is drawn as
 tiles rendered next to the data; `points` and `tracks` layers read a
 registered table (`dataUri`, `latitudeField`, `longitudeField`, `idField`,
