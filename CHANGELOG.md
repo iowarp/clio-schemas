@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+
+- `clio.choice-table.v1`: rows that each pick one option per column, with an icon,
+  description and tone on each option, a defaults row, a row menu and Add. Rows are
+  inline or bound to the data model; a pick fires `onChoose` with `{row, column, value}`.
+
 ## [0.8.0b1] - unreleased
 
 ### Added

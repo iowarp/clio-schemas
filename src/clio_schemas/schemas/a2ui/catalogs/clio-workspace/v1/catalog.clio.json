@@ -174,6 +174,9 @@
     "clio.chart.v1": {
       "kernel": "clio.chart.v1"
     },
+    "clio.choice-table.v1": {
+      "kernel": "clio.choice-table.v1"
+    },
     "clio.code.v1": {
       "kernel": "clio.code.v1"
     },

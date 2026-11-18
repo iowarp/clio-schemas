@@ -32,19 +32,254 @@
       },
       "type": "object"
     },
-    "ChoiceOption": {
+    "ChoiceColumn": {
       "additionalProperties": false,
       "properties": {
-        "label": {
-          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString"
+        "editable": {
+          "description": "false shows the column as a read-only status. Default true.",
+          "type": "boolean"
         },
-        "value": {
+        "help": {
+          "description": "Shown beside the column title.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          },
+          "maxItems": 24,
+          "minItems": 1,
+          "type": "array"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
           "type": "string"
         }
       },
       "required": [
+        "id",
+        "title",
+        "options"
+      ],
+      "type": "object"
+    },
+    "ChoiceIcon": {
+      "description": "Icon name, camelCase.",
+      "enum": [
+        "accountCircle",
+        "add",
+        "alertCircle",
+        "alertTriangle",
+        "arrowBack",
+        "arrowForward",
+        "attachFile",
+        "calendarToday",
+        "call",
+        "camera",
+        "cancel",
+        "check",
+        "checkCircle",
+        "close",
+        "cloud",
+        "computer",
+        "delete",
+        "dns",
+        "download",
+        "edit",
+        "error",
+        "event",
+        "fastForward",
+        "favorite",
+        "favoriteOff",
+        "folder",
+        "help",
+        "home",
+        "hub",
+        "info",
+        "key",
+        "lan",
+        "locationOn",
+        "lock",
+        "lockOpen",
+        "mail",
+        "memory",
+        "menu",
+        "moreHoriz",
+        "moreVert",
+        "notifications",
+        "notificationsOff",
+        "pause",
+        "payment",
+        "person",
+        "phone",
+        "photo",
+        "play",
+        "print",
+        "public",
+        "refresh",
+        "rewind",
+        "search",
+        "security",
+        "send",
+        "settings",
+        "share",
+        "shield",
+        "shoppingCart",
+        "skipNext",
+        "skipPrevious",
+        "star",
+        "starHalf",
+        "starOff",
+        "stop",
+        "storage",
+        "terminal",
+        "upload",
+        "verifiedUser",
+        "visibility",
+        "visibilityOff",
+        "volumeDown",
+        "volumeMute",
+        "volumeOff",
+        "volumeUp",
+        "warning"
+      ],
+      "type": "string"
+    },
+    "ChoiceMenuItem": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action",
+          "description": "Its context gets {row}."
+        },
+        "destructive": {
+          "type": "boolean"
+        },
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 120,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
         "label",
-        "value"
+        "action"
+      ],
+      "type": "object"
+    },
+    "ChoiceOption": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "description": "One line on what this option means.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "icon": {
+          "$ref": "#/$defs/ChoiceIcon"
+        },
+        "label": {
+          "maxLength": 120,
+          "minLength": 1,
+          "type": "string"
+        },
+        "tone": {
+          "enum": [
+            "neutral",
+            "positive",
+            "warning",
+            "negative"
+          ],
+          "type": "string"
+        },
+        "value": {
+          "description": "What a pick sends as value.",
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "type": "object"
+    },
+    "ChoiceRow": {
+      "additionalProperties": false,
+      "properties": {
+        "caption": {
+          "maxLength": 500,
+          "type": "string"
+        },
+        "context": {
+          "additionalProperties": true,
+          "description": "Merged into this row's onChoose context; row, column and value win.",
+          "type": "object"
+        },
+        "error": {
+          "description": "A problem with this row, shown on it.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "icon": {
+          "$ref": "#/$defs/ChoiceIcon"
+        },
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "inherited": {
+          "description": "Column ids whose value follows the defaults row.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "menu": {
+          "description": "Replaces rowMenu for this row.",
+          "items": {
+            "$ref": "#/$defs/ChoiceMenuItem"
+          },
+          "maxItems": 8,
+          "type": "array"
+        },
+        "subtitle": {
+          "maxLength": 500,
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
+          "type": "string"
+        },
+        "values": {
+          "additionalProperties": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "description": "Column id to the picked option's value.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "values"
       ],
       "type": "object"
     },
@@ -1633,6 +1868,9 @@
           "$ref": "#/components/clio.chart.v1"
         },
         {
+          "$ref": "#/components/clio.choice-table.v1"
+        },
+        {
           "$ref": "#/components/clio.code.v1"
         },
         {
@@ -3082,6 +3320,128 @@
         }
       ],
       "description": "Any chart over tabular rows: a preset or an Altair/Vega-Lite spec.",
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "clio.choice-table.v1": {
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "properties": {
+            "add": {
+              "additionalProperties": false,
+              "description": "The Add control under the rows.",
+              "properties": {
+                "action": {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action"
+                },
+                "label": {
+                  "maxLength": 120,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "label",
+                "action"
+              ],
+              "type": "object"
+            },
+            "columns": {
+              "description": "The settings, one column each.",
+              "items": {
+                "$ref": "#/$defs/ChoiceColumn"
+              },
+              "maxItems": 6,
+              "minItems": 1,
+              "type": "array"
+            },
+            "component": {
+              "const": "clio.choice-table.v1"
+            },
+            "defaults": {
+              "additionalProperties": false,
+              "description": "The defaults row; a pick on it sends row \"\".",
+              "properties": {
+                "context": {
+                  "additionalProperties": true,
+                  "description": "Merged into the defaults row's onChoose context.",
+                  "type": "object"
+                },
+                "title": {
+                  "maxLength": 120,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "values": {
+                  "additionalProperties": {
+                    "maxLength": 128,
+                    "type": "string"
+                  },
+                  "description": "Column id to the picked option's value.",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "title",
+                "values"
+              ],
+              "type": "object"
+            },
+            "empty": {
+              "description": "Shown when there are no rows.",
+              "maxLength": 500,
+              "type": "string"
+            },
+            "label": {
+              "description": "Accessible name of the table.",
+              "maxLength": 120,
+              "minLength": 1,
+              "type": "string"
+            },
+            "onChoose": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action",
+              "description": "Fired on a pick. Its context is the action's context, then the row's context, then {row, column, value}."
+            },
+            "rowMenu": {
+              "description": "Entries on every row's menu.",
+              "items": {
+                "$ref": "#/$defs/ChoiceMenuItem"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
+            "rows": {
+              "description": "Inline rows (at most 500) or a binding to a data-model array of the same row shape.",
+              "oneOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/ChoiceRow"
+                  },
+                  "maxItems": 500,
+                  "type": "array"
+                },
+                {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding"
+                }
+              ]
+            }
+          },
+          "required": [
+            "component",
+            "label",
+            "columns",
+            "rows"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "Rows of items that each pick one option per column, with icons and descriptions on the options, an optional defaults row, a row menu and Add. Picks and menu entries are actions; the owner applies them and re-sends the surface.",
       "type": "object",
       "unevaluatedProperties": false
     },

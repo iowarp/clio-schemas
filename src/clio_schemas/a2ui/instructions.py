@@ -211,6 +211,20 @@ table itself. Inline rows require `columns`; a `dataUri` table takes
 link (see Shared selection below). `pageSize` (10, 25, 50, 100 or 500) sets
 the rows shown at first; the reader can change it.
 
+**ChoiceTable** — `clio.choice-table.v1` lets the person pick one option per
+column for each row, for settings that several items share (say, a protocol
+and an access level per endpoint). Give each option a `label` and, where it
+helps, a `description`, an `icon` (camelCase, from the catalog's list) and a
+`tone`. `defaults` adds a row whose values rows follow for the columns they
+list in `inherited`. A pick fires `onChoose` with `{row, column, value}` in its
+context; apply it and re-send the surface. `rowMenu` and `add` are further
+actions. `rows` is inline or a binding such as `{"path": "/items"}`:
+`{"id": "c1", "component": "clio.choice-table.v1", "label": "Endpoints", \
+"columns": [{"id": "access", "title": "Access", "options": [{"value": "open", \
+"label": "Open", "icon": "lockOpen"}, {"value": "locked", "label": "Locked", \
+"icon": "lock", "tone": "positive"}]}], "rows": [{"id": "a", "title": "Alpha", \
+"values": {"access": "locked"}}], "onChoose": {"event": {"name": "choose"}}}`.
+
 **Mermaid** — declarative diagram source rendered with Pele, with compatibility
 for existing Mermaid documents. Pele is the renderer; keep the component name
 `clio.mermaid.v1` and provide Mermaid-family text, not renderer API options.
