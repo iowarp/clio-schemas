@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-## [0.8.0b1] - unreleased
+## [0.8.0] - 2026-11-19
+
+The stable release of the 0.8.0 betas.
 
 ### Added
 
