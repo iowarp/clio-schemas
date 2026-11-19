@@ -305,7 +305,11 @@ _MAP_POINT_DEF: dict[str, Any] = {
 
 _MAP_COMPONENT_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "description": "Interactive points, ordered trajectories, or GeoJSON geometry on a map.",
+    "description": (
+        "Interactive points, ordered trajectories, or GeoJSON geometry on a flat (2D) map. "
+        "Interactive 3D globes come from a plugin (such as Geo), which offer_plugin's "
+        "search finds."
+    ),
     "allOf": [
         {"$ref": f"{COMMON_TYPES_ID}#/$defs/ComponentCommon"},
         {"$ref": "#/$defs/CatalogComponentCommon"},
@@ -1133,7 +1137,7 @@ def _chart_component_schema() -> dict[str, Any]:
 
 
 def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
-    """The 7 bounded components and their local ``$defs``."""
+    """The bounded and field components and their local ``$defs``."""
 
     components = {
         "clio.map.v1": _MAP_COMPONENT_SCHEMA,
@@ -1173,4 +1177,9 @@ def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
         "QueryDownsample": _QUERY_DOWNSAMPLE_DEF,
         "SelectionState": _SELECTION_STATE_DEF,
     }
+    from clio_schemas.a2ui.catalog_fields import field_components  # noqa: PLC0415
+
+    fields, field_defs = field_components()
+    components.update(fields)
+    defs.update(field_defs)
     return components, defs

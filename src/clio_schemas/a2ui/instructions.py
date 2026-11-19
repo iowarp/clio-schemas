@@ -230,8 +230,10 @@ it neither runs a callback nor grants access. Arbitrary click handlers, external
 link targets, init directives and HTML remain unsupported. Inspect the rendered
 image at the person's viewing width and revise cropping or unreadable labels.
 
-**Map** — labeled points or GeoJSON geometry; the renderer owns the
-basemap, so never pass tile/style URLs. Inline points are capped at 500; a
+**Map** — labeled points or GeoJSON geometry on a flat (2D) map; `bearing`
+and `pitch` turn and tilt it, and it has no globe view. Interactive 3D globes
+come from a plugin (such as Geo), which offer_plugin's search finds. The
+renderer owns the basemap, so never pass tile/style URLs. Inline points are capped at 500; a
 `dataUri` map names its columns with `latitudeField`/`longitudeField`/
 `labelField` (required) and optionally `idField`/`detailField`/
 `categoryField` for categorical colours or `valueField` for a numeric colour
@@ -345,7 +347,9 @@ also carry node or cell results: `field` colors by one result, `frame`
 chooses a result frame, and `thresholdField` with `thresholdMin`/
 `thresholdMax` shows cells in range. Bind those values to controls when
 the person should explore them. Bind `camera` to a path when a later action
-should retain the chosen angle. To show the case a person selects, bind
+should retain the chosen angle. `nodeOpacity` maps node names in the model to an
+opacity from 0 to 1, e.g. `{"lid": 0.3, "base": 0.3}` to see a board through its
+case; a name the model lacks is reported in the view. To show the case a person selects, bind
 `meshUri` to the selection, e.g. `{"path": "/selection/case/values/0"}`
 over a table whose selection field holds each case's artifact URI; one
 viewer then follows the table instead of one viewer per case. A 3D view
@@ -367,7 +371,71 @@ and a `colormap`. The viewer queries a bounded sample for its visible
 extent and supplies hover values, a colour legend, pan, zoom, region
 selection, export, and Reference this without renderer actions in the spec.
 Use this when the spatial pattern or grid cells matter more than a table
-of sampled values.
+of sampled values. A NetCDF variable with a time (or other leading)
+dimension draws one frame and says which; bind `selection` to the shared
+`/selection/<key>` path with `selectionField` naming that dimension
+(`"time"`) and the field follows the chart, map or app view on that path.
+Grids with latitude and longitude coordinates are placed by them.
+
+**LayeredMap** — `clio.layered-map.v1` draws gridded fields, points, tracks
+and shapes on one flat map with one time axis. Each of up to 12 `layers` has
+an `id`, a `kind` and a `label`: a `grid` layer reads a registered NetCDF or
+zipped Zarr with longitude and latitude, or a GeoTIFF, COG, VRT or IMG in any
+CRS (`gridUri`, `variable`; for a raster `variable` selects the band; hold other
+leading dimensions with `fixed`, such as `{"level": 500}`) and is drawn as
+tiles rendered next to the data; `points` and `tracks` layers read a
+registered table (`dataUri`, `latitudeField`, `longitudeField`, `idField`,
+and for tracks `trackField` and `timeField`); `shapes` reads GeoJSON
+(`geojsonUri`). Bind `time` to `/selection/<key>` with `timeField`: the
+scrubber writes it, grids draw the nearest frame and rows after it are
+hidden, and a chart or table on the same path follows. `draw` lets the
+person draw a `box`, `path` or `point`; the GeoJSON geometry is written at
+`draw.value` (for example `{"path": "/view/path"}`), and with `action` the
+person can send it, so a recomputed section or subset uses the drawn path.
+An `editable` points layer lets the person move points; moves go to `edits`:
+`{"id": "m1", "component": "clio.layered-map.v1", "layers": [{"id": "sst", \
+"kind": "grid", "label": "SST anomaly", "gridUri": "artifact://artifact_abc", \
+"variable": "anomaly", "colormap": "balance"}, {"id": "ev", "kind": "tracks", \
+"label": "Events", "dataUri": "artifact://artifact_def", "latitudeField": "lat", \
+"longitudeField": "lon", "idField": "event", "trackField": "event", \
+"timeField": "time"}], "time": {"path": "/selection/time"}, "timeField": "time", \
+"selection": {"path": "/selection/event"}, "selectionField": "event"}`.
+
+**Section** — `clio.section.v1` shows a registered section file (dimensions
+`distance` and a vertical such as pressure or depth, as the section tools
+write) with filled colour, contours every `contourInterval`, and the stations
+along it; `variables` lets the person switch. Bind `selection` with
+`selectionField` naming the profile id so a selected station highlights the
+same profile in a profile stack or on a map; `pointer` receives the clicked
+`{distance, vertical, value}`.
+
+**ProfileStack** — `clio.profile-stack.v1` draws many vertical profiles from a
+table (one row per sample: `profileField`, `verticalField`, `valueField`),
+inline `data` or `dataUri`. `variables` lets the person switch value columns;
+`overlayField` draws a second column dashed on the same profiles (model
+against observation). The person can toggle and exclude profiles; bind
+`excluded` (for example `{"path": "/view/excluded"}`) so the excluded ids
+reach you with every action, and add `action` to let them send the choice.
+Bind `selection` with `selectionField` to link profiles with the map's
+points and the section's stations.
+
+**McpApp** — `clio.mcp-app.v1` puts a server's interactive view (an MCP App)
+in the surface. `server`, `tool` and `arguments` are the call that opens the
+view, exactly as you would make it; CLIO makes it when the surface is shown.
+`state` links the view to the data model. Each channel names the `key` the
+view reports in its context (the keys appear in the view's context in your
+turn), the `path` that value is written to, and optionally a `tool`, of the
+server or of the view, that CLIO calls with `{key: value}` when another
+component changes the path. At a `/selection/<key>` path the value is the
+shared selection's one value, so a chart, table or map bound to that path
+follows the view and drives it:
+`{"id": "app", "component": "clio.mcp-app.v1", "server": "viewer", "tool": \
+"open_view", "arguments": {"file": "run.vtu"}, "state": [{"key": "time", \
+"path": "/selection/time", "tool": "set_time"}], "height": 480}` beside a
+chart with `"selection": {"path": "/selection/time"}, "selectionField": "time"`.
+A live view runs only while its server does; give `recordingUri` a video of it
+(an exported animation) and the surface plays that when the view cannot open,
+so a shared or archived dashboard still shows it.
 
 **Chart** — `clio.chart.v1` draws any Vega-Lite chart over tabular rows.
 Prefer a `preset` over writing a `spec`: `trajectories` (one line per entity

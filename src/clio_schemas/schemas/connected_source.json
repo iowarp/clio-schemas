@@ -205,7 +205,8 @@
         "globus",
         "github",
         "obsidian",
-        "ndp"
+        "ndp",
+        "s3"
       ],
       "title": "Provider",
       "type": "string"

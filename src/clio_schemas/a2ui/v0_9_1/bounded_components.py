@@ -62,6 +62,7 @@ from clio_schemas.a2ui.v0_9_1.components import (
     IconComponent,
     ImageComponent,
     ListComponent,
+    McpAppComponent,
     MeshViewportComponent,
     MessageDraftComponent,
     MetricComponent,
@@ -420,7 +421,9 @@ class MapCamera(_ClosedModel):
 
 
 class MapComponent(_ComponentBase):
-    """Interactive geospatial component: inline points, tabular rows, or GeoJSON."""
+    """Interactive geospatial component on a flat (2D) map: inline points, tabular rows,
+    or GeoJSON. Interactive 3D globes come from a plugin (such as Geo), not this component.
+    """
 
     component: Literal["clio.map.v1"] = "clio.map.v1"
     title: DynamicString | None = None
@@ -652,6 +655,10 @@ class ChartComponent(_ComponentBase):
 # replaced by clio.chart.v1 — owner ruling, issue #1533), in the same relative
 # order as the original hand-maintained union (a2ui_v091.py, pre-slice) so
 # consumers see minimal churn.
+from clio_schemas.a2ui.v0_9_1.field_components import (  # noqa: E402 - needs the models above
+    FIELD_COMPONENT_MODELS as _FIELD_MODELS,
+)
+
 COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     TextComponent,
     IconComponent,
@@ -687,9 +694,11 @@ COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     ApprovalComponent,
     MeshViewportComponent,
     RasterViewportComponent,
+    McpAppComponent,
     NumberSliderComponent,
     ChartComponent,
     MessageDraftComponent,
     WeatherComponent,
     StepsComponent,
+    *_FIELD_MODELS,
 )
