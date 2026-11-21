@@ -1747,6 +1747,53 @@
         }
       },
       "valid": true
+    },
+    {
+      "codes": [
+        "forbidden_key"
+      ],
+      "name": "mark-href",
+      "spec": {
+        "encoding": {
+          "x": {
+            "field": "t",
+            "type": "quantitative"
+          },
+          "y": {
+            "field": "v",
+            "type": "quantitative"
+          }
+        },
+        "mark": {
+          "href": "javascript:alert(1)",
+          "type": "point"
+        }
+      },
+      "valid": false
+    },
+    {
+      "codes": [
+        "forbidden_key"
+      ],
+      "name": "encoding-href",
+      "spec": {
+        "encoding": {
+          "href": {
+            "field": "link",
+            "type": "nominal"
+          },
+          "x": {
+            "field": "t",
+            "type": "quantitative"
+          },
+          "y": {
+            "field": "v",
+            "type": "quantitative"
+          }
+        },
+        "mark": "point"
+      },
+      "valid": false
     }
   ],
   "version": 3
