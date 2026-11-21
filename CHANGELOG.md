@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Changed
+
+- The `clio-workspace` sidecar routes `approval.respond` to the agent, not the
+  permission lane. A surface is written by the model, so a control on it no longer
+  answers a pending permission; CLIO's own permission card does that. The producer
+  instructions no longer describe a `permission_id`-bound approval card, and tell the
+  model never to put a `permission_id` or an `allow_*` decision in a surface.
+- `CatalogSidecar` refuses a non-`builtin` catalog that routes an event to the
+  `permission`, `run` or `client` lane.
+
 ## [0.8.0b1] - unreleased
 
 ### Added

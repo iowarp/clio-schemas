@@ -90,6 +90,36 @@ class TestOperationForbiddenForNonRun:
         assert sidecar.events["some.event"].operation is None
 
 
+class TestPackCatalogsRouteOnlyToTheAgent:
+    """Only a builtin catalog routes events to the permission, run or client lanes."""
+
+    @pytest.mark.parametrize(
+        "route",
+        [
+            {"destination": "permission"},
+            {"destination": "run", "operation": "cancel"},
+            {"destination": "client"},
+        ],
+    )
+    def test_a_pack_cannot_route_past_the_agent(self, route: dict[str, Any]) -> None:
+        payload = {**_base_payload(**{"my.click": route}), "trust": {"source": "pack"}}
+        with pytest.raises(ValidationError, match="my.click"):
+            CatalogSidecar.model_validate(payload)
+
+    def test_a_pack_routes_to_the_agent(self) -> None:
+        payload = {
+            **_base_payload(**{"my.click": {"destination": "agent"}, "other": {}}),
+            "trust": {"source": "pack"},
+        }
+        assert CatalogSidecar.model_validate(payload).events["my.click"].destination == "agent"
+
+    def test_a_builtin_catalog_may_route_to_permission(self) -> None:
+        payload = _base_payload(**{"x.answer": {"destination": "permission"}})
+        assert CatalogSidecar.model_validate(payload).events["x.answer"].destination == (
+            "permission"
+        )
+
+
 class TestRenderedWorkspaceSidecar:
     """``render_workspace_sidecar`` (the source of truth) sets the right operations."""
 
@@ -99,8 +129,10 @@ class TestRenderedWorkspaceSidecar:
         assert sidecar.events["run.cancel"].operation == "cancel"
         assert sidecar.events["run.retry"].destination == "run"
         assert sidecar.events["run.retry"].operation == "retry"
-        assert sidecar.events["approval.respond"].destination == "permission"
+        assert sidecar.events["approval.respond"].destination == "agent"
         assert sidecar.events["approval.respond"].operation is None
+        # A surface is model-authored: nothing in the builtin catalog answers a permission.
+        assert all(r.destination != "permission" for r in sidecar.events.values())
 
 
 @pytest.fixture(scope="module")
@@ -132,7 +164,7 @@ class TestCommittedWorkspaceSidecar:
         }
 
     def test_approval_respond_has_no_operation(self, payload: dict[str, Any]) -> None:
-        assert payload["events"]["approval.respond"] == {"destination": "permission"}
+        assert payload["events"]["approval.respond"] == {"destination": "agent"}
 
     def test_private_login_routes_have_scoped_client_destinations(
         self, payload: dict[str, Any]

@@ -2,7 +2,7 @@
   "catalogId": "https://iowarp.ai/a2ui/catalogs/clio-workspace/v1",
   "events": {
     "approval.respond": {
-      "destination": "permission"
+      "destination": "agent"
     },
     "data_source/login/github": {
       "context_schema": {
