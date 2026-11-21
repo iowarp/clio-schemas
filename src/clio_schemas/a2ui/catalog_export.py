@@ -225,7 +225,9 @@ def render_workspace_sidecar() -> dict[str, Any]:
         "trust": {"source": "builtin"},
         "implements": {name: {"kernel": name} for name in catalog["components"]},
         "events": {
-            "approval.respond": {"destination": "permission"},
+            # A surface is written by the model, so its answers go to the agent. A
+            # permission is answered on CLIO's own card, never through a surface.
+            "approval.respond": {"destination": "agent"},
             "run.cancel": {"destination": "run", "operation": "cancel"},
             "run.retry": {"destination": "run", "operation": "retry"},
             **{

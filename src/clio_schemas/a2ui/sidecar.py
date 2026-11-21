@@ -117,6 +117,25 @@ class CatalogSidecar(BaseModel):
                 )
         return self
 
+    @model_validator(mode="after")
+    def _check_trusted_lanes(self) -> CatalogSidecar:
+        """Only a builtin catalog routes events past the agent lane.
+
+        The ``permission``, ``run`` and ``client`` lanes act for the user (answer a
+        permission, cancel or retry a run, open a sign-in), so a pack's catalog may
+        not send its events there.
+        """
+
+        if self.trust.source == "builtin":
+            return self
+        for name, route in self.events.items():
+            if route.destination != "agent":
+                raise ValueError(
+                    f"event {name!r} routes to {route.destination!r}; a "
+                    f"{self.trust.source!r} catalog may route events only to 'agent'"
+                )
+        return self
+
 
 class _NarrationValues(dict):  # type: ignore[type-arg]
     """``str.format_map`` mapping for :func:`render_narration`.

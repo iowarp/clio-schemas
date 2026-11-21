@@ -147,12 +147,12 @@ counts, and `Reference this` agree after filtering.
 
 `Button`, checks, and several scientific components accept an `action`. Most
 actions should be plain agent events (`{"event": {"name": "...", "context":
-{...}}}`) — the agent receives them as an ordinary turn. Three action names
-route elsewhere before the agent sees them: `approval.respond` goes to the
-permission gate, and `run.cancel` / `run.retry` go to the run controller
-(see this catalog's sidecar `events` map). Everything else, including
-`agent.submit` and `form.submit`, is a plain agent event now — there is no
-separate closed action vocabulary to satisfy.
+{...}}}`) — the agent receives them as an ordinary turn. Two action names
+route elsewhere before the agent sees them: `run.cancel` / `run.retry` go to
+the run controller (see this catalog's sidecar `events` map). Everything
+else, including `approval.respond`, `agent.submit` and `form.submit`, is a
+plain agent event — there is no separate closed action vocabulary to
+satisfy.
 
 When CLIO reports that a needed provider account is signed out, explain the
 need in your answer and show an ordinary `Button` with the returned
@@ -167,20 +167,13 @@ sign-in UI; it does not establish that sign-in or source connection succeeded.
 Read source status after the user returns. Existing workspace files need no
 remote source connection. Unsupported clients and offline archives cannot sign in.
 
-`approval.respond` only reaches the permission gate when its `context`
-carries a `permission_id` — that is, when the card is answering a REAL
-pending native permission (a tool call CLIO already paused on; the agent
-got the surface and its `permission_id` from that pause, not from writing
-them itself). A `clio.approval.v1` card the agent builds and shows on its
-own — asking the user a plain yes/no with no underlying paused tool call —
-carries no `permission_id` at all, so its `approval.respond` is a plain
-agent event like any other: the resolved `context` (e.g. `{"approved":
-true}`) is delivered to the agent as the next turn's input, same as
-`agent.submit`. Both are the SAME event name and the SAME component; which
-lane it takes is decided structurally by whether `permission_id` is present,
-never by wording. A `permission_id` that names no real pending permission
-(unknown, already resolved, or expired) is a typed error either way — it is
-never silently delivered to the agent instead.
+A `clio.approval.v1` card asks the user your own yes/no question: its
+`approval.respond` context (e.g. `{"approved": true}`) comes back to you as
+the next turn's input, same as `agent.submit`. It never answers a paused
+tool call. CLIO asks the user about a tool call on its own permission card,
+and only the user answers it there, so never put a `permission_id` or an
+`allow` / `deny` / `allow_session` / `allow_workspace` decision in a
+surface.
 
 ## The scientific components, one example each
 
@@ -545,29 +538,14 @@ registered diff/patch file:
 "body": "The last run used a stale baseline.", "severity": "info", "actions": [{"label": "Rerun", \
 "action": {"event": {"name": "run.retry"}}}]}`.
 
-**Approval** — a gated decision, one to four actions, in two modes (see
-Routing actions above):
-- **Standalone** — the agent's own yes/no question, with no paused tool call
-  behind it. `context` carries only the decision, and the answer comes back
-  as a plain agent turn:
-  `{"id": "ap1", "component": "clio.approval.v1", "title": "Delete 3 stale \
+**Approval** — your own yes/no question, one to four actions; the answer
+comes back as a plain agent turn (see Routing actions above):
+`{"id": "ap1", "component": "clio.approval.v1", "title": "Delete 3 stale \
 checkpoints?", "reason": "Disk pressure on the run volume.", "risk": \
 "Checkpoints cannot be recovered once removed.", "actions": [{"label": \
 "Approve", "action": {"event": {"name": "approval.respond", "context": \
 {"approved": true}}}}, {"label": "Cancel", "action": {"event": {"name": \
 "approval.respond", "context": {"approved": false}}}}]}`.
-- **Bound to a pending permission** — answering a real paused tool call.
-  `context` carries the `permission_id` CLIO handed the surface plus the
-  decision as `action` (`allow` / `deny` / `allow_session` /
-  `allow_workspace`), and the answer resolves that permission instead of
-  starting a turn:
-  `{"id": "ap2", "component": "clio.approval.v1", "title": "Allow deleting \
-scratch.txt?", "reason": "The agent wants to remove a working file.", \
-"risk": "The file cannot be recovered once removed.", "actions": \
-[{"label": "Allow", "action": {"event": {"name": "approval.respond", \
-"context": {"permission_id": "perm_abc123", "action": "allow"}}}}, \
-{"label": "Deny", "action": {"event": {"name": "approval.respond", \
-"context": {"permission_id": "perm_abc123", "action": "deny"}}}}]}`.
 
 ## Accessibility
 
