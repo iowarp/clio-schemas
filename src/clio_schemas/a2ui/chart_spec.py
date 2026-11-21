@@ -135,7 +135,9 @@ ALLOWED_TOP_LEVEL_KEYS: Final[tuple[str, ...]] = (
     # Allowed only as {"name": "source"} (the data rule); presets declare it.
     "data",
 )
-FORBIDDEN_KEYS: Final[tuple[str, ...]] = ("url", "usermeta")
+#: ``href`` makes a mark a link; renderers refuse link loads, and the guard promises a
+#: spec never names a URL, so it is banned with ``url``.
+FORBIDDEN_KEYS: Final[tuple[str, ...]] = ("url", "usermeta", "href")
 COMPOSITION_ARRAY_KEYS: Final[tuple[str, ...]] = ("layer", "concat", "hconcat", "vconcat")
 
 PRESET_NAMES: Final[tuple[str, ...]] = ("trajectories", "heatmap", "spectra", "boxplot", "scatter")

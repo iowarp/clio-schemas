@@ -155,7 +155,7 @@ def test_rules_as_data_match_the_module_constants_and_the_shipped_file() -> None
     assert CHART_SPEC_RULES["allowedTopLevelKeys"] == list(ALLOWED_TOP_LEVEL_KEYS)
     assert CHART_SPEC_RULES["maxSpecBytes"] == 65_536
     assert CHART_SPEC_RULES["maxViews"] == 8
-    assert CHART_SPEC_RULES["forbiddenKeys"] == ["url", "usermeta"]
+    assert CHART_SPEC_RULES["forbiddenKeys"] == ["url", "usermeta", "href"]
     assert CHART_SPEC_RULES["requiredDataObject"] == {"name": "source"}
     shipped = package_schema_dir() / "a2ui" / "chart" / "guard_rules.json"
     assert json.loads(shipped.read_text(encoding="utf-8")) == CHART_SPEC_RULES

@@ -345,7 +345,7 @@
           "properties": {
             "geometries": {
               "items": {
-                "$ref": "#/$defs/GeoJsonGeometry"
+                "$ref": "#/$defs/GeoJsonSimpleGeometry"
               },
               "type": "array"
             },
@@ -356,6 +356,169 @@
           "required": [
             "type",
             "geometries"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    },
+    "GeoJsonSimpleGeometry": {
+      "description": "A GeoJSON Geometry object other than a GeometryCollection.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 3,
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": {
+              "const": "Point"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 2,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": {
+              "const": "MultiPoint"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 2,
+                "type": "array"
+              },
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": {
+              "const": "LineString"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 2,
+                  "type": "array"
+                },
+                "minItems": 2,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": {
+              "const": "MultiLineString"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 2,
+                  "type": "array"
+                },
+                "minItems": 4,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": {
+              "const": "Polygon"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "items": {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 2,
+                    "type": "array"
+                  },
+                  "minItems": 4,
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": {
+              "const": "MultiPolygon"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
           ],
           "type": "object"
         }
@@ -1404,7 +1567,7 @@
       }
     },
     "SpecNoForbiddenKeys": {
-      "description": "No `url` or `usermeta` key anywhere in a Vega-Lite spec, at any depth.",
+      "description": "No `url`, `usermeta` or `href` key anywhere in a Vega-Lite spec, at any depth.",
       "else": {
         "if": {
           "type": "array"
@@ -1432,6 +1595,11 @@
             {
               "required": [
                 "usermeta"
+              ]
+            },
+            {
+              "required": [
+                "href"
               ]
             }
           ]
@@ -1750,17 +1918,8 @@
       ]
     },
     "theme": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
-        "agentDisplayName": {
-          "description": "Text to be displayed next to the surface to identify the agent or tool that created it.",
-          "type": "string"
-        },
-        "iconUrl": {
-          "description": "A URL for an image that identifies the agent or tool associated with the surface.",
-          "format": "uri",
-          "type": "string"
-        },
         "primaryColor": {
           "description": "The primary brand color used for highlights (e.g., primary buttons, active borders). Renderers may generate variants of this color for different contexts. Format: Hexadecimal code (e.g., '#00BFFF').",
           "pattern": "^#[0-9a-fA-F]{6}$",

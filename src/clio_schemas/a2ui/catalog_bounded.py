@@ -51,6 +51,7 @@ from clio_schemas.a2ui.catalog_render import COMMON_TYPES_ID
 from clio_schemas.a2ui.chart_spec import (
     ALLOWED_TOP_LEVEL_KEYS,
     DEFAULT_SELECTION_PARAM,
+    FORBIDDEN_KEYS,
     MAX_INLINE_ROWS,
     PRESET_NAMES,
     SELECTION_PARAM_PATTERN,
@@ -139,10 +140,10 @@ def _nullable(schema: dict[str, Any]) -> dict[str, Any]:
 # clio-agent's JSON-Schema-only validation can enforce them without running
 # clio_schemas.a2ui.chart_spec at all — see the module docstring.
 _SPEC_NO_FORBIDDEN_KEYS_DEF: dict[str, Any] = {
-    "description": "No `url` or `usermeta` key anywhere in a Vega-Lite spec, at any depth.",
+    "description": "No `url`, `usermeta` or `href` key anywhere in a Vega-Lite spec, at any depth.",
     "if": {"type": "object"},
     "then": {
-        "not": {"anyOf": [{"required": ["url"]}, {"required": ["usermeta"]}]},
+        "not": {"anyOf": [{"required": [key]} for key in FORBIDDEN_KEYS]},
         "additionalProperties": {"$ref": "#/$defs/SpecNoForbiddenKeys"},
     },
     "else": {
@@ -210,6 +211,68 @@ def _geojson_ring_array(min_items: int) -> dict[str, Any]:
     return {"type": "array", "items": _GEOJSON_POSITION_DEF, "minItems": min_items}
 
 
+_GEOJSON_SIMPLE_GEOMETRY_BRANCHES: list[dict[str, Any]] = [
+    {
+        "type": "object",
+        "properties": {"type": {"const": "Point"}, "coordinates": _GEOJSON_POSITION_DEF},
+        "required": ["type", "coordinates"],
+        "additionalProperties": False,
+    },
+    {
+        "type": "object",
+        "properties": {
+            "type": {"const": "MultiPoint"},
+            "coordinates": {"type": "array", "items": _GEOJSON_POSITION_DEF},
+        },
+        "required": ["type", "coordinates"],
+        "additionalProperties": False,
+    },
+    {
+        "type": "object",
+        "properties": {"type": {"const": "LineString"}, "coordinates": _geojson_ring_array(2)},
+        "required": ["type", "coordinates"],
+        "additionalProperties": False,
+    },
+    {
+        "type": "object",
+        "properties": {
+            "type": {"const": "MultiLineString"},
+            "coordinates": {"type": "array", "items": _geojson_ring_array(2)},
+        },
+        "required": ["type", "coordinates"],
+        "additionalProperties": False,
+    },
+    {
+        "type": "object",
+        "properties": {
+            "type": {"const": "Polygon"},
+            "coordinates": {"type": "array", "items": _geojson_ring_array(4)},
+        },
+        "required": ["type", "coordinates"],
+        "additionalProperties": False,
+    },
+    {
+        "type": "object",
+        "properties": {
+            "type": {"const": "MultiPolygon"},
+            "coordinates": {
+                "type": "array",
+                "items": {"type": "array", "items": _geojson_ring_array(4)},
+            },
+        },
+        "required": ["type", "coordinates"],
+        "additionalProperties": False,
+    },
+]
+
+#: A geometry other than a collection: what a ``GeometryCollection`` holds. RFC 7946
+#: §3.1.8 says to avoid nested collections, and without nesting the check never recurses.
+_GEOJSON_SIMPLE_GEOMETRY_DEF: dict[str, Any] = {
+    "type": "object",
+    "description": "A GeoJSON Geometry object other than a GeometryCollection.",
+    "oneOf": _GEOJSON_SIMPLE_GEOMETRY_BRANCHES,
+}
+
 _GEOJSON_GEOMETRY_DEF: dict[str, Any] = {
     "type": "object",
     "description": (
@@ -218,62 +281,12 @@ _GEOJSON_GEOMETRY_DEF: dict[str, Any] = {
         "carries geometries. Never a Feature/FeatureCollection, never a bare coordinate array."
     ),
     "oneOf": [
-        {
-            "type": "object",
-            "properties": {"type": {"const": "Point"}, "coordinates": _GEOJSON_POSITION_DEF},
-            "required": ["type", "coordinates"],
-            "additionalProperties": False,
-        },
-        {
-            "type": "object",
-            "properties": {
-                "type": {"const": "MultiPoint"},
-                "coordinates": {"type": "array", "items": _GEOJSON_POSITION_DEF},
-            },
-            "required": ["type", "coordinates"],
-            "additionalProperties": False,
-        },
-        {
-            "type": "object",
-            "properties": {"type": {"const": "LineString"}, "coordinates": _geojson_ring_array(2)},
-            "required": ["type", "coordinates"],
-            "additionalProperties": False,
-        },
-        {
-            "type": "object",
-            "properties": {
-                "type": {"const": "MultiLineString"},
-                "coordinates": {"type": "array", "items": _geojson_ring_array(2)},
-            },
-            "required": ["type", "coordinates"],
-            "additionalProperties": False,
-        },
-        {
-            "type": "object",
-            "properties": {
-                "type": {"const": "Polygon"},
-                "coordinates": {"type": "array", "items": _geojson_ring_array(4)},
-            },
-            "required": ["type", "coordinates"],
-            "additionalProperties": False,
-        },
-        {
-            "type": "object",
-            "properties": {
-                "type": {"const": "MultiPolygon"},
-                "coordinates": {
-                    "type": "array",
-                    "items": {"type": "array", "items": _geojson_ring_array(4)},
-                },
-            },
-            "required": ["type", "coordinates"],
-            "additionalProperties": False,
-        },
+        *_GEOJSON_SIMPLE_GEOMETRY_BRANCHES,
         {
             "type": "object",
             "properties": {
                 "type": {"const": "GeometryCollection"},
-                "geometries": {"type": "array", "items": {"$ref": "#/$defs/GeoJsonGeometry"}},
+                "geometries": {"type": "array", "items": {"$ref": "#/$defs/GeoJsonSimpleGeometry"}},
             },
             "required": ["type", "geometries"],
             "additionalProperties": False,
@@ -1170,6 +1183,7 @@ def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
         "SpecDataNamedSource": _SPEC_DATA_NAMED_SOURCE_DEF,
         "SpecNoBindElement": _SPEC_NO_BIND_ELEMENT_DEF,
         "GeoJsonGeometry": _GEOJSON_GEOMETRY_DEF,
+        "GeoJsonSimpleGeometry": _GEOJSON_SIMPLE_GEOMETRY_DEF,
         "DataQuery": _DATA_QUERY_DEF,
         "QueryFilter": _QUERY_FILTER_DEF,
         "QuerySort": _QUERY_SORT_DEF,
