@@ -151,6 +151,20 @@ def _render_workspace_functions() -> dict[str, Any]:
     }
 
 
+#: Basic functions this catalog leaves out. A surface is written by the model, and a
+#: regular expression it chooses runs in the renderer when the component mounts: one
+#: catastrophic pattern (``^(a+)+$``) blocks the page, and again on every replay.
+#: ``required``, ``length``, ``numeric`` and ``email`` cover form checks without one.
+OMITTED_BASIC_FUNCTIONS = frozenset({"regex"})
+
+
+def _drop_model_regexes(components: dict[str, Any]) -> None:
+    """Remove ``TextField.validationRegexp``, a model-chosen regex the renderer runs."""
+
+    for part in components["TextField"]["allOf"]:
+        part.get("properties", {}).pop("validationRegexp", None)
+
+
 def render_workspace_catalog() -> dict[str, Any]:
     """Render the ``clio-workspace`` catalog file: all 32 CLIO components.
 
@@ -174,6 +188,8 @@ def render_workspace_catalog() -> dict[str, Any]:
     components.update(hand_components)
     defs.update(hand_defs)
 
+    _drop_model_regexes(components)
+
     basic_catalog = _load_basic_catalog()
     defs["theme"] = basic_catalog["$defs"]["theme"]
 
@@ -181,7 +197,10 @@ def render_workspace_catalog() -> dict[str, Any]:
         "oneOf": [{"$ref": f"#/components/{name}"} for name in sorted(components)],
         "discriminator": {"propertyName": "component"},
     }
-    functions = {**basic_catalog["functions"], **_render_workspace_functions()}
+    functions = {
+        **{k: v for k, v in basic_catalog["functions"].items() if k not in OMITTED_BASIC_FUNCTIONS},
+        **_render_workspace_functions(),
+    }
     defs["anyFunction"] = {"oneOf": [{"$ref": f"#/functions/{name}"} for name in sorted(functions)]}
 
     catalog: dict[str, Any] = {
