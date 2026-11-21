@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Removed
+
+- The `clio-workspace` catalog no longer offers the Basic `regex` function or
+  `TextField.validationRegexp`. A surface is written by the model, and the renderer
+  ran its pattern when the component mounted, so one catastrophic pattern
+  (`^(a+)+$`) froze the page, and again on every replay. `required`, `length`,
+  `numeric` and `email` still cover form checks. The protocol models are unchanged.
+
 ## [0.8.0b1] - unreleased
 
 ### Added
