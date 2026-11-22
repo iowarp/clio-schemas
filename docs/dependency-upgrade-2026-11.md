@@ -87,27 +87,75 @@ a commit that includes it.
 
 | Package | Current | Latest | Why |
 |---|---|---|---|
-| @apidevtools/json-schema-ref-parser | 11.9.3 | 16.0.8 | Transitive. json-schema-to-typescript 16.0.0 declares `^11.9.3`. Forcing 16.x with an `overrides` entry would run the generator on a resolver it was never released against, so we wait for json-schema-to-typescript to move. |
+| @apidevtools/json-schema-ref-parser | 11.9.3 | 16.0.8 | Transitive. json-schema-to-typescript 16.0.0 declares `^11.9.3`. Forcing it is a decision for you: see D1 below. |
 | js-yaml / argparse under it | 4.3.2 / 2.0.1 | 5.5.0 / 3.0.4 | Same reason: `@apidevtools/json-schema-ref-parser` 11.9.3 declares `js-yaml: ^4.1.0`. |
 
 Nothing was reverted: every major passed.
 
+## Using what the upgrades offer
+
+Beyond the version bumps, I looked for what the new versions let us do better.
+
+### Adopted on this branch
+
+Each was low-risk and is in its own commit, with the full gate passing. Committed schemas and
+generated TS stay byte-identical.
+
+| # | Change | Value | Why it is safe |
+|---|---|---|---|
+| A1 | **Pin every json-schema-to-typescript option** (`schemas-to-ts.mjs`). Adds `ignoreMinAndMaxItems: false`, `inferStringEnumKeysFromValues: false`, `maxItems: 20`, `unknownAny: true`, `unreachableDefinitions: false`. | The generator's comment already promised "fully-specified options so output does not depend on library defaults drifting", but these five still used the library's defaults. 16.0.0 already changed what `unreachableDefinitions` does, so a default is not a contract. | Each value is the current default (checked against `DEFAULT_OPTIONS`). Output byte-identical. |
+| A2 | **Typecheck the generated TS with `verbatimModuleSyntax` and `erasableSyntaxOnly`** (`tsconfig.check.json`). | Consumers that compile one file at a time (Node's type stripping, esbuild, swc) need `export type` for type-only re-exports and can't handle enums or namespaces. Our output already meets both rules, but nothing enforced them. A generator option or upgrade that broke one would have passed `npm run check`. `erasableSyntaxOnly` needs TS >= 5.8, which the 7.0 upgrade gives us. | The current output passes. Negative controls (a `const enum`, a value-style `export { ArtifactRecord }`) are rejected (TS1294, TS1205). Output byte-identical. |
+| A3 | **Metaschema test for every committed JSON Schema** (`tests/test_schemas_metaschema.py`). Runs jsonschema's `Draft202012Validator.check_schema` on the 27 per-model schemas, `index.json` and the clio-workspace `catalog.json`. | `export --verify` proves the committed bytes are what the locked pydantic renders, not that the render is a valid schema. 2.14 changed a lot of JSON Schema generation, and every future pydantic bump will too. The check includes format checks (e.g. `pattern` must compile as a regex) and fails if a file names a dialect other than 2020-12. | All 29 files pass today. Two negative controls show the check is live. Test only: +30 tests. |
+
+Considered and not adopted (no value for us today):
+
+- **pydantic 2.14's new features.** None touch our export path: `frozendict`, `TypeForm`, lazy imports, `EllipsisType`, `multiple_of` on `timedelta`/`Fraction`, `__namespace__` on `create_model`. The JSON Schema fixes in 2.14 (`Decimal` patterns, `InitVar`, `unless-none` serializers, deprecated subclasses, `str_min_length` config) don't hit our models: the regenerate is byte-identical. The one 2.14 feature that matters is the stable `MISSING` sentinel, which is a design call (D3).
+- **TypeScript 7 itself.** Its value is speed. It needed no config change, and our `tsc` run is already sub-second, so nothing to adopt beyond A2.
+- **Removing `flattenRefSiblings`** from `schemas-to-ts.mjs`. Under json-schema-to-typescript 16, the 8 `$ref`-with-sibling nodes in `index.json` no longer produce duplicate types: generating without the workaround is byte-identical. Removing it gains nothing and would bring back the old bug if a future generator regressed, so it stays. Its comment could note that 16 no longer needs it.
+- **json-schema-to-typescript's upcoming `declarationStyle: 'type'` and `formatTypes`.** These are listed under "Next" in its changelog and are not in 16.0.0. `formatTypes` (e.g. `date-time -> Date`) would be wrong for us anyway: the wire carries strings.
+
+### Decisions for the user
+
+These are risky or design-level, so none is implemented. Each has the value, the risk and my
+recommendation.
+
+**D1. Force `@apidevtools/json-schema-ref-parser` 16 (held back at 11.9.3)**
+- *Value:* low. It drops the second, older copy of js-yaml (4.3.2) and argparse (2.0.1), so js-yaml 5.5.0 is the only one installed. We don't resolve external or YAML `$ref`s: everything is internal `#/$defs`.
+- *Risk:* json-schema-to-typescript 16.0.0 declares `^11.9.3`, so an npm `overrides` entry would run it on a resolver five majors newer, a combination nobody tested or supports. The resolver also needs Node >= 22.19.0, a tighter floor than the `node-version: "22"` our CI and gact-tui's `schema-ts-gen.yml` use today. I tried it in a throwaway copy: the generated TS was byte-identical.
+- *Recommendation:* **hold.** Pick it up for free when json-schema-to-typescript widens its range.
+
+**D2. Stop emitting a named type for every property `title` in the generated TS**
+- *Value:* high for TS consumers. pydantic puts a `title` on every property, and json-schema-to-typescript turns each title into an exported alias. `_models.ts` therefore exports 577 names, 471 of them aliases like `export type Name = string`, and 240 have numeric suffixes from collisions (`Name1`, `Surfaceid1`, `Code1`, ...). Those names are noise in autocomplete, and they renumber whenever a model gains a same-titled field. Dropping property-level `title` in the TS-only transform (the same place `flattenRefSiblings` runs; the JSON Schema is untouched) gives 103 exports and 13 aliases. `_models.ts` goes from 1990 to 1515 lines, and the new output typechecks under the stricter A2 config. Model, enum and `$defs` names, and every per-model module, are unchanged.
+- *Risk:* it's a breaking change to the TS API. Any consumer that imports one of the ~470 alias names (gact-tui, clio-agent) stops compiling. I couldn't check their code from this session. The golden changes almost entirely, and consumers' regenerate-and-compare CI goes red until they regenerate.
+- *Recommendation:* **do it, but as its own coordinated change.** Grep gact-tui and clio-agent for imports of `_models` alias names first. Then ship it in one clio-schemas release with a CHANGELOG note, and land the regenerated TS in consumers right after. A middle option is `customName` to drop only the numbered aliases, but it still renames things, so a clean cut is better.
+
+**D3. Use pydantic's now-stable `MISSING` sentinel for "absent" vs `null`**
+- *Value:* 141 of the 520 properties in the aggregate are `X | None = None`. They export as `anyOf: [X, null]` with `"default": null`, and they dump as `null` when unset. With `x: X | MISSING = MISSING`, the field exports as plain `X` (not required, no default) and is left out of `model_dump()` when unset. That's a truer contract for "optional, never null" fields and tighter TS (`x?: X` instead of `x?: X | null`).
+- *Risk:* it's a wire and schema change. Every converted field changes schema bytes (needs a version bump) and serialized output: writers stop sending `"x": null`. Readers that treat `null` and "missing" differently, or that send explicit `null`, break. The rollout rules in the README apply (readers before writers, adjacent versions interoperate). `MISSING` is also brand-new in stable pydantic.
+- *Recommendation:* **don't convert existing fields wholesale.** Consider `MISSING` for new strict (`ClioSchemaBase`) records, field by field, where `null` has no meaning. Revisit existing fields only when a record is already getting a breaking change.
+
+**D4. Put `$schema` in each per-model schema file**
+- *Value:* the 27 per-model files don't declare a dialect. `index.json` and the catalog do. With `"$schema": "https://json-schema.org/draft/2020-12/schema"`, a consumer's validator (Ajv, jsonschema) picks 2020-12 instead of its default, which can be draft-07 (e.g. Ajv's default class). The A3 test would then check the declared dialect instead of assuming one.
+- *Risk:* low technically (pydantic emits 2020-12), but it changes the bytes of all 27 shipped files and their hashes, so it needs a version bump, and consumers' byte checks see it. Some Ajv setups need the 2020 class to load a schema that declares 2020-12.
+- *Recommendation:* **do it in the next schema-changing release**, so the byte churn rides along with a version bump that happens anyway. It's a small change in `render_model_schema`.
+
 ## Verification
 
-Run after every group (each commit), on Python 3.13 with Node 22.23.5, and at the end on
-Python 3.12 (CI's version) too:
+Run after every group (each commit), on Python 3.13 with Node 22.23.5. The final dependency state
+was also run on Python 3.12 (CI's version). The numbers below are for the final commit, which
+includes A1-A3:
 
 | Check | Result |
 |---|---|
 | `uv sync --extra dev --locked` | ok |
 | `ruff check src tests scripts` | All checks passed |
-| `ruff format --check src tests scripts` | 63 files already formatted |
+| `ruff format --check src tests scripts` | 64 files already formatted |
 | `pyright src tests scripts` | 0 errors (3.13 and 3.12) |
 | `python -m clio_schemas.export --verify` | 44 committed schema files canonical |
 | `scripts/check_version_bump.py --base v0.8.0` | ok (no schema bytes changed) |
 | `uv build` | wheel + sdist build |
-| `npm ci` + `pytest` (includes the TS round-trip/golden tests) | 954 passed (3.13 and 3.12) |
-| `npm run check` (generate + `tsc`) | clean; output identical to `tests/golden` |
+| `npm ci` + `pytest` (includes the TS round-trip/golden tests) | 984 passed: 954 before A3, also on 3.12; +30 from A3 |
+| `npm run check` (generate + `tsc`, with A2's flags) | clean; output identical to `tests/golden` |
 
 ## Commits
 
@@ -119,3 +167,7 @@ Python 3.12 (CI's version) too:
 6. json-schema-to-typescript 16.0.0 (+ regenerated golden)
 7. typescript 7.0.2
 8. this report
+9. A1: pin every json-schema-to-typescript option
+10. A2: `verbatimModuleSyntax` + `erasableSyntaxOnly` for the TS check
+11. A3: metaschema test for the committed schemas
+12. this report: adopted items and decisions
