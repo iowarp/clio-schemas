@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Changed
+
+- The committed schemas are canonical under pydantic 2.14.4
+  (`LOCKED_PYDANTIC_VERSION`, was 2.13.4). Regenerating under it gives the same
+  bytes, so no shipped schema changed.
+
 ## [0.8.0] - 2026-11-19
 
 The stable release of the 0.8.0 betas.
