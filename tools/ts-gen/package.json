@@ -9,7 +9,7 @@
     "check": "node schemas-to-ts.mjs --in ../../src/clio_schemas/schemas --out ../../generated-ts && tsc -p tsconfig.check.json"
   },
   "dependencies": {
-    "json-schema-to-typescript": "15.0.4"
+    "json-schema-to-typescript": "16.0.0"
   },
   "devDependencies": {
     "typescript": "5.9.3"

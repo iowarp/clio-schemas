@@ -14,7 +14,7 @@ export type Name = string;
 export type Returntype = "string" | "number" | "boolean" | "array" | "object" | "any" | "void";
 export type Functions = FunctionDefinition[];
 export type Supportedcatalogids1 = string[];
-export type JsonValue = unknown | undefined;
+export type JsonValue = unknown;
 export type Version = "v0.9" | "v0.9.1";
 export type Name1 = string;
 export type Sourcecomponentid = string;
@@ -919,12 +919,10 @@ export interface InlineCatalog {
 }
 export interface Components {
   [k: string]:
-    | (
-        | {
-            [k: string]: unknown | undefined;
-          }
-        | boolean
-      )
+    | {
+        [k: string]: unknown | undefined;
+      }
+    | boolean
     | undefined;
 }
 /**
@@ -944,12 +942,10 @@ export interface Parameters {
 }
 export interface Theme {
   [k: string]:
-    | (
-        | {
-            [k: string]: unknown | undefined;
-          }
-        | boolean
-      )
+    | {
+        [k: string]: unknown | undefined;
+      }
+    | boolean
     | undefined;
 }
 /**

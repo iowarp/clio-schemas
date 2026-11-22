@@ -7,6 +7,11 @@
 - The committed schemas are canonical under pydantic 2.14.4
   (`LOCKED_PYDANTIC_VERSION`, was 2.13.4). Regenerating under it gives the same
   bytes, so no shipped schema changed.
+- The TypeScript generator (`tools/ts-gen`) uses json-schema-to-typescript 16.0.0.
+  Three spots in `_models.ts` print differently but mean the same types:
+  `JsonValue` is `unknown` instead of `unknown | undefined`, and the value types of
+  `Components` and `Theme` lose a redundant pair of parentheses. A consumer that
+  regenerates TypeScript with this generator will see that diff once.
 
 ## [0.8.0] - 2026-11-19
 
