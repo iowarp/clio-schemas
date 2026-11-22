@@ -62,14 +62,23 @@ const BANNER = [
 const REEXPORT_BANNER = `${BANNER}\n`;
 
 // Pinned, fully-specified options so output does not depend on library
-// defaults drifting between versions.
+// defaults drifting between versions. Every option json-schema-to-typescript
+// 16 accepts is set here except `cwd` (set per call), `$refOptions` and
+// `customName` (both unused). The values below that match its defaults are
+// pinned anyway: 16.0.0 already changed what one of them
+// (`unreachableDefinitions`) does, so a default is not a contract.
 const COMPILE_OPTIONS = {
   bannerComment: BANNER,
   additionalProperties: false,
   declareExternallyReferenced: true,
   enableConstEnums: false,
   format: true,
+  ignoreMinAndMaxItems: false,
+  inferStringEnumKeysFromValues: false,
+  maxItems: 20,
   strictIndexSignatures: true,
+  unknownAny: true,
+  unreachableDefinitions: false,
   style: {
     bracketSpacing: true,
     printWidth: 100,
