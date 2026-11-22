@@ -1,5 +1,5 @@
 {
-  "//": "Isolated strict typecheck of generated .ts files. `types: []` prevents ambient @types (transitive deps of json-schema-to-typescript) from leaking in.",
+  "//": "Isolated strict typecheck of generated .ts files. `types: []` prevents ambient @types (transitive deps of json-schema-to-typescript) from leaking in. `verbatimModuleSyntax` and `erasableSyntaxOnly` prove the output also works for consumers that strip types per file (Node type stripping, esbuild, swc): type re-exports must say `export type`, and there are no enums or namespaces.",
   "compilerOptions": {
     "strict": true,
     "noEmit": true,
@@ -8,6 +8,8 @@
     "lib": ["es2020"],
     "module": "esnext",
     "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
     "types": [],
     "forceConsistentCasingInFileNames": true
   },
