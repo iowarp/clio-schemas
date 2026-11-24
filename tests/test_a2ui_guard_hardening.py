@@ -9,8 +9,9 @@ from jsonschema import Draft202012Validator
 from pydantic import TypeAdapter, ValidationError
 
 from clio_schemas.a2ui.catalog_export import render_workspace_catalog
-from clio_schemas.a2ui.v0_9_1.bounded_components import GeoJsonGeometry
-from clio_schemas.a2ui.validation import catalog_validators, message_validator
+from clio_schemas.a2ui.chart_spec import check_chart_spec
+from clio_schemas.a2ui.v0_9_1.bounded_components import ChartComponent, GeoJsonGeometry
+from clio_schemas.a2ui.validation import message_validator
 
 WORKSPACE = render_workspace_catalog()
 ENCODING = {
@@ -31,9 +32,10 @@ def _chart(spec: dict[str, Any]) -> dict[str, Any]:
     ],
 )
 def test_a_chart_spec_names_no_link(spec: dict[str, Any]) -> None:
-    chart = catalog_validators(WORKSPACE)["clio.chart.v1"]
-    assert chart.is_valid(_chart({"mark": "point", "encoding": ENCODING}))
-    assert not chart.is_valid(_chart(spec))
+    assert not check_chart_spec({"mark": "point", "encoding": ENCODING})
+    assert [v.code for v in check_chart_spec(spec)] == ["forbidden_key"]
+    with pytest.raises(ValidationError):
+        ChartComponent.model_validate(_chart(spec))
 
 
 POINT = {"type": "Point", "coordinates": [0, 0]}

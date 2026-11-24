@@ -31,7 +31,13 @@ from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
 from clio_schemas.a2ui.catalog_export import render_workspace_catalog
-from clio_schemas.a2ui.chart_spec import MAX_INLINE_ROWS, PRESET_NAMES, fixture_path, load_preset
+from clio_schemas.a2ui.chart_spec import (
+    MAX_INLINE_ROWS,
+    PRESET_NAMES,
+    check_chart_spec,
+    fixture_path,
+    load_preset,
+)
 from clio_schemas.a2ui.v0_9_1.bounded_components import COMPONENT_MODELS, ChartComponent
 from clio_schemas.a2ui.v0_9_1.components import (
     SelectionState,
@@ -1057,8 +1063,8 @@ def test_chart_query_limit_still_rejects_a_fractional_float() -> None:
         ChartComponent.model_validate(payload)
 
 
-def test_spec_with_url_anywhere_is_rejected_by_the_json_validator_alone() -> None:
-    """The forbidden-key ban is now real JSON Schema, not just a pydantic-side guard."""
+def test_spec_with_url_anywhere_is_rejected_by_the_chart_guard() -> None:
+    """The forbidden-key ban runs in the chart guard (iteratively), not the JSON Schema."""
 
     payload = {
         "id": "ch",
@@ -1066,19 +1072,19 @@ def test_spec_with_url_anywhere_is_rejected_by_the_json_validator_alone() -> Non
         "spec": {"layer": [{"mark": "point", "encoding": {}, "usermeta": {"url": "x"}}]},
         "data": [{"x": 1}],
     }
-    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    assert check_chart_spec(payload["spec"])
     with pytest.raises(ValidationError):
         ChartComponent.model_validate(payload)
 
 
-def test_spec_data_named_source_at_any_depth_is_rejected_by_the_json_validator_alone() -> None:
+def test_spec_data_named_source_at_any_depth_is_rejected_by_the_chart_guard() -> None:
     payload = {
         "id": "ch",
         "component": "clio.chart.v1",
         "spec": {"layer": [{"mark": "point", "data": {"values": [1, 2, 3]}}]},
         "data": [{"x": 1}],
     }
-    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    assert check_chart_spec(payload["spec"])
     with pytest.raises(ValidationError):
         ChartComponent.model_validate(payload)
 
@@ -1094,7 +1100,7 @@ def test_spec_data_named_source_nested_still_validates() -> None:
     ChartComponent.model_validate(payload)
 
 
-def test_spec_bind_element_anywhere_is_rejected_by_both_validators() -> None:
+def test_spec_bind_element_anywhere_is_rejected_by_the_chart_guard() -> None:
     """bind.element is a CSS selector that could mount a widget anywhere on the host page."""
 
     payload = {
@@ -1113,7 +1119,7 @@ def test_spec_bind_element_anywhere_is_rejected_by_both_validators() -> None:
         },
         "data": [{"t": 1}],
     }
-    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    assert check_chart_spec(payload["spec"])
     with pytest.raises(ValidationError):
         ChartComponent.model_validate(payload)
 
@@ -1132,7 +1138,7 @@ def test_spec_bind_element_nested_in_a_layer_is_also_rejected() -> None:
         },
         "data": [{"t": 1}],
     }
-    assert not WORKSPACE_VALIDATORS["clio.chart.v1"].is_valid(payload)
+    assert check_chart_spec(payload["spec"])
     with pytest.raises(ValidationError):
         ChartComponent.model_validate(payload)
 
