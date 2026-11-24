@@ -3933,9 +3933,11 @@
               "description": "Drawn in place; pressing it opens the dialog and fires its own action."
             },
             "width": {
+              "description": "narrow for a short form, wide for a dialog that walks through steps and lists, such as adding something from a catalog.",
               "enum": [
                 "narrow",
-                "default"
+                "default",
+                "wide"
               ],
               "type": "string"
             }

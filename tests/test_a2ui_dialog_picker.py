@@ -169,7 +169,8 @@ DIALOG_CASES = [
         id="unknown-confirm-tone",
     ),
     pytest.param(_dialog(cancel={"action": ACT}), False, id="cancel-without-label"),
-    pytest.param(_dialog(width="wide"), False, id="unknown-width"),
+    pytest.param(_dialog(width="wide"), True, id="wide"),
+    pytest.param(_dialog(width="huge"), False, id="unknown-width"),
     pytest.param(_dialog(bogus=True), False, id="unknown-key"),
 ]
 

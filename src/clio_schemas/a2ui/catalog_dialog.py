@@ -150,7 +150,14 @@ _DIALOG_SCHEMA: dict[str, Any] = {
                         "cancel without an action."
                     ),
                 },
-                "width": {"type": "string", "enum": list(DIALOG_WIDTHS)},
+                "width": {
+                    "type": "string",
+                    "enum": list(DIALOG_WIDTHS),
+                    "description": (
+                        "narrow for a short form, wide for a dialog that walks through steps "
+                        "and lists, such as adding something from a catalog."
+                    ),
+                },
             },
             "required": ["component", "title", "open"],
         },
