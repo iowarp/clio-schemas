@@ -345,7 +345,7 @@
           "properties": {
             "geometries": {
               "items": {
-                "$ref": "#/$defs/GeoJsonGeometry"
+                "$ref": "#/$defs/GeoJsonSimpleGeometry"
               },
               "type": "array"
             },
@@ -356,6 +356,169 @@
           "required": [
             "type",
             "geometries"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    },
+    "GeoJsonSimpleGeometry": {
+      "description": "A GeoJSON Geometry object other than a GeometryCollection.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 3,
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": {
+              "const": "Point"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 2,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": {
+              "const": "MultiPoint"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 2,
+                "type": "array"
+              },
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": {
+              "const": "LineString"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 2,
+                  "type": "array"
+                },
+                "minItems": 2,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": {
+              "const": "MultiLineString"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 2,
+                  "type": "array"
+                },
+                "minItems": 4,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": {
+              "const": "Polygon"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "items": {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 2,
+                    "type": "array"
+                  },
+                  "minItems": 4,
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": {
+              "const": "MultiPolygon"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
           ],
           "type": "object"
         }
@@ -1333,111 +1496,6 @@
       ],
       "type": "object"
     },
-    "SpecDataNamedSource": {
-      "description": "Every `data` key anywhere in a Vega-Lite spec is absent or exactly {\"name\": \"source\"} — rows come from the component's data/dataUri, never the spec.",
-      "else": {
-        "if": {
-          "type": "array"
-        },
-        "then": {
-          "items": {
-            "$ref": "#/$defs/SpecDataNamedSource"
-          }
-        }
-      },
-      "if": {
-        "type": "object"
-      },
-      "then": {
-        "additionalProperties": {
-          "$ref": "#/$defs/SpecDataNamedSource"
-        },
-        "properties": {
-          "data": {
-            "const": {
-              "name": "source"
-            }
-          }
-        }
-      }
-    },
-    "SpecNoBindElement": {
-      "description": "No `element` key inside any `bind` object (params[].bind.element) anywhere in a Vega-Lite spec, at any depth — it is a CSS selector that could mount a Vega input widget into any element on the host page, not just this chart.",
-      "else": {
-        "if": {
-          "type": "array"
-        },
-        "then": {
-          "items": {
-            "$ref": "#/$defs/SpecNoBindElement"
-          }
-        }
-      },
-      "if": {
-        "type": "object"
-      },
-      "then": {
-        "additionalProperties": {
-          "$ref": "#/$defs/SpecNoBindElement"
-        },
-        "properties": {
-          "bind": {
-            "allOf": [
-              {
-                "if": {
-                  "type": "object"
-                },
-                "then": {
-                  "not": {
-                    "required": [
-                      "element"
-                    ]
-                  }
-                }
-              },
-              {
-                "$ref": "#/$defs/SpecNoBindElement"
-              }
-            ]
-          }
-        }
-      }
-    },
-    "SpecNoForbiddenKeys": {
-      "description": "No `url` or `usermeta` key anywhere in a Vega-Lite spec, at any depth.",
-      "else": {
-        "if": {
-          "type": "array"
-        },
-        "then": {
-          "items": {
-            "$ref": "#/$defs/SpecNoForbiddenKeys"
-          }
-        }
-      },
-      "if": {
-        "type": "object"
-      },
-      "then": {
-        "additionalProperties": {
-          "$ref": "#/$defs/SpecNoForbiddenKeys"
-        },
-        "not": {
-          "anyOf": [
-            {
-              "required": [
-                "url"
-              ]
-            },
-            {
-              "required": [
-                "usermeta"
-              ]
-            }
-          ]
-        }
-      }
-    },
     "TabDefinition": {
       "additionalProperties": false,
       "properties": {
@@ -1750,17 +1808,8 @@
       ]
     },
     "theme": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
-        "agentDisplayName": {
-          "description": "Text to be displayed next to the surface to identify the agent or tool that created it.",
-          "type": "string"
-        },
-        "iconUrl": {
-          "description": "A URL for an image that identifies the agent or tool associated with the surface.",
-          "format": "uri",
-          "type": "string"
-        },
         "primaryColor": {
           "description": "The primary brand color used for highlights (e.g., primary buttons, active borders). Renderers may generate variants of this color for different contexts. Format: Hexadecimal code (e.g., '#00BFFF').",
           "pattern": "^#[0-9a-fA-F]{6}$",
@@ -2813,18 +2862,7 @@
               "type": "string"
             },
             "spec": {
-              "allOf": [
-                {
-                  "$ref": "#/$defs/SpecNoForbiddenKeys"
-                },
-                {
-                  "$ref": "#/$defs/SpecDataNamedSource"
-                },
-                {
-                  "$ref": "#/$defs/SpecNoBindElement"
-                }
-              ],
-              "description": "A Vega-Lite spec whose rows come from data/dataUri as the named dataset 'source' — the spec is chart configuration, never a data channel, and the dataset itself is unbounded via dataUri regardless of this cap. This schema already enforces the top-level key allowlist, no url/usermeta key at any depth, no bind.element at any depth (a CSS selector that could mount an input widget anywhere on the host page), and data only as {name: source} at any depth; the renderer additionally enforces the config-size (65536 bytes) and view-count (8) caps that keep the spec itself bounded and abuse-resistant, which JSON Schema cannot express. See a2ui/chart/guard_rules.json.",
+              "description": "A Vega-Lite spec whose rows come from data/dataUri as the named dataset 'source' — the spec is chart configuration, never a data channel, and the dataset itself is unbounded via dataUri regardless of this cap. This schema enforces the top-level key allowlist; the chart guard (clio_schemas.a2ui.chart_spec, run by every consumer and the renderer) also refuses a url, usermeta or href key at any depth, bind.element at any depth (a CSS selector that could mount an input widget anywhere on the host page), data other than {name: source} at any depth, a spec over 65536 bytes and more than 8 views. See a2ui/chart/guard_rules.json.",
               "propertyNames": {
                 "enum": [
                   "$schema",

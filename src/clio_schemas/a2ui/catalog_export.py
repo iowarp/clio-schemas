@@ -175,7 +175,16 @@ def render_workspace_catalog() -> dict[str, Any]:
     defs.update(hand_defs)
 
     basic_catalog = _load_basic_catalog()
-    defs["theme"] = basic_catalog["$defs"]["theme"]
+    # Closed, with only the color: a surface is written by the model, so a theme's
+    # `agentDisplayName` would let it claim to come from someone else, and `iconUrl`
+    # is a URL slot of any scheme.
+    defs["theme"] = {
+        **basic_catalog["$defs"]["theme"],
+        "properties": {
+            "primaryColor": basic_catalog["$defs"]["theme"]["properties"]["primaryColor"]
+        },
+        "additionalProperties": False,
+    }
 
     defs["anyComponent"] = {
         "oneOf": [{"$ref": f"#/components/{name}"} for name in sorted(components)],

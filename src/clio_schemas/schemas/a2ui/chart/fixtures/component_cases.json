@@ -153,7 +153,7 @@
       "valid": true
     },
     {
-      "jsonSchemaValid": false,
+      "jsonSchemaValid": true,
       "name": "reject-spec-data-url",
       "payload": {
         "component": "clio.chart.v1",

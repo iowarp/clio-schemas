@@ -181,11 +181,27 @@ class GeoJsonMultiPolygon(_ClosedModel):
     coordinates: list[list[GeoJsonLinearRing]]
 
 
+#: A GeoJSON Geometry other than a collection: what a ``GeometryCollection`` holds.
+GeoJsonSimpleGeometry = Annotated[
+    GeoJsonPoint
+    | GeoJsonMultiPoint
+    | GeoJsonLineString
+    | GeoJsonMultiLineString
+    | GeoJsonPolygon
+    | GeoJsonMultiPolygon,
+    Field(discriminator="type"),
+]
+
+
 class GeoJsonGeometryCollection(_ClosedModel):
-    """A GeoJSON ``GeometryCollection`` (RFC 7946 §3.1.8): nested geometries."""
+    """A GeoJSON ``GeometryCollection`` (RFC 7946 §3.1.8), one level deep.
+
+    RFC 7946 says to avoid nested collections; allowing them let a short cell nest
+    deep enough to exhaust the validator's stack.
+    """
 
     type: Literal["GeometryCollection"]
-    geometries: list[GeoJsonGeometry]
+    geometries: list[GeoJsonSimpleGeometry]
 
 
 #: Every GeoJSON Geometry type (RFC 7946 §3.1) a chart row cell may hold.
@@ -199,10 +215,6 @@ GeoJsonGeometry = Annotated[
     | GeoJsonGeometryCollection,
     Field(discriminator="type"),
 ]
-# `from __future__ import annotations` means `GeoJsonGeometryCollection.geometries`
-# was built with `GeoJsonGeometry` as an unresolved forward reference; it is a
-# module global by now, so this completes the model.
-GeoJsonGeometryCollection.model_rebuild()
 
 ChartRowValue = str | int | float | bool | None | GeoJsonGeometry
 ChartPreset = Literal["trajectories", "heatmap", "spectra", "boxplot", "scatter"]

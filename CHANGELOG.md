@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+### Changed
+
+- The `clio-workspace` catalog no longer carries the chart spec's recursive rules
+  (`$defs/SpecNoForbiddenKeys`, `SpecDataNamedSource`, `SpecNoBindElement`). They
+  cost about 80 µs per byte of spec in `jsonschema`: four 62 KB specs in one message
+  took 39 s of CPU here. `check_chart_spec` enforces the same rules iteratively in
+  milliseconds, and consumers must run it on every message (clio-agent does from
+  iowarp/clio-agent#2398). The schema keeps the top-level key allowlist. The
+  `reject-spec-data-url` component case is now refused by the guard alone
+  (`jsonSchemaValid: true`).
+- The chart guard forbids `href` with `url` and `usermeta`, at any depth of a
+  `clio.chart.v1` spec (`FORBIDDEN_KEYS`, `guard_rules.json`, the catalog's
+  `SpecNoForbiddenKeys`). A spec names no link, as it names no URL. Two shared guard
+  cases cover a mark's and an encoding's `href`.
+- A GeoJSON `GeometryCollection` in a chart cell holds only non-collection geometries
+  (RFC 7946 §3.1.8), in both the pydantic models and the catalog
+  (`$defs/GeoJsonSimpleGeometry`). Deep nesting had exhausted the JSON Schema
+  validator's stack (`RecursionError`) instead of failing validation.
+- The `clio-workspace` catalog's `theme` takes only `primaryColor`. A surface is
+  written by the model; `agentDisplayName` let it name another author, and `iconUrl`
+  took a URL of any scheme.
+
 ## [0.8.0b1] - unreleased
 
 ### Added
