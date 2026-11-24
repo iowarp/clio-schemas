@@ -199,10 +199,29 @@ column for each row, for settings that several items share (say, a protocol
 and an access level per endpoint). Give each option a `label` and, where it
 helps, a `description`, an `icon` (camelCase, from the catalog's list) and a
 `tone`. `defaults` adds a row whose values rows follow for the columns they
-list in `inherited`. A pick fires `onChoose` with `{row, column, value}` in its
-context; apply it and re-send the surface. `rowMenu` and `add` are further
-actions. `rows` is inline or a binding such as `{"path": "/items"}`:
+list in `inherited`. A row's `options` (`{"protocol": ["ssh"]}`) narrows a
+column to some of its values for that row. A pick fires `onChoose` with
+`{row, column, value}` in its context; apply it and re-send the surface.
+`rowMenu` and `add` are further actions. `rows` is inline or a binding such as
+`{"path": "/items"}`:
 `{"id": "c1", "component": "clio.choice-table.v1", "label": "Endpoints", "columns": [{"id": "access", "title": "Access", "options": [{"value": "open", "label": "Open", "icon": "lockOpen"}, {"value": "locked", "label": "Locked", "icon": "lock", "tone": "positive"}]}], "rows": [{"id": "a", "title": "Alpha", "values": {"access": "locked"}}], "onChoose": {"event": {"name": "choose"}}}`.
+
+**Dialog** — `clio.dialog.v1` is a modal the person opens from a `trigger`
+(the id of a component drawn in place, such as a `Button`) or that you open by
+setting its `open` binding to true. Its body is one `content` component, or
+`tabs` whose `child` ids each name a component, with `activeTab` bound to the
+shown tab's id. `rail` shows numbered steps, `status` one line above the
+footer, and the footer holds `test`, `cancel` and `confirm` actions. A `cancel`
+without an action, Escape and the close button fire `onClose`:
+`{"id": "d1", "component": "clio.dialog.v1", "title": "Add endpoint", "open": {"path": "/dialogs/add"}, "trigger": "add-open", "content": "add-body", "cancel": {"label": "Cancel"}, "confirm": {"label": "Save", "action": {"event": {"name": "save", "context": {"values": {"path": "/add"}}}}}}`.
+
+**Picker** — `clio.picker.v1` lets the person pick one item from a list with a
+`title`, `subtitle`, `chips` and `meta` per item. `search` adds a search box,
+`limit` shows that many until the person searches, items sharing a `group` sit
+under one heading, and `variant: "select"` draws a compact dropdown instead. A
+pick writes the item's `value` to the `value` binding and fires `onPick` with
+`{value}` in its context:
+`{"id": "p1", "component": "clio.picker.v1", "label": "Site", "search": "Search sites", "value": {"path": "/add/site"}, "items": [{"value": "alpha", "title": "Alpha", "chips": ["SSH"]}], "onPick": {"event": {"name": "pick"}}}`.
 
 **Mermaid** — declarative diagram source rendered with Pele, with compatibility
 for existing Mermaid documents. Pele is the renderer; keep the component name

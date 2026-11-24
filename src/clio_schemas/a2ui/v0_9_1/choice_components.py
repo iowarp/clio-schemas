@@ -3,9 +3,10 @@
 A general settings grid with no domain vocabulary: each column is a setting
 whose options carry a label, a description and an icon, each row is an item
 that picks one option per column, and an optional defaults row holds the
-values rows inherit. Picks, the row menu and Add are actions, so the owner of
-the surface applies a change and re-sends the surface. Rows are inline or a
-data-model binding to an array of the same row shape.
+values rows inherit. A row may narrow a column to some of its options. Picks,
+the row menu and Add are actions, so the owner of the surface applies a change
+and re-sends the surface. Rows are inline or a data-model binding to an array
+of the same row shape.
 """
 
 from __future__ import annotations
@@ -150,7 +151,7 @@ class ChoiceMenuItem(_ClosedModel):
 
 
 class ChoiceRow(_ClosedModel):
-    """One item and the option it picks in each column."""
+    """One item and the option it picks in each column; ``options`` narrows what it offers."""
 
     id: ChoiceId
     title: ChoiceLabel
@@ -162,6 +163,9 @@ class ChoiceRow(_ClosedModel):
     error: ChoiceText | None = None
     context: dict[str, JsonValue] | None = None
     menu: list[ChoiceMenuItem] | None = Field(default=None, max_length=MAX_CHOICE_MENU)
+    options: dict[str, Annotated[list[ChoiceId], Field(max_length=MAX_CHOICE_OPTIONS)]] | None = (
+        None
+    )
 
 
 class ChoiceDefaults(_ClosedModel):
@@ -198,6 +202,9 @@ class ChoiceTableComponent(_ComponentBase):
         if len(set(columns)) != len(columns):
             raise ValueError("column ids must be unique")
         known = set(columns)
+        offered = {
+            column.id: {option.value for option in column.options} for column in self.columns
+        }
         if self.defaults is not None:
             _check_keys("defaults.values", self.defaults.values, known)
         if isinstance(self.rows, list):
@@ -207,6 +214,14 @@ class ChoiceTableComponent(_ComponentBase):
             for row in self.rows:
                 _check_keys(f"row {row.id!r} values", row.values, known)
                 _check_keys(f"row {row.id!r} inherited", row.inherited or [], known)
+                _check_keys(f"row {row.id!r} options", row.options or {}, known)
+                for column, values in (row.options or {}).items():
+                    extra = sorted(set(values) - offered[column])
+                    if extra:
+                        raise ValueError(
+                            f"row {row.id!r} options[{column!r}]: {extra} are not options "
+                            "of that column"
+                        )
         return self
 
 

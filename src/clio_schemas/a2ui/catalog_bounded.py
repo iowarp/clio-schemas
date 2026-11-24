@@ -1137,7 +1137,7 @@ def _chart_component_schema() -> dict[str, Any]:
 
 
 def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
-    """The bounded, field and choice components and their local ``$defs``."""
+    """The bounded, field, choice and dialog components and their local ``$defs``."""
 
     components = {
         "clio.map.v1": _MAP_COMPONENT_SCHEMA,
@@ -1178,9 +1178,10 @@ def hand_authored_components() -> tuple[dict[str, Any], dict[str, Any]]:
         "SelectionState": _SELECTION_STATE_DEF,
     }
     from clio_schemas.a2ui.catalog_choice import choice_components  # noqa: PLC0415
+    from clio_schemas.a2ui.catalog_dialog import dialog_components  # noqa: PLC0415
     from clio_schemas.a2ui.catalog_fields import field_components  # noqa: PLC0415
 
-    for extra, extra_defs in (field_components(), choice_components()):
+    for extra, extra_defs in (field_components(), choice_components(), dialog_components()):
         components.update(extra)
         defs.update(extra_defs)
     return components, defs

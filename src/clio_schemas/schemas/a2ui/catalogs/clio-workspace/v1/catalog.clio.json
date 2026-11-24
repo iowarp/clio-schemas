@@ -183,6 +183,9 @@
     "clio.data-table.v1": {
       "kernel": "clio.data-table.v1"
     },
+    "clio.dialog.v1": {
+      "kernel": "clio.dialog.v1"
+    },
     "clio.diff.v1": {
       "kernel": "clio.diff.v1"
     },
@@ -206,6 +209,9 @@
     },
     "clio.metric.v1": {
       "kernel": "clio.metric.v1"
+    },
+    "clio.picker.v1": {
+      "kernel": "clio.picker.v1"
     },
     "clio.profile-stack.v1": {
       "kernel": "clio.profile-stack.v1"

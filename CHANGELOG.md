@@ -7,6 +7,13 @@
 - `clio.choice-table.v1`: rows that each pick one option per column, with an icon,
   description and tone on each option, a defaults row, a row menu and Add. Rows are
   inline or bound to the data model; a pick fires `onChoose` with `{row, column, value}`.
+- `clio.choice-table.v1` rows take `options`, mapping a column id to the option values
+  that row offers (every option of the column when absent).
+- `clio.dialog.v1`: a modal opened from a trigger in the page or by its `open` binding,
+  with one body or tabs, a step rail, a status line, and a footer of Test, Cancel and
+  confirm. Closing it fires `onClose`.
+- `clio.picker.v1`: a searchable list, or a compact select, of items with a title,
+  subtitle, chips and a group. A pick writes the `value` binding and fires `onPick`.
 
 ## [0.8.0b1] - unreleased
 

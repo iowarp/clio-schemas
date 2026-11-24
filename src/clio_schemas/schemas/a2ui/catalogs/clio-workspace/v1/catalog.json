@@ -258,6 +258,19 @@
           "maxItems": 8,
           "type": "array"
         },
+        "options": {
+          "additionalProperties": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 24,
+            "type": "array"
+          },
+          "description": "Column id to the option values this row offers; every option when absent.",
+          "type": "object"
+        },
         "subtitle": {
           "maxLength": 500,
           "type": "string"
@@ -407,6 +420,33 @@
       "required": [
         "key",
         "label"
+      ],
+      "type": "object"
+    },
+    "DialogTab": {
+      "additionalProperties": false,
+      "properties": {
+        "child": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentId",
+          "description": "The component the tab shows."
+        },
+        "icon": {
+          "description": "An icon name. Narrow dialogs show only the icons.",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "child"
       ],
       "type": "object"
     },
@@ -1161,6 +1201,44 @@
       ],
       "type": "object"
     },
+    "PickerItem": {
+      "additionalProperties": false,
+      "properties": {
+        "chips": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 8,
+          "type": "array"
+        },
+        "group": {
+          "description": "Items with the same group sit under one heading, in order.",
+          "type": "string"
+        },
+        "meta": {
+          "description": "Shown at the item's end.",
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "value": {
+          "description": "What a pick writes to the value binding.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "title"
+      ],
+      "type": "object"
+    },
     "QueryAggregate": {
       "additionalProperties": false,
       "description": "Group rows by groupBy (empty or omitted: one global group) and reduce; each metric becomes a result column named {column}_{fn}, which must not repeat a groupBy column.",
@@ -1877,6 +1955,9 @@
           "$ref": "#/components/clio.data-table.v1"
         },
         {
+          "$ref": "#/components/clio.dialog.v1"
+        },
+        {
           "$ref": "#/components/clio.diff.v1"
         },
         {
@@ -1899,6 +1980,9 @@
         },
         {
           "$ref": "#/components/clio.metric.v1"
+        },
+        {
+          "$ref": "#/components/clio.picker.v1"
         },
         {
           "$ref": "#/components/clio.profile-stack.v1"
@@ -3651,6 +3735,223 @@
       "type": "object",
       "unevaluatedProperties": false
     },
+    "clio.dialog.v1": {
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "properties": {
+            "activeTab": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding",
+              "description": "The id of the tab shown."
+            },
+            "cancel": {
+              "additionalProperties": false,
+              "description": "With an action it fires the action; without, it closes the dialog and fires onClose.",
+              "properties": {
+                "action": {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action"
+                },
+                "label": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "label"
+              ],
+              "type": "object"
+            },
+            "component": {
+              "const": "clio.dialog.v1"
+            },
+            "confirm": {
+              "additionalProperties": false,
+              "description": "The main button. Ctrl+Enter presses it.",
+              "properties": {
+                "action": {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "label": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "tone": {
+                  "enum": [
+                    "default",
+                    "destructive"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "label",
+                "action"
+              ],
+              "type": "object"
+            },
+            "content": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentId",
+              "description": "The body, when the dialog has no tabs."
+            },
+            "description": {
+              "type": "string"
+            },
+            "onClose": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action",
+              "description": "Fired when the person closes the dialog: Escape, the close button, or a cancel without an action."
+            },
+            "open": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding",
+              "description": "A boolean; the dialog is open while it is true. The client sets it when the trigger is pressed and clears it on close."
+            },
+            "rail": {
+              "additionalProperties": false,
+              "description": "The numbered steps the dialog walks through.",
+              "properties": {
+                "step": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "steps": {
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "maxItems": 6,
+                  "minItems": 2,
+                  "type": "array"
+                },
+                "tabs": {
+                  "description": "The tabs the rail shows on; every tab when absent.",
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "steps",
+                "step"
+              ],
+              "type": "object"
+            },
+            "status": {
+              "additionalProperties": false,
+              "description": "A line above the footer: a test's result or progress.",
+              "properties": {
+                "action": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "action": {
+                      "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action"
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "label": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "label",
+                    "action"
+                  ],
+                  "type": "object"
+                },
+                "detail": {
+                  "type": "string"
+                },
+                "text": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "tone": {
+                  "enum": [
+                    "neutral",
+                    "positive",
+                    "warning",
+                    "negative",
+                    "busy"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "tone",
+                "text"
+              ],
+              "type": "object"
+            },
+            "tabs": {
+              "items": {
+                "$ref": "#/$defs/DialogTab"
+              },
+              "maxItems": 6,
+              "minItems": 1,
+              "type": "array"
+            },
+            "test": {
+              "additionalProperties": false,
+              "description": "At the footer's start. Ctrl+Shift+Enter presses it.",
+              "properties": {
+                "action": {
+                  "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "keyboard": {
+                  "type": "string"
+                },
+                "label": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "label",
+                "action"
+              ],
+              "type": "object"
+            },
+            "title": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "trigger": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentId",
+              "description": "Drawn in place; pressing it opens the dialog and fires its own action."
+            },
+            "width": {
+              "enum": [
+                "narrow",
+                "default"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "component",
+            "title",
+            "open"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "A trigger drawn in the page that opens a modal dialog with optional tabs, a step rail, a status line and a footer of Test, Cancel and confirm.",
+      "type": "object",
+      "unevaluatedProperties": false
+    },
     "clio.diff.v1": {
       "allOf": [
         {
@@ -4766,6 +5067,79 @@
         }
       ],
       "description": "One labeled number, optionally with a unit and trend.",
+      "type": "object",
+      "unevaluatedProperties": false
+    },
+    "clio.picker.v1": {
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "properties": {
+            "component": {
+              "const": "clio.picker.v1"
+            },
+            "empty": {
+              "description": "Shown when no item matches.",
+              "type": "string"
+            },
+            "error": {
+              "description": "A problem with the pick, shown beneath.",
+              "type": "string"
+            },
+            "hint": {
+              "type": "string"
+            },
+            "items": {
+              "items": {
+                "$ref": "#/$defs/PickerItem"
+              },
+              "maxItems": 200,
+              "type": "array"
+            },
+            "label": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "limit": {
+              "description": "Without a search, show this many and name the rest.",
+              "minimum": 1,
+              "type": "integer"
+            },
+            "onPick": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/Action",
+              "description": "Fired on a pick, with {value} merged into its context."
+            },
+            "search": {
+              "description": "A search box's placeholder; no search box when absent.",
+              "type": "string"
+            },
+            "value": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DataBinding",
+              "description": "The picked item's value. The client writes it on a pick."
+            },
+            "variant": {
+              "enum": [
+                "list",
+                "select"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "component",
+            "label",
+            "items",
+            "value"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "A searchable list, or a compact select, of items with a title, subtitle and chips. A pick writes the value binding and fires onPick.",
       "type": "object",
       "unevaluatedProperties": false
     },

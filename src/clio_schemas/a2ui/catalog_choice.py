@@ -4,8 +4,8 @@ Hand-authored JSON Schema mirroring ``ChoiceTableComponent``
 (``a2ui/v0_9_1/choice_components.py``): bounded columns, options, rows and
 menus, one icon vocabulary, and rows inline or bound to the data model. The
 rules JSON Schema cannot express (unique ids, value keys naming declared
-columns) live on the model. Kept out of ``catalog_bounded.py`` so that module
-does not grow.
+columns, a row's options naming that column's values) live on the model. Kept
+out of ``catalog_bounded.py`` so that module does not grow.
 """
 
 from __future__ import annotations
@@ -114,6 +114,17 @@ _ROW_DEF: dict[str, Any] = {
             "description": "Merged into this row's onChoose context; row, column and value win.",
         },
         "menu": {**_MENU, "description": "Replaces rowMenu for this row."},
+        "options": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "maxItems": MAX_CHOICE_OPTIONS,
+                "items": _ID,
+            },
+            "description": (
+                "Column id to the option values this row offers; every option when absent."
+            ),
+        },
     },
     "required": ["id", "title", "values"],
     "additionalProperties": False,

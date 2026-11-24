@@ -658,6 +658,9 @@ class ChartComponent(_ComponentBase):
 from clio_schemas.a2ui.v0_9_1.choice_components import (  # noqa: E402
     CHOICE_COMPONENT_MODELS as _CHOICE_MODELS,
 )
+from clio_schemas.a2ui.v0_9_1.dialog_components import (  # noqa: E402
+    DIALOG_COMPONENT_MODELS as _DIALOG_MODELS,
+)
 from clio_schemas.a2ui.v0_9_1.field_components import (  # noqa: E402 - needs the models above
     FIELD_COMPONENT_MODELS as _FIELD_MODELS,
 )
@@ -705,4 +708,5 @@ COMPONENT_MODELS: tuple[type[BaseModel], ...] = (
     StepsComponent,
     *_FIELD_MODELS,
     *_CHOICE_MODELS,
+    *_DIALOG_MODELS,
 )
